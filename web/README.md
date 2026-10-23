@@ -1,6 +1,9 @@
-# TAB Film
+# TAB — film and desk
 
-The 2:39 TAB film (`project/TAB Film.dc.html`) built as a standalone Vite + React app. It plays at 1920×1080, scales to fit the window, and stays synced to the ElevenLabs voiceover.
+Two pages, one static Vite + React app:
+
+- **`/` — TAB Film.** The 2:45 film (`project/TAB Film.dc.html`) at 1920×1080, scaled to fit the window and synced to the ElevenLabs voiceover.
+- **`/desk.html` — TAB Desk.** The clickable employee demo: the desktop the employee shares with TAB, in four rooms (Day: the assistant; Write: the editor; Call: the wingman; Close: the librarian). Ported from the `TAB - Desk` Claude Design export.
 
 ```sh
 npm install
@@ -8,12 +11,20 @@ npm run dev       # http://localhost:5173
 npm run build     # static site in dist/
 ```
 
-## Controls
+## Film controls
 
 - Click the film or press **Space** to play or pause. **← / →** step 0.1 s (hold Shift for 1 s), and **0** or **Home** jumps back to the start.
 - Use the scrub bar to seek. Hovering over it previews that frame.
 - Add `#t=SECONDS` to the URL to open the film paused at that moment, e.g. `/#t=128` for the ROI math or `/#t=165` for the closing card.
 - The film ends on a contact card that stays on screen: three bulletins from the film plus LinkedIn, email and a LinkedIn QR code. The links on it are clickable. Contact details live in `CONTACT` in `src/film/Contact.tsx`.
+
+## The desk
+
+- TAB greets on arrival and offers a walkthrough of the day's three things, out loud and on screen (browser speech) or on screen only. Then it proposes one pin.
+- Each room has a single amber line. It speaks once on arrival and then waits. Typed asks in the line route you to the right room ("the call with Rina" opens Call).
+- In Write, TAB interrupts once on its own, 14 seconds in, to bring you to the Northwind call.
+- The sideline holds TAB, Glossary, Settings (brightness and warmth apply live) and Back. The bottom bar switches rooms, restarts the demo, or shows all four rooms at once.
+- The logic in `src/desk/Desk.tsx` is a one-to-one port of the prototype's component class: same timers, word pacing and copy.
 
 ## How it's built
 

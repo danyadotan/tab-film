@@ -1,0 +1,14 @@
+body { margin: 0; background: #e4e2e0; }
+a { color: var(--color-accent-700); }
+a:hover { color: var(--color-accent-900); }
+[contenteditable]:focus { outline: none; }
+
+/* hover and focus states carried over from the prototype's style-hover / style-focus */
+.chrome-tab:hover { opacity: .7; }
+.line-next:hover { background: oklch(0.62 0.17 60) !important; }
+.line-stop:hover { color: var(--color-text) !important; }
+.line-x:hover { background: var(--color-neutral-200); color: var(--color-text) !important; }
+.line-choice:hover { background: oklch(0.95 0.05 80) !important; }
+.line-input:focus { border-bottom-color: oklch(0.7 0.17 65) !important; }
+.side-pill:hover { transform: scale(1.15); }
+.did-check:hover { background: var(--color-accent-100); }
