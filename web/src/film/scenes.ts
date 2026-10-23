@@ -16,6 +16,7 @@ export const SCENES: Scene[] = [
   { name: 'Company', dur: 21.12, nat: 20, desc: 'The employee browser becomes one cell of 2,500; an anonymous friction ledger and its ROI' },
   { name: 'Outro', dur: 5.4, nat: 6, desc: 'One thing at a time' },
   { name: 'Statement', dur: 7.4, nat: 7.4, desc: "Closing statement for the buyer: attention looked after, nights slept better" },
+  { name: 'Contact', dur: 6, nat: 6, desc: 'Held last frame: three bulletins from the film, then contact details and a LinkedIn QR code' },
 ];
 
 /** Where the voiceover track ends, in playback seconds. */

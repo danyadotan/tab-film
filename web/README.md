@@ -12,7 +12,8 @@ npm run build     # static site in dist/
 
 - Click the film or press **Space** to play or pause. **← / →** step 0.1 s (hold Shift for 1 s), and **0** or **Home** jumps back to the start.
 - Use the scrub bar to seek. Hovering over it previews that frame.
-- Add `#t=SECONDS` to the URL to open the film paused at that moment, e.g. `/#t=128` for the ROI math.
+- Add `#t=SECONDS` to the URL to open the film paused at that moment, e.g. `/#t=128` for the ROI math or `/#t=165` for the closing card.
+- The film ends on a contact card that stays on screen: three bulletins from the film plus LinkedIn, email and a LinkedIn QR code. The links on it are clickable. Contact details live in `CONTACT` in `src/film/Contact.tsx`.
 
 ## How it's built
 
