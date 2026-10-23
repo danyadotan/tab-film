@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/broadsheet-74f2bd77-1572-48bb-a3ab-6cfa90e647f0/styles.css">
+<script src="_ds/broadsheet-74f2bd77-1572-48bb-a3ab-6cfa90e647f0/_ds_bundle.js"></script>
+</helmet>
+<div style="display:flex;align-items:flex-start;height:100%;font-family:var(--font-heading);color:var(--color-text)">
+  <sc-if value="{{ showG }}" hint-placeholder-val="{{ false }}">
+    <div style="width:340px;height:100%;background:#fff;box-shadow:var(--shadow-lg);padding:40px 28px 28px;box-sizing:border-box;overflow:auto">
+      <div style="font-size:13px;letter-spacing:.14em;color:var(--color-accent-700);font-weight:700">GLOSSARY · TODAY'S TERMS</div>
+      <h3 style="margin:8px 0 14px;font-size:28px;line-height:1.1;font-weight:600">Words on your screen</h3>
+      <input class="input" placeholder="Look up a term" value="{{ q }}" onInput="{{ setQ }}" style="width:100%;box-sizing:border-box;font-size:16px">
+      <div style="display:flex;flex-direction:column;gap:14px;margin-top:18px">
+        <sc-for list="{{ terms }}" as="t" hint-placeholder-count="6">
+          <div><div style="font-size:18px;font-weight:600">{{ t.k }}</div><div style="font-size:15px;line-height:1.45;color:var(--color-neutral-700);margin-top:2px">{{ t.v }}</div></div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ showS }}" hint-placeholder-val="{{ false }}">
+    <div style="width:340px;height:100%;background:#fff;box-shadow:var(--shadow-lg);padding:40px 28px 28px;box-sizing:border-box;overflow:auto">
+      <div style="font-size:13px;letter-spacing:.14em;color:var(--color-accent-2-700);font-weight:700">YOUR USUAL SETTINGS</div>
+      <h3 style="margin:8px 0 6px;font-size:28px;line-height:1.1;font-weight:600">Adjust without leaving</h3>
+      <p style="margin:0 0 20px;font-size:15px;line-height:1.45;color:var(--color-neutral-700)">Changes apply right away. You stay on this screen.</p>
+      <div style="display:flex;flex-direction:column;gap:16px;font-size:16px">
+        <div><div style="margin-bottom:4px">Brightness</div><input type="range" min="40" max="100" value="{{ bright }}" onInput="{{ setBright }}" style="width:100%;accent-color:var(--color-accent)"></div>
+        <div><div style="margin-bottom:4px">Warmth</div><input type="range" min="0" max="80" value="{{ warm }}" onInput="{{ setWarm }}" style="width:100%;accent-color:var(--color-accent)"></div>
+        <sc-for list="{{ groups }}" as="g" hint-placeholder-count="4">
+          <div><div style="margin-bottom:6px">{{ g.label }}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <sc-for list="{{ g.opts }}" as="o" hint-placeholder-count="3">
+                <button onClick="{{ o.click }}" style="all:unset;cursor:pointer;padding:5px 12px;font-size:15px;border-radius:2px;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button>
+              </sc-for>
+            </div></div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+  <div style="display:flex;flex-direction:column;gap:10px;margin-top:84px;margin-right:2px;align-items:center">
+    <button onClick="{{ tab }}" title="For anything, just TAB it" style="all:unset;cursor:pointer;writing-mode:vertical-rl;white-space:nowrap;padding:14px 8px 18px;border-radius:999px !important;box-shadow:0 0 22px -2px oklch(0.72 0.17 65),inset 0 0 0 1.5px rgba(255,255,255,.45);display:flex;align-items:center;gap:10px;background:radial-gradient(80% 60% at 50% 50%,oklch(0.55 0.16 50),oklch(0.8 0.17 80));color:#fff;font-size:15px;font-weight:700;letter-spacing:.18em;transform-origin:right center;transition:transform .25s ease" style-hover="transform:scale(1.15)"><span style="width:14px;height:14px;border-radius:50%;background:#fff;opacity:.95;flex:none;box-shadow:0 0 10px #fff"></span>TAB</button>
+    <button onClick="{{ toggleG }}" style="all:unset;cursor:pointer;writing-mode:vertical-rl;white-space:nowrap;padding:12px 7px 16px;border-radius:999px !important;box-shadow:0 0 18px -2px var(--color-accent-700),inset 0 0 0 1.5px rgba(255,255,255,.35);display:flex;align-items:center;gap:10px;background:radial-gradient(80% 60% at 50% 50%,var(--color-accent-900),var(--color-accent-600));color:#fff;font-size:14px;letter-spacing:.14em;transform-origin:right center;transition:transform .25s ease" style-hover="transform:scale(1.15)"><span style="width:14px;height:14px;border-radius:50%;background:#fff;opacity:.9;flex:none"></span>GLOSSARY</button>
+    <button onClick="{{ toggleS }}" style="all:unset;cursor:pointer;writing-mode:vertical-rl;white-space:nowrap;padding:12px 7px 16px;border-radius:999px !important;box-shadow:0 0 18px -2px var(--color-accent-2-700),inset 0 0 0 1.5px rgba(255,255,255,.35);display:flex;align-items:center;gap:10px;background:radial-gradient(80% 60% at 50% 50%,var(--color-accent-2-900),var(--color-accent-2-600));color:#fff;font-size:14px;letter-spacing:.14em;transform-origin:right center;transition:transform .25s ease" style-hover="transform:scale(1.15)"><span style="width:14px;height:14px;border-radius:50%;background:#fff;opacity:.9;flex:none"></span>SETTINGS</button>
+    <button onClick="{{ back }}" style="all:unset;cursor:pointer;writing-mode:vertical-rl;white-space:nowrap;padding:12px 7px 16px;border-radius:999px !important;box-shadow:0 0 18px -2px var(--color-neutral-800),inset 0 0 0 1.5px rgba(255,255,255,.35);display:flex;align-items:center;gap:10px;background:radial-gradient(80% 60% at 50% 50%,var(--color-neutral-900),var(--color-neutral-600));color:#fff;font-size:14px;letter-spacing:.14em;transform-origin:right center;transition:transform .25s ease;opacity:{{ backOp }}" style-hover="transform:scale(1.15)"><span style="width:14px;height:14px;border-radius:50%;background:#fff;opacity:.9;flex:none"></span>{{ backLab }}</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:400,&quot;height&quot;:744},&quot;prefs&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;onPref&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(k:string,v:any)=&gt;void&quot;},&quot;backTo&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Briefs&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;onBack&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;},&quot;onTab&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;}}">
+class Component extends DCLogic {
+  state = { panel: null, q: '' };
+  renderVals() {
+    const p = this.props.prefs || {}, on = (k, v) => this.props.onPref && this.props.onPref(k, v), panel = this.state.panel;
+    const grp = (label, key, opts) => ({ label, opts: opts.map(o => ({ label: o, click: () => on(key, o), bg: p[key] === o ? 'var(--color-accent)' : 'var(--color-neutral-200)', fg: p[key] === o ? '#fff' : 'var(--color-text)' })) });
+    const T = [
+      ['Brief', 'A folder TAB builds around one goal for today: the doc, the people and the data it needs.'],
+      ['Thread', 'Everything for one task opened together as a single surface, then put away again.'],
+      ['Parked', 'Tabs filed away, not closed. Restorable any time.'],
+      ['Skill card', 'A small tool (compare, calendar, timer) that appears only when the task needs it.'],
+      ['Digest', 'Notifications held back and delivered together at a set time.'],
+      ['Main doc / Possible merge', 'The version you work in, and the one candidate TAB suggests folding into it.'],
+      ['Low- / high-stakes', 'Reversible and private, TAB does. Sends, shares or changes someone else\'s day, TAB asks.'],
+      ['Tier', 'A pricing level: Starter, Team, Scale.'],
+      ['Activation cohort', 'Users grouped by signup week, tracked to their first key action.']
+    ];
+    const q = this.state.q.toLowerCase(), bt = this.props.backTo;
+    return {
+      showG: panel === 'g', showS: panel === 's',
+      toggleG: () => this.setState({ panel: panel === 'g' ? null : 'g' }),
+      toggleS: () => this.setState({ panel: panel === 's' ? null : 's' }),
+      back: () => { this.setState({ panel: null }); this.props.onBack && this.props.onBack(); },
+      tab: () => { this.setState({ panel: null }); this.props.onTab && this.props.onTab(); },
+      backLab: bt ? 'BACK · ' + String(bt).toUpperCase() : 'BACK', backOp: bt ? 1 : .45,
+      bright: p.bright ?? 85, warm: p.warm ?? 25,
+      setBright: e => on('bright', +e.target.value), setWarm: e => on('warm', +e.target.value),
+      groups: [grp('Sound', 'sound', ['Off', 'Soft', 'Ambient']), grp('Alerts', 'quiet', ['Quiet', 'Digest', 'All']), grp('Text', 'text', ['Compact', 'Roomy', 'Large']), grp('Motion', 'motion', ['Reduced', 'Full'])],
+      q: this.state.q, setQ: e => this.setState({ q: e.target.value }),
+      terms: T.filter(t => !q || (t[0] + t[1]).toLowerCase().includes(q)).map(t => ({ k: t[0], v: t[1] }))
+    };
+  }
+}
+</script>
+</body>
+</html>

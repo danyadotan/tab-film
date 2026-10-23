@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/broadsheet-74f2bd77-1572-48bb-a3ab-6cfa90e647f0/styles.css">
+<script src="_ds/broadsheet-74f2bd77-1572-48bb-a3ab-6cfa90e647f0/_ds_bundle.js"></script>
+<style>body{margin:0;background:#e4e2e0}a{color:var(--color-accent-700)}a:hover{color:var(--color-accent-900)}</style>
+</helmet>
+<div style="font-family:var(--font-body);color:var(--color-text)">
+<div style="position:sticky;top:0;z-index:50;background:var(--color-bg);display:flex;align-items:center;gap:20px;padding:12px 24px;flex-wrap:wrap;box-shadow:var(--shadow-sm)">
+  <div style="font-family:var(--font-heading);font-weight:700;letter-spacing:.14em;color:var(--color-accent-2)">TAB</div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;flex:1">
+    <sc-for list="{{ steps }}" as="s" hint-placeholder-count="8">
+      <button onClick="{{ s.go }}" style="all:unset;cursor:pointer;padding:5px 11px;font-size:14px;border-radius:2px;background:{{ s.bg }};color:{{ s.fg }}">{{ s.n }} · {{ s.label }}</button>
+    </sc-for>
+  </div>
+  <button class="btn btn-secondary" onClick="{{ toggleBoard }}">{{ boardLabel }}</button>
+</div>
+
+<div style="padding:24px;display:flex;flex-wrap:wrap;gap:28px;justify-content:center;align-items:flex-start">
+
+<!-- 1 BOOT -->
+<div style="display:{{ d0 }};zoom:{{ z }}">
+<div style="font-size:30px;margin:0 0 6px;color:var(--color-neutral-600);display:{{ lab }}">1 · Boot — before any browser is chosen</div>
+<div style="width:1280px;height:800px;overflow:hidden;position:relative;background:var(--color-bg);box-shadow:var(--shadow-md);font-family:var(--font-heading)">
+  <div style="position:absolute;left:96px;top:64px;font-size:15px;letter-spacing:.14em;color:var(--color-accent-2);font-weight:700">TAB · MONDAY 5 OCTOBER · 8:40</div>
+  <h1 style="position:absolute;left:96px;top:130px;margin:0;font-size:132px;font-weight:600;letter-spacing:-.02em;line-height:1">Good morning.</h1>
+  <p style="position:absolute;left:96px;top:310px;width:640px;margin:0;font-size:27px;line-height:1.45">The room is nearly ready. I took the weekend's 14 open tabs, folded them into three briefs, and left the noise out.</p>
+  <div style="position:absolute;left:96px;top:500px;display:flex;gap:56px">
+    <div style="width:180px"><div style="font-size:64px;color:var(--color-accent);line-height:1">50<span style="font-size:24px"> min</span></div><div style="font-size:18px;margin-top:6px">to standup</div></div>
+    <div style="width:180px"><div style="font-size:64px;color:var(--color-accent);line-height:1">12:00</div><div style="font-size:18px;margin-top:6px">onboarding spec due</div></div>
+    <div style="width:180px"><div style="font-size:64px;color:var(--color-accent);line-height:1">3</div><div style="font-size:18px;margin-top:6px">replies waiting on you</div></div>
+  </div>
+  <div style="position:absolute;left:96px;top:690px;display:flex;gap:20px;align-items:center">
+    <button class="btn btn-primary" onClick="{{ g1 }}" style="font-size:19px;padding:14px 28px">Set the room</button>
+    <span style="font-style:italic;font-size:17px;color:var(--color-neutral-600)">Open any browser you like — I'll follow. Suggested: this one.</span>
+  </div>
+  <div style="position:absolute;right:-60px;top:-40px;width:520px;height:900px;display:flex;opacity:.9">
+    <div style="flex:1;background:radial-gradient(circle,var(--color-accent) 22%,transparent 24%) 0 0/14px 14px;opacity:.55"></div>
+    <div style="flex:1;background:radial-gradient(circle,var(--color-accent-2) 22%,transparent 24%) 7px 7px/14px 14px;opacity:.45;margin-left:-70px"></div>
+  </div>
+</div></div>
+
+<!-- 2 SENSORY -->
+<div style="display:{{ d1 }};zoom:{{ z }}">
+<div style="font-size:30px;margin:0 0 6px;color:var(--color-neutral-600);display:{{ lab }}">2 · Pre-session sensory setup</div>
+<div style="width:1280px;height:800px;overflow:hidden;position:relative;background:var(--color-bg);box-shadow:var(--shadow-md);font-family:var(--font-heading);filter:{{ tone }}">
+  <div style="position:absolute;left:96px;top:64px;width:520px">
+    <div style="font-size:15px;letter-spacing:.14em;color:var(--color-accent-2);font-weight:700">BEFORE YOU START</div>
+    <h2 style="margin:12px 0 10px;font-size:54px;line-height:1.05;font-weight:600">I set the room from your usual Monday.</h2>
+    <p style="margin:0 0 28px;font-size:19px;line-height:1.45;color:var(--color-neutral-700)">Change anything. It applies instantly, and everything reverts when you close the day.</p>
+    <div style="display:grid;grid-template-columns:150px 1fr;row-gap:14px;align-items:center;font-size:18px">
+      <span>Brightness</span><input type="range" min="40" max="100" value="{{ bright }}" onInput="{{ setBright }}" style="accent-color:var(--color-accent)">
+      <span>Warmth</span><input type="range" min="0" max="80" value="{{ warm }}" onInput="{{ setWarm }}" style="accent-color:var(--color-accent)">
+      <sc-for list="{{ groups }}" as="g" hint-placeholder-count="4">
+        <span>{{ g.label }}</span>
+        <div style="display:flex;gap:6px">
+          <sc-for list="{{ g.opts }}" as="o" hint-placeholder-count="2">
+            <button onClick="{{ o.click }}" style="all:unset;cursor:pointer;padding:6px 14px;font-size:16px;border-radius:2px;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button>
+          </sc-for>
+        </div>
+      </sc-for>
+      <span>Anything else</span><input class="input" placeholder="TAB: anything missing? just ask and TAB it." style="font-size:16px;font-family:var(--font-heading)">
+    </div>
+    <div style="margin-top:34px;display:flex;gap:18px;align-items:center">
+      <button class="btn btn-primary" onClick="{{ g2 }}" style="font-size:18px;padding:12px 24px;white-space:nowrap">Looks right — open my briefs</button>
+      <span style="font-size:15px;font-style:italic;color:var(--color-neutral-600)">Uses your saved preferences and device ambient light.</span>
+    </div>
+  </div>
+  <div style="position:absolute;left:720px;top:96px;width:460px;padding:36px;background:#fff;box-shadow:var(--shadow-md)">
+    <div style="font-size:13px;letter-spacing:.14em;color:var(--color-neutral-600)">LIVE PREVIEW</div>
+    <h3 style="margin:10px 0;font-size:34px;line-height:1.1">Onboarding spec</h3>
+    <p style="margin:0;font-size:{{ fs }}px;line-height:{{ lh }}">Pricing tiers remain the open question. Everything else in sections one to three is settled and waiting for your review before noon.</p>
+    <div style="margin-top:22px;display:flex;gap:10px;font-size:14px;color:var(--color-neutral-700);flex-wrap:wrap">
+      <span class="tag tag-accent">Sound: {{ sound }}</span><span class="tag tag-neutral">Alerts: {{ quiet }}</span><span class="tag tag-accent-2">Motion: {{ motion }}</span>
+    </div>
+  </div>
+  <div style="position:absolute;left:720px;top:500px;width:460px;font-family:var(--font-body)">
+    <div style="font-size:48px;line-height:.8;color:var(--color-accent-2);font-family:var(--font-heading)">*</div>
+    <p style="margin:6px 0 0;font-size:19px;font-style:italic;line-height:1.45">You won't see this page every morning for long. Soon it becomes a tab you open now and then — the more you adjust and use the browser, the better I "feel" what works for you, and the dashboard sets itself to your needs.</p>
+    <div style="margin-top:10px;font-size:13px;color:var(--color-neutral-600)">Learned from your own adjustments only. Reset any time.</div>
+  </div>
+</div></div>
+
+<!-- 3 BRIEFS -->
+<div style="display:{{ d2 }};zoom:{{ z }}">
+<div style="font-size:30px;margin:0 0 6px;color:var(--color-neutral-600);display:{{ lab }}">3 · Desktop 1 — Briefs (made by TAB)</div>
+<div style="width:1280px;height:800px;overflow:hidden;position:relative;background:var(--color-bg);box-shadow:var(--shadow-md);font-family:var(--font-heading);filter:{{ tone }}">
+  <dc-import name="TAB Chrome" active="0" on-go="{{ goPage }}" hint-size="100%,56px"></dc-import>
+  <div style="position:absolute;left:{{ M.b.l }};top:110px;width:{{ M.b.w }};transition:left .3s,width .3s">
+    <div style="font-size:13px;letter-spacing:.14em;color:var(--color-neutral-600)">THREE BRIEFS · SORTED BY WHAT MOVES TODAY</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:36px;margin-top:22px">
+      <div style="background:{{ b1 }};padding:12px;margin:-12px;transition:background .3s"><div style="font-size:13px;letter-spacing:.14em;color:var(--color-accent-700);font-weight:700">SHIP · BY 12:00</div>
+        <h3 style="margin:8px 0 12px;font-size:30px;line-height:1.05;font-weight:600">Onboarding spec</h3>
+        <div style="font-size:17px;line-height:1.6">Draft v4, §1–3 settled<br>§4 pricing tiers open<br>Legal comments (2)<br>Activation cohort</div></div>
+      <div style="background:{{ b2 }};padding:12px;margin:-12px;transition:background .3s"><div style="font-size:13px;letter-spacing:.14em;color:var(--color-accent-700);font-weight:700">9:30 · 50 MIN</div>
+        <h3 style="margin:8px 0 12px;font-size:30px;line-height:1.05;font-weight:600">Standup</h3>
+        <div style="font-size:17px;line-height:1.6">Your three lines, drafted<br>Blocker: pricing<br>Last week's commitments<br>Who's out today</div></div>
+      <div style="background:{{ b3 }};padding:12px;margin:-12px;transition:background .3s"><div style="font-size:13px;letter-spacing:.14em;color:var(--color-accent-700);font-weight:700">WAITING ON YOU</div>
+        <h3 style="margin:8px 0 12px;font-size:30px;line-height:1.05;font-weight:600">Replies</h3>
+        <div style="font-size:17px;line-height:1.6">Dana — tier question<br>Omar — 1:1 timing<br>Legal — share access<br><span style="color:var(--color-neutral-600);font-style:italic">11 others held</span></div></div>
+    </div>
+    <sc-if value="{{ pinned }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:64px">
+        <div style="font-size:13px;letter-spacing:.14em;color:var(--color-accent-2);font-weight:700">PINNED AT THE CENTER · UNTIL 12:00</div>
+        <div style="font-size:40px;font-weight:600;line-height:1.1;margin-top:8px">§4 Pricing tiers — the one open question in the spec.</div>
+        <button class="btn btn-primary" onClick="{{ g3 }}" style="margin-top:16px;white-space:nowrap">Open it</button>
+      </div>
+    </sc-if>
+  </div>
+  <div style="position:absolute;left:1010px;top:104px;width:220px;display:{{ M.b.rail }};flex-direction:column;gap:12px;font-size:15px">
+    <div style="font-family:var(--font-body)">
+      <div style="font-size:40px;line-height:.8;color:var(--color-accent-2);font-family:var(--font-heading)">*</div>
+      <p style="margin:4px 0 10px;font-size:16px;font-style:italic;line-height:1.45">{{ noteText }}</p>
+      <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-primary" onClick="{{ pin }}" style="white-space:nowrap">{{ pinLabel }}</button><button class="btn btn-ghost" onClick="{{ g6 }}" style="white-space:nowrap">What I did</button></div>
+      <div style="margin-top:8px;font-size:12px;color:var(--color-neutral-600)">From 3 reopens, 0 edits — a workflow event, nothing about you.</div>
+    </div>
+    <div>
+      <button onClick="{{ S.walk.t }}" style="all:unset;cursor:pointer;display:flex;justify-content:space-between;align-items:baseline;width:100%;padding:6px 0;font-size:12px;letter-spacing:.14em;font-weight:700;color:var(--color-neutral-700)" style-hover="color:var(--color-accent-700)"><span>WALK ME THROUGH</span><span style="font-size:18px;font-weight:400">{{ S.walk.sign }}</span></button>
+      <sc-if value="{{ S.walk.open }}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{ walkOff }}" hint-placeholder-val="{{ true }}">
+          <p style="margin:4px 0 10px;line-height:1.45">Optional: TAB takes you through the three briefs — on screen, out loud, or both.</p>
+          <div style="display:flex;gap:4px;margin-bottom:10px">
+            <sc-for list="{{ modes }}" as="m" hint-placeholder-count="3">
+              <button onClick="{{ m.click }}" style="all:unset;cursor:pointer;padding:4px 9px;font-size:14px;border-radius:2px;background:{{ m.bg }};color:{{ m.fg }}">{{ m.label }}</button>
+            </sc-for>
+          </div>
+          <button class="btn btn-secondary" onClick="{{ walkStart }}" style="white-space:nowrap">Start walkthrough</button>
+        </sc-if>
+        <sc-if value="{{ walkOn }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:4px;font-size:12px;color:var(--color-neutral-600)">{{ walkMeta }}</div>
+          <div style="font-size:20px;font-weight:600;margin-top:2px">{{ walkTitle }}</div>
+          <p style="margin:4px 0 10px;font-size:16px;line-height:1.45;font-style:italic;font-family:var(--font-body)">“{{ walkLine }}”</p>
+          <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-primary" onClick="{{ walkNext }}" style="white-space:nowrap">{{ walkNextLab }}</button><button class="btn btn-ghost" onClick="{{ walkStop }}">Stop</button></div>
+        </sc-if>
+      </sc-if>
+    </div>
+    <div>
+      <button onClick="{{ S.skills.t }}" style="all:unset;cursor:pointer;display:flex;justify-content:space-between;align-items:baseline;width:100%;padding:6px 0;font-size:12px;letter-spacing:.14em;font-weight:700;color:var(--color-neutral-700)" style-hover="color:var(--color-accent-700)"><span>SKILLS FOR TODAY · 4</span><span style="font-size:18px;font-weight:400">{{ S.skills.sign }}</span></button>
+      <sc-if value="{{ S.skills.open }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;line-height:1.35">
+          <div><span style="color:var(--color-accent-700)">Compare</span> — v3 ↔ v4 of the spec</div>
+          <div><span style="color:var(--color-accent-700)">Calendar</span> — free 10:00–10:30</div>
+          <div><span style="color:var(--color-accent-700)">Metrics</span> — activation, 4 wks</div>
+          <div><span style="color:var(--color-accent-700)">Timer</span> — 60 min on §4</div>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+  <button onClick="{{ M.b.t }}" style="position:absolute;top:66px;right:56px;z-index:15;white-space:nowrap" class="btn btn-ghost">{{ M.b.lab }}</button>
+  <dc-import name="TAB Sideline" prefs="{{ prefs }}" on-pref="{{ setPref }}" back-to="{{ backTo }}" on-back="{{ goBack }}" style="position:absolute;right:0;top:56px;height:744px;z-index:20" hint-size="36px,744px"></dc-import>
+</div></div>
+
+<!-- 4 TEXT -->
+<div style="display:{{ d3 }};zoom:{{ z }}">
+<div style="font-size:30px;margin:0 0 6px;color:var(--color-neutral-600);display:{{ lab }}">4 · Desktop 2 — Text &amp; versions</div>
+<div style="width:1280px;height:800px;overflow:hidden;position:relative;background:var(--color-bg);box-shadow:var(--shadow-md);font-family:var(--font-heading);filter:{{ tone }}">
+  <dc-import name="TAB Chrome" active="1" on-go="{{ goPage }}" hint-size="100%,56px"></dc-import>
+  <div style="position:absolute;left:{{ M.t.l }};top:110px;width:{{ M.t.w }};transition:left .3s,width .3s">
+    <div style="display:flex;gap:56px">
+      <div style="white-space:nowrap"><div style="font-size:13px;letter-spacing:.14em;color:var(--color-accent-700);font-weight:700">MAIN DOC</div><div style="font-size:20px;margin-top:4px">Spec v4 · yours · 8:12</div></div>
+      <div style="white-space:nowrap"><div style="font-size:13px;letter-spacing:.14em;color:var(--color-accent-2);font-weight:700">POSSIBLE MERGE</div><div style="font-size:20px;margin-top:4px">v3 + Dana's edits · Fri</div></div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:18px;flex-wrap:wrap;font-size:14px;color:var(--color-neutral-700)">
+      <span><span style="text-decoration:line-through;color:var(--color-accent-2)">struck</span> merge removes</span><span><span style="background:var(--color-accent-100)">highlighted</span> merge adds</span><span><span style="color:var(--color-accent-2)">*</span> TAB note</span>
+    </div>
+    <div style="margin-top:36px;font-size:13px;letter-spacing:.14em;color:var(--color-accent-700);font-weight:700">§4 · PRICING TIERS</div>
+    <p style="font-size:28px;line-height:1.5;margin:12px 0">Onboarding is offered in <span style="text-decoration:line-through;color:var(--color-accent-2)">two tiers</span> <span style="background:var(--color-accent-100)">three tiers: Starter, Team, Scale</span><sup style="color:var(--color-accent-2)">*</sup>. Trial length is <span style="background:var(--color-accent-100)">14 days</span><sup style="color:var(--color-accent-2)">**</sup> across all of them.</p>
+    <p style="font-size:28px;line-height:1.5;margin:0">Open: does Starter include the guided checklist? <i style="color:var(--color-neutral-600)">Decision owner: Dana.</i></p>
+    <div style="margin-top:24px;font-size:16px;font-style:italic;line-height:1.55;font-family:var(--font-body)">
+      <div><span style="color:var(--color-accent-2)">*</span> Dana's edit — matches what Northwind asked for in the pilot.</div>
+      <div><span style="color:var(--color-accent-2)">**</span> Conflicts with Legal comment 2, which suggests 30 days.</div>
+    </div>
+    <div style="margin-top:24px;display:flex;gap:10px"><button class="btn btn-primary" onClick="{{ doMerge }}" style="white-space:nowrap">{{ mergeLab }}</button><button class="btn btn-ghost" style="white-space:nowrap">Keep main as is</button></div>
+  </div>
+  <div style="position:absolute;left:1010px;top:104px;width:220px;display:{{ M.t.rail }};flex-direction:column;gap:12px;font-size:15px">
+    <div style="font-family:var(--font-body)">
+      <div style="font-size:40px;line-height:.8;color:var(--color-accent-2);font-family:var(--font-heading)">*</div>
+      <p style="margin:4px 0 10px;font-size:16px;font-style:italic;line-height:1.45">Two versions, never more. Everything older, and yesterday's finished docs, are folded below — out of sight, not gone.</p>
+      <button class="btn btn-secondary" style="white-space:nowrap">Ask Dana for me</button>
+    </div>
+    <div>
+      <button onClick="{{ S.proj.t }}" style="all:unset;cursor:pointer;display:flex;justify-content:space-between;align-items:baseline;width:100%;padding:6px 0;font-size:12px;letter-spacing:.14em;font-weight:700;color:var(--color-neutral-700)" style-hover="color:var(--color-accent-700)"><span>PROJECTS · 3</span><span style="font-size:18px;font-weight:400">{{ S.proj.sign }}</span></button>
+      <sc-if value="{{ S.proj.open }}" hint-placeholder-val="{{ false }}">
+        <sc-for list="{{ projects }}" as="p" hint-placeholder-count="3">
+          <div style="margin-top:8px"><div style="display:flex;justify-content:space-between;gap:6px"><span>{{ p.name }}</span><span style="color:var(--color-accent-700)">{{ p.pct }}%</span></div>
+            <div style="height:2px;background:var(--color-neutral-200);margin-top:4px"><div style="height:2px;width:{{ p.w }};background:var(--color-accent)"></div></div></div>
+        </sc-for>
+      </sc-if>
+    </div>
+    <div>
+      <button onClick="{{ S.table.t }}" style="all:unset;cursor:pointer;display:flex;justify-content:space-between;align-items:baseline;width:100%;padding:6px 0;font-size:12px;letter-spacing:.14em;font-weight:700;color:var(--color-neutral-700)" style-hover="color:var(--color-accent-700)"><span>ALSO ON THE TABLE · 2</span><span style="font-size:18px;font-weight:400">{{ S.table.sign }}</span></button>
+      <sc-if value="{{ S.table.open }}" hint-placeholder-val="{{ false }}">
+        <sc-for list="{{ others }}" as="p" hint-placeholder-count="2">
+          <div style="margin-top:8px"><div style="display:flex;justify-content:space-between;gap:6px"><span>{{ p.name }}</span><span style="color:var(--color-accent-700)">{{ p.pct }}%</span></div>
+            <div style="height:2px;background:var(--color-neutral-200);margin-top:4px"><div style="height:2px;width:{{ p.w }};background:var(--color-neutral-500)"></div></div></div>
+        </sc-for>
+      </sc-if>
+    </div>
+    <div>
+      <button onClick="{{ S.cleared.t }}" style="all:unset;cursor:pointer;display:flex;justify-content:space-between;align-items:baseline;width:100%;padding:6px 0;font-size:12px;letter-spacing:.14em;font-weight:700;color:var(--color-neutral-700)" style-hover="color:var(--color-accent-700)"><span>CLEARED BY TAB · 3 TAGS</span><span style="font-size:18px;font-weight:400">{{ S.cleared.sign }}</span></button>
+      <sc-if value="{{ S.cleared.open }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px">
+          <sc-for list="{{ docTags }}" as="t" hint-placeholder-count="3">
+            <button onClick="{{ t.click }}" style="all:unset;cursor:pointer;padding:3px 8px;font-size:13px;border-radius:2px;background:{{ t.bg }};color:{{ t.fg }}">{{ t.label }}</button>
+          </sc-for>
+        </div>
+        <sc-if value="{{ tagOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ tagGroups }}" as="g" hint-placeholder-count="3">
+              <div><div style="font-size:11px;letter-spacing:.12em;color:var(--color-accent-700);font-weight:700">{{ g.h }}</div><div style="font-size:14px;line-height:1.4">{{ g.items }}</div></div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </sc-if>
+    </div>
+  </div>
+  <button onClick="{{ M.t.t }}" style="position:absolute;top:66px;right:56px;z-index:15;white-space:nowrap" class="btn btn-ghost">{{ M.t.lab }}</button>
+  <dc-import name="TAB Sideline" prefs="{{ prefs }}" on-pref="{{ setPref }}" back-to="{{ backTo }}" on-back="{{ goBack }}" style="position:absolute;right:0;top:56px;height:744px;z-index:20" hint-size="36px,744px"></dc-import>
+</div></div>
+
+<!-- 5 CALL -->
+<div style="display:{{ d4 }};zoom:{{ z }}">
+<div style="font-size:30px;margin:0 0 6px;color:var(--color-neutral-600);display:{{ lab }}">5 · Desktop 3 — Video call, TAB on standby</div>
+<div style="width:1280px;height:800px;overflow:hidden;position:relative;background:var(--color-bg);box-shadow:var(--shadow-md);font-family:var(--font-heading);filter:{{ tone }}">
+  <dc-import name="TAB Chrome" active="2" on-go="{{ goPage }}" hint-size="100%,56px"></dc-import>
+  <div style="position:absolute;left:{{ M.c.l }};top:92px;width:{{ M.c.w }};transition:left .3s,width .3s">
+    <div style="font-size:13px;letter-spacing:.14em;color:var(--color-accent-2);font-weight:700">KEEP IN VIEW · PINNED FOR THE WHOLE CALL</div>
+    <div style="font-size:34px;font-weight:600;line-height:1.15;margin-top:6px">We leave with a tier and a start date for the 40-seat rollout.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px">
+      <sc-for list="{{ tiles }}" as="t" hint-placeholder-count="4">
+        <div class="halftone" style="height:128px;background:var(--color-neutral-200);display:flex;align-items:flex-end;padding:8px;font-size:14px">{{ t }}</div>
+      </sc-for>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1.6fr;gap:32px;margin-top:22px">
+      <div><div style="font-size:13px;letter-spacing:.14em;color:var(--color-accent-700);font-weight:700">PURPOSE</div><div style="font-size:18px;line-height:1.4;margin-top:4px">Agree on the tier; confirm who signs.</div></div>
+      <div><div style="font-size:13px;letter-spacing:.14em;color:var(--color-accent-700);font-weight:700">LEAD WITH</div><div style="font-size:20px;line-height:1.4;margin-top:4px;font-style:italic;font-family:var(--font-body)">“Which team goes live first? That tells us whether Team or Scale fits.”</div></div>
+    </div>
+  </div>
+  <div style="position:absolute;left:1010px;top:104px;width:220px;display:{{ M.c.rail }};flex-direction:column;gap:10px;font-size:15px">
+    <div style="font-family:var(--font-body)">
+      <div style="font-size:40px;line-height:.8;color:var(--color-accent-2);font-family:var(--font-heading)">*</div>
+      <p style="margin:4px 0 0;font-size:16px;font-style:italic;line-height:1.45">On standby, off camera. If audio drops I'll move you to dial-in and keep notes running.</p>
+    </div>
+    <div>
+      <button onClick="{{ S.room.t }}" style="all:unset;cursor:pointer;display:flex;justify-content:space-between;align-items:baseline;width:100%;padding:6px 0;font-size:12px;letter-spacing:.14em;font-weight:700;color:var(--color-neutral-700)" style-hover="color:var(--color-accent-700)"><span>ROOM CHECK · ALL SET ✓</span><span style="font-size:18px;font-weight:400">{{ S.room.sign }}</span></button>
+      <sc-if value="{{ S.room.open }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:3px;margin-top:4px">
+          <sc-for list="{{ env }}" as="e" hint-placeholder-count="5">
+            <div style="display:flex;gap:8px;line-height:1.4"><span style="width:84px;flex:none">{{ e.k }}</span><span style="flex:1;min-width:0;color:var(--color-neutral-700)">{{ e.v }}</span></div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+    <div>
+      <button onClick="{{ S.caller.t }}" style="all:unset;cursor:pointer;display:flex;justify-content:space-between;align-items:baseline;width:100%;padding:6px 0;font-size:12px;letter-spacing:.14em;font-weight:700;color:var(--color-neutral-700)" style-hover="color:var(--color-accent-700)"><span>ABOUT THE CALLER</span><span style="font-size:18px;font-weight:400">{{ S.caller.sign }}</span></button>
+      <sc-if value="{{ S.caller.open }}" hint-placeholder-val="{{ true }}">
+        <div style="font-size:17px;font-weight:600;line-height:1.2;margin-top:2px">Rina Kaplan, Head of Ops, Northwind</div>
+        <div style="display:flex;flex-direction:column;gap:5px;margin-top:6px;line-height:1.35">
+          <div>1 · Signed the pilot in August; 81% activation.</div>
+          <div>2 · Asked twice about seat limits.</div>
+          <div>3 · Prefers short calls — last one ran 22 min.</div>
+        </div>
+      </sc-if>
+    </div>
+    <div>
+      <button onClick="{{ S.folder.t }}" style="all:unset;cursor:pointer;display:flex;justify-content:space-between;align-items:baseline;width:100%;padding:6px 0;font-size:12px;letter-spacing:.14em;font-weight:700;color:var(--color-neutral-700)" style-hover="color:var(--color-accent-700)"><span>MEETING FOLDER · 4</span><span style="font-size:18px;font-weight:400">{{ S.folder.sign }}</span></button>
+      <sc-if value="{{ S.folder.open }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:5px;margin-top:4px;align-items:flex-start">
+          <span class="tag tag-accent">1 · Agenda</span><span class="tag tag-accent">2 · Pricing v4 — shareable</span><span class="tag tag-accent">3 · Pilot results</span><span class="tag tag-neutral">4 · Contract — internal</span>
+        </div>
+      </sc-if>
+    </div>
+    <div>
+      <button onClick="{{ S.sent.t }}" style="all:unset;cursor:pointer;display:flex;justify-content:space-between;align-items:baseline;width:100%;padding:6px 0;font-size:12px;letter-spacing:.14em;font-weight:700;color:var(--color-neutral-700)" style-hover="color:var(--color-accent-700)"><span>SENT · WHERE YOU STAND</span><span style="font-size:18px;font-weight:400">{{ S.sent.sign }}</span></button>
+      <sc-if value="{{ S.sent.open }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:4px;line-height:1.45">Pilot results · Thu · opened 3×<br>Pricing v3 · Fri · v4 replaces it</div>
+        <div style="margin-top:6px;line-height:1.4;font-style:italic;font-family:var(--font-body)">Pilot approved. Pricing open. Contract waits on the tier.</div>
+      </sc-if>
+    </div>
+    <div>
+      <button onClick="{{ S.eod.t }}" style="all:unset;cursor:pointer;display:flex;justify-content:space-between;align-items:baseline;width:100%;padding:6px 0;font-size:12px;letter-spacing:.14em;font-weight:700;color:var(--color-neutral-700)" style-hover="color:var(--color-accent-700)"><span>END-OF-DAY UPDATE</span><span style="font-size:18px;font-weight:400">{{ S.eod.sign }}</span></button>
+      <sc-if value="{{ S.eod.open }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:4px;line-height:1.5"><b>Done</b> — spec v4 §1–3<br><b>Blocked</b> — tiers, on Dana<br><b>Tomorrow</b> — Legal review</div>
+        <button class="btn btn-secondary" onClick="{{ g7 }}" style="margin-top:8px;white-space:nowrap">Close the day</button>
+      </sc-if>
+    </div>
+  </div>
+  <button onClick="{{ M.c.t }}" style="position:absolute;top:66px;right:56px;z-index:15;white-space:nowrap" class="btn btn-ghost">{{ M.c.lab }}</button>
+  <dc-import name="TAB Sideline" prefs="{{ prefs }}" on-pref="{{ setPref }}" back-to="{{ backTo }}" on-back="{{ goBack }}" style="position:absolute;right:0;top:56px;height:744px;z-index:20" hint-size="36px,744px"></dc-import>
+</div></div>
+
+<!-- 6 PARKED -->
+<div style="display:{{ d5 }};zoom:{{ z }}">
+<div style="font-size:30px;margin:0 0 6px;color:var(--color-neutral-600);display:{{ lab }}">6 · Desktop 4 — Parked (the context switcher)</div>
+<div style="width:1280px;height:800px;overflow:hidden;position:relative;background:var(--color-bg);box-shadow:var(--shadow-md);font-family:var(--font-heading);filter:{{ tone }}">
+  <dc-import name="TAB Chrome" active="3" on-go="{{ goPage }}" hint-size="100%,56px"></dc-import>
+  <div style="position:absolute;left:{{ M.p.l }};top:110px;width:{{ M.p.w }};transition:left .3s,width .3s">
+    <h2 style="margin:0;font-size:44px;font-weight:600">14 tabs, filed. None lost.</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px 48px;margin-top:34px">
+      <sc-for list="{{ parked }}" as="p" hint-placeholder-count="4">
+        <div><div style="font-size:13px;letter-spacing:.14em;color:{{ p.c }};font-weight:700">{{ p.k }}</div>
+          <div style="font-size:30px;margin:6px 0 8px;line-height:1.05">{{ p.t }}</div>
+          <div style="font-size:16px;line-height:1.6;color:var(--color-neutral-700)">{{ p.items }}</div>
+          <button class="btn btn-ghost" onClick="{{ p.go }}" style="margin-top:6px;padding-left:0;white-space:nowrap">{{ p.cta }}</button></div>
+      </sc-for>
+    </div>
+  </div>
+  <div style="position:absolute;left:1010px;top:104px;width:220px;display:{{ M.p.rail }};font-family:var(--font-body)">
+    <div style="font-size:40px;line-height:.8;color:var(--color-accent-2);font-family:var(--font-heading)">*</div>
+    <p style="margin:4px 0 0;font-size:16px;font-style:italic;line-height:1.45">Switching is a handoff, not a hunt. Say the task — "pricing" — and I bring the doc, thread and chart together, then put them away.</p>
+  </div>
+  <button onClick="{{ M.p.t }}" style="position:absolute;top:66px;right:56px;z-index:15;white-space:nowrap" class="btn btn-ghost">{{ M.p.lab }}</button>
+  <dc-import name="TAB Sideline" prefs="{{ prefs }}" on-pref="{{ setPref }}" back-to="{{ backTo }}" on-back="{{ goBack }}" style="position:absolute;right:0;top:56px;height:744px;z-index:20" hint-size="36px,744px"></dc-import>
+</div></div>
+
+<!-- 7 HANDOFF -->
+<div style="display:{{ d6 }};zoom:{{ z }}">
+<div style="font-size:30px;margin:0 0 6px;color:var(--color-neutral-600);display:{{ lab }}">7 · Cognitive-load handoff — what TAB did vs. asks</div>
+<div style="width:1280px;height:800px;overflow:hidden;position:relative;background:var(--color-bg);box-shadow:var(--shadow-md);font-family:var(--font-heading);filter:{{ tone }}">
+  <dc-import name="TAB Chrome" active="0" on-go="{{ goPage }}" hint-size="100%,56px"></dc-import>
+  <div style="position:absolute;left:{{ M.h.l }};top:110px;width:{{ M.h.w }};transition:left .3s,width .3s">
+    <div style="font-size:13px;letter-spacing:.14em;color:var(--color-accent-2);font-weight:700">YOUR CALL · 3</div>
+    <sc-for list="{{ asks }}" as="a" hint-placeholder-count="3">
+      <div style="margin-top:22px"><div style="font-size:26px;line-height:1.25">{{ a.t }}</div>
+        <div style="font-size:15px;color:var(--color-neutral-600);font-style:italic;margin:4px 0 10px">{{ a.why }}</div>
+        <div style="display:flex;gap:8px;align-items:center"><button class="btn {{ a.cls }}" onClick="{{ a.yes }}" style="white-space:nowrap">{{ a.yesLab }}</button><button class="btn btn-ghost">Hold</button></div></div>
+    </sc-for>
+  </div>
+  <div style="position:absolute;left:1010px;top:104px;width:220px;display:{{ M.h.rail }};flex-direction:column;gap:12px;font-size:15px">
+    <div style="font-family:var(--font-body)">
+      <div style="font-size:40px;line-height:.8;color:var(--color-accent-2);font-family:var(--font-heading)">*</div>
+      <p style="margin:4px 0 0;font-size:16px;font-style:italic;line-height:1.45">Reversible and private, I just do. Anything that sends, shares or changes someone else's day, I ask.</p>
+    </div>
+    <div>
+      <button onClick="{{ S.did.t }}" style="all:unset;cursor:pointer;display:flex;justify-content:space-between;align-items:baseline;width:100%;padding:6px 0;font-size:12px;letter-spacing:.14em;font-weight:700;color:var(--color-neutral-700)" style-hover="color:var(--color-accent-700)"><span>DONE BY TAB · 4</span><span style="font-size:18px;font-weight:400">{{ S.did.sign }}</span></button>
+      <sc-if value="{{ S.did.open }}" hint-placeholder-val="{{ false }}">
+        <sc-for list="{{ did }}" as="d" hint-placeholder-count="4">
+          <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;margin-top:6px;line-height:1.3;opacity:{{ d.op }}"><span style="text-decoration:{{ d.td }}">{{ d.t }}</span><button onClick="{{ d.go }}" style="all:unset;cursor:pointer;color:var(--color-accent-700);font-size:14px" style-hover="text-decoration:underline">{{ d.lab }}</button></div>
+        </sc-for>
+      </sc-if>
+    </div>
+  </div>
+  <button onClick="{{ M.h.t }}" style="position:absolute;top:66px;right:56px;z-index:15;white-space:nowrap" class="btn btn-ghost">{{ M.h.lab }}</button>
+  <dc-import name="TAB Sideline" prefs="{{ prefs }}" on-pref="{{ setPref }}" back-to="{{ backTo }}" on-back="{{ goBack }}" style="position:absolute;right:0;top:56px;height:744px;z-index:20" hint-size="36px,744px"></dc-import>
+</div></div>
+
+<!-- 8 WRAP -->
+<div style="display:{{ d7 }};zoom:{{ z }}">
+<div style="font-size:30px;margin:0 0 6px;color:var(--color-neutral-600);display:{{ lab }}">8 · End-of-session wrap</div>
+<div style="width:1280px;height:800px;overflow:hidden;position:relative;background:var(--color-bg);box-shadow:var(--shadow-md);font-family:var(--font-heading);filter:{{ tone }}">
+  <div style="position:absolute;left:96px;top:64px;font-size:15px;letter-spacing:.14em;color:var(--color-accent-2);font-weight:700">TAB · MONDAY 5 OCTOBER · 17:48</div>
+  <h1 style="position:absolute;left:96px;top:120px;margin:0;font-size:112px;font-weight:600;line-height:1;letter-spacing:-.02em">That's the day.</h1>
+  <div style="position:absolute;left:96px;top:300px;display:flex;gap:64px">
+    <div style="width:220px"><div style="font-size:64px;color:var(--color-accent);line-height:1">11:42</div><div style="font-size:18px;margin-top:6px">spec sent, 18 min early</div></div>
+    <div style="width:220px"><div style="font-size:64px;color:var(--color-accent);line-height:1">3</div><div style="font-size:18px;margin-top:6px">stalls cleared in flow</div></div>
+    <div style="width:220px"><div style="font-size:64px;color:var(--color-accent);line-height:1">2</div><div style="font-size:18px;margin-top:6px">decisions left to you, both made</div></div>
+  </div>
+  <p style="position:absolute;left:96px;top:500px;width:620px;margin:0;font-size:25px;line-height:1.45">Tomorrow's brief is already filed: Legal review first, then the retro. Brightness, warmth and sound return to how you had them.</p>
+  <div style="position:absolute;left:96px;top:690px;display:flex;gap:16px">
+    <button class="btn btn-primary" onClick="{{ g0 }}" style="font-size:18px;padding:12px 24px">Close the edition</button>
+    <button class="btn btn-ghost" onClick="{{ g2 }}">Review the day</button>
+  </div>
+</div></div>
+
+</div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+class Component extends DCLogic {
+  state = { stage: 0, prev: null, board: false, bright: 85, warm: 25, sound: 'Soft', quiet: 'Digest', text: 'Roomy', motion: 'Reduced', pinned: false, undone: {}, ok: {}, z: 1, walk: 0, walkMode: 'Both', openTag: null, merged: false, sec: { caller: true }, wide: {} };
+  componentDidMount() { this.fit = () => this.setState({ z: Math.min(1, (window.innerWidth - 56) / 1280) }); this.fit(); window.addEventListener('resize', this.fit); }
+  componentWillUnmount() { window.removeEventListener('resize', this.fit); }
+  renderVals() {
+    const s = this.state, set = (k, v) => () => this.setState({ [k]: v });
+    const nav = n => this.setState(st => st.stage === n ? { board: false } : { stage: n, prev: st.stage, board: false });
+    const go = n => () => nav(n);
+    const keys5 = ['b', 't', 'c', 'p', 'h'];
+    const names = ['Boot', 'Room', 'Briefs', 'Text', 'Call', 'Parked', 'Handoff', 'Wrap'];
+    const grp = (label, key, opts) => ({ label, opts: opts.map(o => ({ label: o, click: set(key, o), bg: s[key] === o ? 'var(--color-accent)' : 'var(--color-neutral-200)', fg: s[key] === o ? '#fff' : 'var(--color-text)' })) });
+    const d = {}, g = {}; for (let i = 0; i < 8; i++) { d['d' + i] = (s.board || s.stage === i) ? 'block' : 'none'; g['g' + i] = go(i); }
+    const S = {}; ['walk', 'skills', 'proj', 'table', 'cleared', 'room', 'caller', 'folder', 'sent', 'eod', 'did'].forEach(k => S[k] = { open: !!s.sec[k], sign: s.sec[k] ? '–' : '+', t: () => this.setState(st => ({ sec: { ...st.sec, [k]: !st.sec[k] } })) });
+    if (s.walk) S.walk = { ...S.walk, open: true, sign: '–' };
+    const W = [['Onboarding spec', 'Due at noon. Sections one to three are settled; only pricing tiers are open.'], ['Standup', 'Your three lines are drafted. The one blocker to raise is the pricing decision.'], ['Replies', 'Three need you. Dana\'s matters most — it unblocks the spec.']];
+    const w = s.walk, hl = i => w === i ? 'var(--color-accent-100)' : 'transparent';
+    const TG = { last: { label: 'Last week · 4', g: [['NEEDS TO CLOSE', 'Q3 pricing memo — sign-off pending'], ['GOES TOGETHER', 'Cohort chart + Activation brief'], ['LAST LOOK OR SIGN', 'Vendor NDA — your signature']] }, next: { label: 'Next week · 3', g: [['NEEDS TO CLOSE', 'Legal review pack — Wed'], ['GOES TOGETHER', 'Retro notes + Release one-pager'], ['LAST LOOK OR SIGN', 'Board slide draft']] }, older: { label: 'Older versions · 2', g: [['KEPT, NOT SHOWN', 'v2 · Thu — v1 · outline']] } };
+    const pf = (k, t, items, c, cta, n) => ({ k, t, items, c, cta, go: go(n) });
+    const didItems = ['Closed 9 duplicate tabs', 'Muted #launch-chat to 10:00', 'Snapshotted spec v4', 'Moved alerts to digest'];
+    const asksItems = [['Send Dana: "Tier decision needed by 11:00"', 'Sends a message in your name'], ['Move your 1:1 with Omar to 14:00', "Changes someone else's calendar"], ['Share the draft with Legal', 'Gives outside access to a document']];
+    const M = {}; keys5.forEach(k => { const on = !!s.wide[k]; M[k] = { l: on ? '96px' : '112px', w: on ? '1090px' : '850px', rail: on ? 'none' : 'flex', lab: on ? '↙ Restore side column' : '↗ Enlarge', t: () => this.setState(st => ({ wide: { ...st.wide, [k]: !st.wide[k] } })) }; });
+    return {
+      ...d, ...g, S, M, z: s.board ? Math.min(.44, s.z * .44) : s.z, lab: s.board ? 'block' : 'none',
+      steps: names.map((n, i) => ({ n: i + 1, label: n, go: go(i), bg: !s.board && s.stage === i ? 'var(--color-accent)' : 'transparent', fg: !s.board && s.stage === i ? '#fff' : 'var(--color-text)' })),
+      boardLabel: s.board ? 'Back to prototype' : 'See all 8 screens', toggleBoard: () => this.setState({ board: !s.board }),
+      tone: `brightness(${(s.bright / 100 + .1).toFixed(2)}) sepia(${(s.warm / 160).toFixed(2)})`,
+      bright: s.bright, warm: s.warm, setBright: e => this.setState({ bright: +e.target.value }), setWarm: e => this.setState({ warm: +e.target.value }),
+      groups: [grp('Sound', 'sound', ['Off', 'Soft', 'Ambient']), grp('Alerts', 'quiet', ['Quiet', 'Digest', 'All']), grp('Text', 'text', ['Compact', 'Roomy', 'Large']), grp('Motion', 'motion', ['Reduced', 'Full'])],
+      fs: s.text === 'Large' ? 24 : s.text === 'Roomy' ? 20 : 17, lh: s.text === 'Compact' ? 1.35 : 1.6,
+      sound: s.sound, quiet: s.quiet, motion: s.motion,
+      prefs: { bright: s.bright, warm: s.warm, sound: s.sound, quiet: s.quiet, text: s.text, motion: s.motion },
+      setPref: (k, v) => this.setState({ [k]: v }),
+      backTo: s.prev != null ? names[s.prev] : '', goBack: () => s.prev != null && this.setState({ stage: s.prev, prev: s.stage, board: false }),
+      goPage: i => nav([2, 3, 4, 5][i]),
+      pinned: s.pinned, pin: () => this.setState({ pinned: !s.pinned }), pinLabel: s.pinned ? 'Pinned ✓' : 'Pin it',
+      noteText: s.pinned ? 'Pinned. §4 sits at the center until noon; other threads are held.' : 'Three reopens of the spec in six minutes, no edits. The open question is §4, pricing. Pin it to the center?',
+      b1: hl(1), b2: hl(2), b3: hl(3), walkOn: w > 0, walkOff: w === 0,
+      walkTitle: w ? W[w - 1][0] : '', walkLine: w ? W[w - 1][1] : '',
+      walkMeta: `Brief ${w} of 3 · ${s.walkMode === 'Visual' ? 'On screen' : s.walkMode === 'Spoken' ? 'Speaking' : 'Screen + voice'}`,
+      walkNextLab: w === 3 ? 'Done' : 'Next brief', walkNext: () => this.setState({ walk: w === 3 ? 0 : w + 1 }), walkStop: () => this.setState({ walk: 0 }), walkStart: () => this.setState({ walk: 1 }),
+      modes: ['Visual', 'Spoken', 'Both'].map(m => ({ label: m, click: set('walkMode', m), bg: s.walkMode === m ? 'var(--color-accent)' : 'var(--color-neutral-200)', fg: s.walkMode === m ? '#fff' : 'var(--color-text)' })),
+      projects: [['Onboarding spec', 72], ['Standup update', 90], ['Replies', 79]].map(p => ({ name: p[0], pct: p[1], w: p[1] + '%' })),
+      others: [['Release one-pager', 40], ['Q4 roadmap', 15]].map(p => ({ name: p[0], pct: p[1], w: p[1] + '%' })),
+      docTags: Object.keys(TG).map(k => ({ label: TG[k].label, click: () => this.setState({ openTag: s.openTag === k ? null : k }), bg: s.openTag === k ? 'var(--color-accent)' : 'var(--color-neutral-200)', fg: s.openTag === k ? '#fff' : 'var(--color-text)' })),
+      tagOpen: !!s.openTag, tagGroups: s.openTag ? TG[s.openTag].g.map(x => ({ h: x[0], items: x[1] })) : [],
+      mergeLab: s.merged ? 'Merged into main ✓' : 'Merge highlighted', doMerge: () => this.setState({ merged: true }),
+      tiles: ['You', 'Rina Kaplan · Northwind', 'Tom Ruiz · Northwind', 'Dana'],
+      env: [['Camera', 'On, framed'], ['Mic', 'Headset, clear'], ['Network', '42 ms, stable'], ['Light', 'Dim — brightness +10%'], ['Share', 'Meeting folder only']].map(e => ({ k: e[0], v: e[1] })),
+      parked: [pf('ONBOARDING SPEC', '5 tabs', 'Spec v4 · Legal comments · Cohort chart · Pricing ref · Dana thread', 'var(--color-accent-700)', 'Open as one thread', 3), pf('STANDUP', '3 tabs', 'Board · Last notes · Team calendar', 'var(--color-accent-700)', 'Open brief', 2), pf('READ LATER', '4 tabs', 'Parked to Wednesday afternoon', 'var(--color-accent-700)', 'Move to today', 2), pf('DUPLICATES', '2 tabs', 'Closed. Restorable for 7 days.', 'var(--color-accent-2)', 'Restore', 6)],
+      did: didItems.map((t, i) => ({ t, op: s.undone[i] ? .5 : 1, td: s.undone[i] ? 'line-through' : 'none', lab: s.undone[i] ? 'Redo' : 'Undo', go: () => this.setState({ undone: { ...s.undone, [i]: !s.undone[i] } }) })),
+      asks: asksItems.map((a, i) => ({ t: a[0], why: a[1], cls: s.ok[i] ? 'btn-secondary' : 'btn-primary', yesLab: s.ok[i] ? 'Done ✓' : 'Approve', yes: () => this.setState({ ok: { ...s.ok, [i]: true } }) }))
+    };
+  }
+}
+</script>
+</body>
+</html>
