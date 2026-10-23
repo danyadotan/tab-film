@@ -1,0 +1,16 @@
+{
+  "name": "bridge-it",
+  "owner": {
+    "name": "Danya Dotan",
+    "url": "https://tab-at-work.com"
+  },
+  "description": "Bridge-iT plugins by Danya Dotan: tools that protect human attention around AI work.",
+  "plugins": [
+    {
+      "name": "bridge-it-bouncer",
+      "source": "./plugins/bridge-it-bouncer",
+      "description": "Verifies and consolidates AI-generated work before presenting the smallest necessary human decision.",
+      "version": "0.1.0"
+    }
+  ]
+}

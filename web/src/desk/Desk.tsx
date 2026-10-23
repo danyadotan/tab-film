@@ -14,7 +14,7 @@ interface State extends Prefs {
   taken: boolean;
   copy: 'mine' | 'dana';
   joined: boolean;
-  ok: Record<number, boolean>;
+  ok: Record<number, string>;
   checked: Record<number, boolean>;
   z: number;
   walk: number;
@@ -39,7 +39,31 @@ const TABS = [['Day', '3 things'], ['Write', 'spec v4 · 2 copies'], ['Call', '1
 const TIMES = ['Mon 5 Oct · 8:40', 'Mon 5 Oct · 10:24', 'Mon 5 Oct · 10:30', 'Mon 5 Oct · 17:48'];
 const PEOPLE = ['You', 'Rina Kaplan · Northwind', 'Tom Ruiz · Northwind', 'Dana'];
 const QA = [['What are the seat limits?', 'Team is 50 seats; Scale is unlimited. You need 40 — Team fits.'], ['Can we keep pilot pricing?', 'Pilot rate holds through Q1 on an annual plan.'], ['How fast can we start?', 'Earliest Nov 3. Legal needs ten days on the contract.'], ['Does Starter include the checklist?', 'Dana decides by 11:00 — say “yes, on Team and above” if pressed.']];
-const ALERTS = [['Legal comment 2 still conflicts with the 14-day trial', 'Unresolved in the sent spec — Legal reviews tomorrow', 'Add to tomorrow'], ['Omar\'s 1:1 moved to 14:00 — pending his OK', 'Changes someone else\'s calendar; you approved, he hasn\'t', 'Nudge Omar']];
+// The two real alerts, as Bridge-iT Bouncer closure-gate decisions: only what
+// materially changed, why it needs you, two choices, and how it closes.
+interface Decision { title: string; changed: string; why: string; choices: { id: string; label: string; closed: string; say: string }[] }
+const ALERTS: Decision[] = [
+  {
+    title: 'Settle the trial length before Legal reviews the spec tomorrow.',
+    changed: 'Legal comment 2 asks for 30 days; the sent spec says 14 (+16 days).',
+    why: 'It changes what Northwind was told — an external commitment.',
+    choices: [
+      { id: 'tomorrow', label: 'Add to tomorrow', closed: 'Filed · first on tomorrow\'s review ✓', say: 'Filed. Comment 2 opens tomorrow\'s review — I checked the agenda; it\'s there.' },
+      { id: 'thirty', label: 'Offer 30 days', closed: 'Spec updated to 30 days · Northwind not yet told', say: 'Spec now says 30 days. Telling Northwind is a separate call — it stays with you.' },
+    ],
+  },
+  {
+    title: 'Confirm moving Omar\'s 1:1 to 14:00.',
+    changed: '11:00 → 14:00 (+3 h), on someone else\'s calendar.',
+    why: 'You approved the move; Omar hasn\'t. Only you can nudge him or release the slot.',
+    choices: [
+      { id: 'nudge', label: 'Nudge Omar', closed: 'Waiting on Omar · slot held till he answers', say: 'One line sent to Omar. It stays open until he answers — I\'ll tell you when.' },
+      { id: 'keep', label: 'Keep 11:00', closed: 'Back at 11:00 · Omar\'s calendar restored ✓', say: 'Back at 11:00. Omar\'s calendar is as he had it — checked.' },
+    ],
+  },
+];
+// What the bouncer did with today's agent work before any of it reached you.
+const GATE = [['25', 'passed silently'], ['16', 'consolidated'], ['3', 'returned to their agents'], ['2', 'brought to you']];
 const DID = [['Folded 14 weekend tabs into three things', 'Same goal, one place'], ['Muted #launch-chat until 10:00', '14 messages, none mention you'], ['Snapshotted spec v4 before Dana\'s copy', 'Your way back'], ['Held the spec through the call', 'Nothing to save, nothing lost'], ['Moved 11 replies to the 14:00 digest', 'Your Monday setting']];
 
 const EASE = 'cubic-bezier(.2,.8,.2,1)';
@@ -268,6 +292,7 @@ export class Desk extends Component<object, State> {
               <div style={kick('var(--color-accent-2)')}>TAB PROPOSES</div>
               <p style={{ margin: '6px 0 10px', fontSize: 16, lineHeight: 1.45 }}>The checklist question is Dana's. Ask her now, so it's answered before noon?</p>
               <button className="btn btn-primary" onClick={() => { this.setState({ asked: true }); this.say('Sent to Dana: “Does Starter include the guided checklist? Need it by 11:00.” Her answer lands here.', 'DONE', false, () => this.rest()); }} style={{ whiteSpace: 'nowrap' }}>{s.asked ? 'Asked ✓' : 'Ask Dana for me'}</button>
+              <div style={{ fontSize: 13, lineHeight: 1.4, color: 'var(--color-neutral-600)', fontStyle: 'italic', marginTop: 8 }}>It sends a message in your name, so it waits for you. Taking her wording into your copy doesn't — that one's reversible.</div>
             </div>
             <div>
               <div style={kick('var(--color-neutral-700)')}>FOLDED AWAY</div>
@@ -325,8 +350,22 @@ export class Desk extends Component<object, State> {
               </div>
               <div>
                 <div style={kick('var(--color-accent-2)')}>REAL ALERTS · 2</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 12 }}>
-                  {ALERTS.map((a, i) => <div key={i}><div style={{ fontSize: 19, lineHeight: 1.3 }}>{a[0]}</div><div style={{ fontSize: 15, color: 'var(--color-neutral-600)', fontStyle: 'italic', margin: '3px 0 8px' }}>{a[1]}</div><button className={`btn ${s.ok[i] ? 'btn-secondary' : 'btn-primary'}`} onClick={() => this.setState({ ok: { ...s.ok, [i]: true } })} style={{ whiteSpace: 'nowrap' }}>{s.ok[i] ? 'Done ✓' : a[2]}</button></div>)}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 12 }}>
+                  {ALERTS.map((a, i) => {
+                    const pick = a.choices.find(c => c.id === s.ok[i]), open = !pick && ALERTS.findIndex((_, j) => !s.ok[j]) === i;
+                    if (pick) return <div key={i}><div style={{ fontSize: 17, lineHeight: 1.3, color: 'var(--color-neutral-700)' }}>{a.title}</div><div style={{ fontSize: 14, color: 'var(--color-accent-700)', marginTop: 3 }}>{pick.closed}</div></div>;
+                    if (!open) return <div key={i} style={{ fontSize: 15, color: 'var(--color-neutral-600)' }}><span style={kick('var(--color-neutral-600)', 11)}>NEXT · </span>{a.title}</div>;
+                    return <div key={i}>
+                      <div style={kick('var(--color-neutral-700)', 11)}>DECISION REQUIRED · {i + 1} OF 2</div>
+                      <div style={{ fontSize: 19, lineHeight: 1.25, marginTop: 4 }}>{a.title}</div>
+                      <div style={{ fontSize: 14, lineHeight: 1.35, marginTop: 8 }}><span style={{ color: 'var(--color-neutral-600)' }}>What changed · </span>{a.changed}</div>
+                      <div style={{ fontSize: 14, lineHeight: 1.35, marginTop: 4 }}><span style={{ color: 'var(--color-neutral-600)' }}>Why it's yours · </span>{a.why}</div>
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
+                        {a.choices.map((c, k) => <button key={c.id} className={`btn ${k === 0 ? 'btn-primary' : 'btn-secondary'}`} onClick={() => { this.setState({ ok: { ...s.ok, [i]: c.id } }); this.say(c.say, 'DONE', false, () => this.rest()); }} style={{ whiteSpace: 'nowrap' }}>{c.label}</button>)}
+                      </div>
+                      <div style={{ fontSize: 13, color: 'var(--color-neutral-600)', fontStyle: 'italic', marginTop: 6 }}>After you choose, I update what it touches and check it before I call it closed.</div>
+                    </div>;
+                  })}
                 </div>
               </div>
               <div>
@@ -340,7 +379,11 @@ export class Desk extends Component<object, State> {
                 <div style={{ fontSize: 13, color: 'var(--color-neutral-600)', marginTop: 10 }}>Every line reversible for 7 days. Check means you looked.</div>
               </div>
             </div>
-            <div style={{ marginTop: 44, display: 'flex', gap: 18, alignItems: 'center' }}>
+            <div style={{ marginTop: 18, display: 'flex', gap: 18, alignItems: 'baseline' }}>
+              <div style={kick('var(--color-neutral-700)')}>BRIDGE-IT BOUNCER · TODAY</div>
+              <div style={{ fontSize: 16 }}>{GATE.map((g, i) => <span key={g[1]} title={i === 2 ? 'e.g. a drafted reply to Legal claiming Northwind agreed to 30 days — no source, so it went back to its agent, not to you.' : undefined} style={{ cursor: i === 2 ? 'help' : undefined }}>{i > 0 && <span style={{ color: 'var(--color-neutral-400)' }}> · </span>}<span style={{ color: 'var(--color-accent)', fontSize: 20 }}>{g[0]}</span> {g[1]}</span>)}</div>
+            </div>
+            <div style={{ marginTop: 16, display: 'flex', gap: 18, alignItems: 'center' }}>
               <button className="btn btn-primary" onClick={this.go(0)} style={{ fontSize: 18, padding: '12px 24px', whiteSpace: 'nowrap' }}>Goodbye — close the edition</button>
               <span style={{ fontSize: 16, fontStyle: 'italic', color: 'var(--color-neutral-600)', fontFamily: 'var(--font-body)' }}>Brightness, warmth and sound return to how you had them.</span>
             </div>
