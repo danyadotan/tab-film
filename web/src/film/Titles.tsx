@@ -71,5 +71,6 @@ export function Statement() {
       <div style={{ fontFamily: BODY, fontStyle: 'italic', fontSize: 34, lineHeight: 1.3, color: C.n7, maxWidth: 760, opacity: tw(T, 142.2, 0.8), transform: `translateY(${(1 - tw(T, 142.2, 0.8)) * 14}px)` }}>Same team. Same week. The hours you were already paying for, handed back.</div>
       <div style={{ fontSize: 26, lineHeight: 1.45, maxWidth: 560, opacity: tw(T, 143.1, 0.8), transform: `translateY(${(1 - tw(T, 143.1, 0.8)) * 14}px)` }}>No new headcount. No new tool to learn. One line, in the browser they already live in.</div>
     </div>
+    <a className="btn btn-primary" href="desk.html" onClick={e => e.stopPropagation()} style={{ marginTop: 48, fontSize: 24, padding: '14px 28px', textDecoration: 'none', opacity: tw(T, 144.1, 0.7), transform: `translateY(${(1 - tw(T, 144.1, 0.7)) * 12}px)`, pointerEvents: tw(T, 144.1, 0.7) > 0.5 ? 'auto' : 'none' }}>Try the desk →</a>
   </div>;
 }

@@ -44,7 +44,9 @@ function Rules({ p }: { p: number }) {
 export function Contact() {
   const { T } = useFilm();
   const link = { color: C.ink, textDecoration: 'none' };
-  return <div style={{ position: 'absolute', left: 120, top: 96, width: 1680, opacity: tw(T, AT, 0.6) }}>
+  const o = tw(T, AT, 0.6);
+  // Click-through until it shows, so its links never catch clicks mid-film.
+  return <div style={{ position: 'absolute', left: 120, top: 96, width: 1680, opacity: o, pointerEvents: o > 0.5 ? 'auto' : 'none' }}>
     <div style={{ ...kick, fontSize: 20, letterSpacing: '.16em', color: C.mag }}>TAB · FROM INTENTION TO DONE</div>
     <div style={{ marginTop: 18 }}><Rules p={tw(T, AT + 0.2, 1.2, 'draw')} /></div>
 
