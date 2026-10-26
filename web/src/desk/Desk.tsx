@@ -445,7 +445,7 @@ export class Desk extends Component<object, State> {
               <div>
                 <div style={kick('var(--color-neutral-700)')}>REPORT</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 12 }}>
-                  {[['11:42', 'spec sent, 18 min early'], ['Team', 'tier agreed with Northwind; start Nov 3'], ['3', `approvals asked of you today: ${s.sendStep === 2 ? 'the send is done' : 'the send is waiting'}, two below`]].map(r => <div key={r[0]} style={{ display: 'flex', gap: 14, alignItems: 'baseline' }}><span style={{ fontSize: 40, lineHeight: 1, color: 'var(--color-accent)', width: 120 }}>{r[0]}</span><span style={{ fontSize: 17 }}>{r[1]}</span></div>)}
+                  {[['11:42', 'spec sent, 18 min early'], ['Team', 'tier agreed with Northwind; start Nov 3'], ['3', `approvals asked of you today: ${s.sendPick !== null ? 'the send is done' : 'the send is waiting'}, two below`]].map(r => <div key={r[0]} style={{ display: 'flex', gap: 14, alignItems: 'baseline' }}><span style={{ fontSize: 40, lineHeight: 1, color: 'var(--color-accent)', width: 120 }}>{r[0]}</span><span style={{ fontSize: 17 }}>{r[1]}</span></div>)}
                 </div>
                 <div style={{ ...kick('var(--color-neutral-700)'), marginTop: 34 }}>TOMORROW · ALREADY FILED</div>
                 <div style={{ fontSize: 17, lineHeight: 1.5, marginTop: 8 }}>Legal review first (comment 2 on trial length), then the retro at 11:00. Room set to your Tuesday.</div>
