@@ -24,6 +24,10 @@ npm run build     # static site in dist/
 - Each room has a single amber line. It speaks once on arrival and then waits. Typed asks in the line route you to the right room ("the call with Rina" opens Call).
 - In Write, TAB interrupts once on its own, 14 seconds in, to bring you to the Northwind call.
 - The sideline holds TAB, Glossary, Settings (brightness and warmth apply live) and Back. The bottom bar switches rooms, restarts the demo, or shows all four rooms at once.
+- **Write → Ready to send:** TAB checks three facts (two confirmed, one left out as unconfirmed), lists what it shredded, and offers two versions of the employee's own words. Sending one is the first of the day's three approvals.
+- **Call** runs in three phases: *Before* (notes from the last call, three questions to ask, her likely questions), *During* (video tiles, her answers filled in under your questions), *After* (what you heard, follow-ups with owners, the summary filed).
+- **Close** is the 16:45–17:00 end-of-day: report, two Closure Gate decisions, the Bouncer's count for the day.
+- **TAB steps out:** press **T** (or "● TAB" in the bottom bar) and the amber tab leaves the desk as its own entity. **T** or **Esc** brings it back.
 - The logic in `src/desk/Desk.tsx` is a one-to-one port of the prototype's component class: same timers, word pacing and copy.
 
 ## How it's built

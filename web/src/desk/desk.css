@@ -12,3 +12,10 @@ a:hover { color: var(--color-accent-900); }
 .line-input:focus { border-bottom-color: oklch(0.7 0.17 65) !important; }
 .side-pill:hover { transform: scale(1.15); }
 .did-check:hover { background: var(--color-accent-100); }
+
+/* TAB steps out: the card arrives from the right edge, where the amber tab lives */
+.tab-out-backdrop { animation: tab-out-fade .35s ease-out; }
+.tab-out-card { animation: tab-out-rise .8s cubic-bezier(.2,.8,.2,1); transform-origin: 100% 50%; }
+@keyframes tab-out-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes tab-out-rise { from { opacity: 0; transform: translateX(38vw) scale(.35); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .tab-out-backdrop, .tab-out-card { animation: none; } }
