@@ -17,6 +17,9 @@ interface State extends Prefs {
   ok: Record<number, string>;
   checked: Record<number, boolean>;
   z: number;
+  small: boolean;
+  portrait: boolean;
+  hintClosed: boolean;
   walk: number;
   walkMode: 'Both' | 'Visual';
   said: Record<number, boolean>;
@@ -25,7 +28,7 @@ interface State extends Prefs {
   line: LineState;
 }
 
-const INIT: State = { stage: 0, prev: null, board: false, bright: 85, warm: 25, sound: 'Soft', quiet: 'Digest', text: 'Roomy', motion: 'Reduced', pinned: false, asked: false, taken: false, copy: 'mine', joined: false, ok: {}, checked: {}, z: 1, walk: 0, walkMode: 'Both', said: {}, nudged: false, wide: {}, line: { open: false, words: [], shown: 0, meta: '', speaking: false, controls: false, idle: false, choices: null } };
+const INIT: State = { stage: 0, prev: null, board: false, bright: 85, warm: 25, sound: 'Soft', quiet: 'Digest', text: 'Roomy', motion: 'Reduced', pinned: false, asked: false, taken: false, copy: 'mine', joined: false, ok: {}, checked: {}, z: 1, small: false, portrait: false, hintClosed: false, walk: 0, walkMode: 'Both', said: {}, nudged: false, wide: {}, line: { open: false, words: [], shown: 0, meta: '', speaking: false, controls: false, idle: false, choices: null } };
 
 const ARRIVE = [
   null,
@@ -78,8 +81,14 @@ const briefRow: CSSProperties = { display: 'grid', gridTemplateColumns: '64px 11
 export class Desk extends Component<object, State> {
   state: State = { ...INIT };
   // Full view: the 1280×800 room fills the window in both directions (minus the
-  // 24px margin and the bottom demo bar), growing on large screens too.
-  private fit = () => this.setState({ z: Math.min(1.6, (window.innerWidth - 56) / 1280, (window.innerHeight - 48 - 72) / 800) });
+  // margin and the bottom demo bar), growing on large screens too. Measured on the
+  // layout viewport: on phones innerWidth grows once content overflows, which fed
+  // the old fit a too-large width and cropped the room.
+  private fit = () => {
+    const W = document.documentElement.clientWidth, H = document.documentElement.clientHeight, small = W < 760 || H < 520;
+    const pad = small ? 8 : 24, bar = small ? 44 : 72;
+    this.setState({ small, portrait: small && H > W, z: Math.min(1.6, (W - 2 * pad - 8) / 1280, (H - 2 * pad - bar) / 800) });
+  };
   private lastStage = 0;
   private gen = 0;
   private nudgeT?: number;
@@ -221,7 +230,7 @@ export class Desk extends Component<object, State> {
     const A = this.enlarge('a'), W = this.enlarge('w'), Cl = this.enlarge('c');
 
     return <div style={{ fontFamily: 'var(--font-body)', color: 'var(--color-text)', paddingBottom: 64 }}>
-      <div style={{ padding: 24, display: 'flex', flexWrap: 'wrap', gap: 28, justifyContent: 'center', alignItems: 'flex-start' }}>
+      <div style={{ padding: s.small ? 8 : 24, display: 'flex', flexWrap: 'wrap', gap: s.small ? 12 : 28, justifyContent: 'center', alignItems: 'flex-start' }}>
 
         {/* 1 DAY · the assistant */}
         {this.room(0, <>
@@ -393,14 +402,22 @@ export class Desk extends Component<object, State> {
         </>)}
       </div>
 
-      <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 50, background: 'var(--color-bg)', display: 'flex', alignItems: 'center', gap: 16, padding: '10px 24px', flexWrap: 'wrap', boxShadow: 'var(--shadow-sm)' }}>
-        <div style={{ fontSize: 11, letterSpacing: '.14em', color: 'var(--color-neutral-600)', fontWeight: 700, whiteSpace: 'nowrap' }}>DEMO · FOUR ROOMS</div>
-        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', flex: 1 }}>
-          {NAMES.map((n, i) => { const on = !s.board && s.stage === i; return <button key={n} onClick={this.go(i)} style={{ all: 'unset', cursor: 'pointer', padding: '4px 10px', fontSize: 14, borderRadius: 2, background: on ? 'var(--color-accent)' : 'transparent', color: on ? '#fff' : 'var(--color-text)', whiteSpace: 'nowrap' }}>{i + 1} · {n} — {WHO[i]}</button>; })}
+      <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 50, background: 'var(--color-bg)', display: 'flex', alignItems: 'center', gap: s.small ? 4 : 16, padding: s.small ? '4px 8px' : '10px 24px', flexWrap: s.small ? 'nowrap' : 'wrap', overflowX: 'auto', boxShadow: 'var(--shadow-sm)' }}>
+        {!s.small && <div style={{ fontSize: 11, letterSpacing: '.14em', color: 'var(--color-neutral-600)', fontWeight: 700, whiteSpace: 'nowrap' }}>DEMO · FOUR ROOMS</div>}
+        <div style={{ display: 'flex', gap: 4, flexWrap: s.small ? 'nowrap' : 'wrap', flex: 1 }}>
+          {NAMES.map((n, i) => { const on = !s.board && s.stage === i; return <button key={n} onClick={this.go(i)} style={{ all: 'unset', cursor: 'pointer', padding: s.small ? '6px 8px' : '4px 10px', fontSize: s.small ? 13 : 14, borderRadius: 2, background: on ? 'var(--color-accent)' : 'transparent', color: on ? '#fff' : 'var(--color-text)', whiteSpace: 'nowrap' }}>{i + 1} · {n}{s.small ? '' : ` — ${WHO[i]}`}</button>; })}
         </div>
-        <button className="btn btn-ghost" onClick={this.restart} style={{ whiteSpace: 'nowrap' }}>Restart demo</button>
-        <button className="btn btn-ghost" onClick={() => this.setState({ board: !s.board })}>{s.board ? 'Back to demo' : 'All four'}</button>
+        <button className="btn btn-ghost" onClick={this.restart} style={{ whiteSpace: 'nowrap', fontSize: s.small ? 13 : undefined }}>{s.small ? 'Restart' : 'Restart demo'}</button>
+        <button className="btn btn-ghost" onClick={() => this.setState({ board: !s.board })} style={{ whiteSpace: 'nowrap', fontSize: s.small ? 13 : undefined }}>{s.board ? 'Back to demo' : s.small ? 'All 4' : 'All four'}</button>
       </div>
+
+      {/* Phones held upright: the desk is a 1280×800 desktop, so suggest turning sideways. */}
+      {s.portrait && !s.hintClosed && <div style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'color-mix(in srgb, var(--color-bg) 96%, transparent)', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 28px', gap: 14, fontFamily: 'var(--font-heading)' }}>
+        <div style={kick('var(--color-accent-2)')}>TAB · A SHARED DESK</div>
+        <div style={{ fontSize: 32, fontWeight: 600, lineHeight: 1.1 }}>Turn your phone sideways.</div>
+        <div style={{ fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: 18, lineHeight: 1.4, color: 'var(--color-neutral-700)' }}>TAB Desk is a full workday on one screen. It reads best in landscape, or on a computer at tab-at-work.com.</div>
+        <button className="btn btn-primary" onClick={() => this.setState({ hintClosed: true })} style={{ alignSelf: 'flex-start', marginTop: 8 }}>Continue anyway</button>
+      </div>}
     </div>;
   }
 }
