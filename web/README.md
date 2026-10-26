@@ -40,3 +40,12 @@ Prototype-only features that were left out: the Claude Design tweaks panel, the 
 This is a plain static Vite build. On Vercel, import the repo and set **Root Directory** to `web`. Vite is detected automatically. Netlify works too: build command `npm run build`, publish directory `web/dist`.
 
 The ledger and ROI figures are still illustrative placeholders. Replace them in `src/film/Company.tsx` once the Tikshoov pilot results are in.
+
+## Domains
+
+`web/vercel.json` gives each domain its own front page from the same deployment:
+
+- **tab-at-work.com** (and www) opens straight into the Desk at `/`. The film is at `/film`.
+- **Any other domain** (e.g. tab.dynamicbridge.io) opens the film at `/`. The desk is at `/desk.html`.
+
+The Desk fills the window in both directions: the 1280×800 room scales between fit-to-screen and 160%.

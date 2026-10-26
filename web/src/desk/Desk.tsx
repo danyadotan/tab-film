@@ -77,7 +77,9 @@ const briefRow: CSSProperties = { display: 'grid', gridTemplateColumns: '64px 11
  */
 export class Desk extends Component<object, State> {
   state: State = { ...INIT };
-  private fit = () => this.setState({ z: Math.min(1, (window.innerWidth - 56) / 1280) });
+  // Full view: the 1280×800 room fills the window in both directions (minus the
+  // 24px margin and the bottom demo bar), growing on large screens too.
+  private fit = () => this.setState({ z: Math.min(1.6, (window.innerWidth - 56) / 1280, (window.innerHeight - 48 - 72) / 800) });
   private lastStage = 0;
   private gen = 0;
   private nudgeT?: number;
