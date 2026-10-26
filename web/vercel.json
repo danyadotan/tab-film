@@ -3,6 +3,7 @@
   "routes": [
     { "src": "^/$", "has": [{ "type": "host", "value": "tab-at-work.com" }], "dest": "/desk.html" },
     { "src": "^/$", "has": [{ "type": "host", "value": "www.tab-at-work.com" }], "dest": "/desk.html" },
-    { "src": "^/film/?$", "dest": "/index.html" }
+    { "src": "^/film/$", "status": 308, "headers": { "Location": "/film" } },
+    { "src": "^/film$", "dest": "/index.html" }
   ]
 }
