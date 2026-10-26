@@ -300,7 +300,7 @@ export class Desk extends Component<object, State> {
           <div style={main(A)}>
             <div style={{ fontSize: 13, letterSpacing: '.14em', color: 'var(--color-accent-2)', fontWeight: 700 }}>{LONG}</div>
             <h1 style={{ margin: '8px 0 0', fontSize: 64, fontWeight: 600, lineHeight: 1.02, letterSpacing: '-.01em' }}>Good morning. Here is your day.</h1>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 34 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: s.pace === 'Full' ? 4 : 14, marginTop: s.pace === 'Full' ? 24 : 34 }}>
               <div style={{ ...briefRow, outline: hl(1) }}>
                 <div style={{ fontSize: 48, lineHeight: 1, color: 'var(--color-accent)' }}>1</div><div style={{ fontSize: 16, color: 'var(--color-neutral-600)' }}>by 12:00</div>
                 <div><div style={{ fontSize: 30, lineHeight: 1.15 }}>Onboarding spec — ship it.</div><div style={{ fontSize: 17, marginTop: 4, color: 'var(--color-neutral-700)' }}>Sections one to three settled. <span style={{ color: 'var(--color-accent-2)' }}>§4 pricing tiers</span> still open.</div></div></div>
@@ -311,11 +311,12 @@ export class Desk extends Component<object, State> {
                 <div style={{ fontSize: 48, lineHeight: 1, color: 'var(--color-accent)' }}>3</div><div style={{ fontSize: 16, color: 'var(--color-neutral-600)' }}>when free</div>
                 <div><div style={{ fontSize: 30, lineHeight: 1.15 }}>Replies — Dana first.</div><div style={{ fontSize: 17, marginTop: 4, color: 'var(--color-neutral-700)' }}>Her answer unblocks the spec. Then Omar, then Legal. Eleven others held till 14:00.</div></div></div>
               {light && s.heard < 2 && <div style={{ fontSize: 17, color: 'var(--color-neutral-700)', padding: '6px 0 0 84px' }}>Two more held — the standup and the replies. Ask when you're ready.</div>}
-              {s.pace === 'Full' && <div style={briefRow}>
-                <div style={{ fontSize: 48, lineHeight: 1, color: 'var(--color-accent)' }}>4</div><div style={{ fontSize: 16, color: 'var(--color-neutral-600)' }}>after 14:00</div>
-                <div><div style={{ fontSize: 30, lineHeight: 1.15 }}>Digest — eleven replies.</div><div style={{ fontSize: 17, marginTop: 4, color: 'var(--color-neutral-700)' }}>None mention you directly. Ready to skim in one pass.</div></div></div>}
+              {/* Full adds the afternoon digest as one compact line, so four rows still fit with the line open */}
+              {s.pace === 'Full' && <div style={{ ...briefRow, padding: '4px 14px' }}>
+                <div style={{ fontSize: 32, lineHeight: 1, color: 'var(--color-accent)' }}>4</div><div style={{ fontSize: 16, color: 'var(--color-neutral-600)' }}>after 14:00</div>
+                <div style={{ fontSize: 22, lineHeight: 1.2 }}>Digest — eleven replies. <span style={{ fontSize: 16, color: 'var(--color-neutral-700)' }}>None mention you; one pass.</span></div></div>}
             </div>
-            {s.pinned && <div style={{ marginTop: 36, display: 'flex', gap: 18, alignItems: 'baseline' }}>
+            {s.pinned && <div style={{ marginTop: 28, display: 'flex', gap: 18, alignItems: 'baseline' }}>
               <div style={{ fontSize: 13, letterSpacing: '.14em', color: 'var(--color-accent-2)', fontWeight: 700, whiteSpace: 'nowrap' }}>PINNED UNTIL 12:00</div>
               <div style={{ fontSize: 24, lineHeight: 1.2 }}>§4 Pricing tiers — <a href="#" onClick={this.go(1)}>open it</a></div>
             </div>}
