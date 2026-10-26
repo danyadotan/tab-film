@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from 'react';
 
-export interface Prefs { bright: number; warm: number; sound: string; quiet: string; text: string; motion: string }
+export interface Prefs { bright: number; warm: number; sound: string; quiet: string; text: string }
 
 const TERMS: [string, string][] = [
   ['Brief', 'A folder TAB builds around one goal for today: the doc, the people and the data it needs.'],
@@ -13,7 +13,7 @@ const TERMS: [string, string][] = [
   ['Tier', 'A pricing level: Starter, Team, Scale.'],
   ['Activation cohort', 'Users grouped by signup week, tracked to their first key action.'],
 ];
-const GROUPS: [string, keyof Prefs, string[]][] = [['Sound', 'sound', ['Off', 'Soft', 'Ambient']], ['Alerts', 'quiet', ['Quiet', 'Digest', 'All']], ['Text', 'text', ['Compact', 'Roomy', 'Large']], ['Motion', 'motion', ['Reduced', 'Full']]];
+const GROUPS: [string, keyof Prefs, string[]][] = [['Sound', 'sound', ['Off', 'Soft', 'Ambient']], ['Alerts', 'quiet', ['Quiet', 'Digest', 'All']], ['Text', 'text', ['Compact', 'Roomy', 'Large']]];
 
 const panel: CSSProperties = { width: 340, height: '100%', background: '#fff', boxShadow: 'var(--shadow-lg)', padding: '40px 28px 28px', boxSizing: 'border-box', overflow: 'auto' };
 // Square-edged: the prototype declared a 999px radius with !important, which its runtime dropped — this matches what it renders.

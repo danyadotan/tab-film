@@ -33,7 +33,8 @@ interface State extends Prefs {
   line: LineState;
 }
 
-const INIT: State = { stage: 0, prev: null, board: false, bright: 85, warm: 25, sound: 'Soft', quiet: 'Digest', text: 'Roomy', motion: 'Reduced', pinned: false, asked: false, taken: false, copy: 'mine', joined: false, ok: {}, checked: {}, z: 1, small: false, portrait: false, hintClosed: false, sendStep: 0, sendPick: null, callPhase: 'before', answered: 0, stepOut: false, walk: 0, walkMode: 'Both', said: {}, nudged: false, wide: {}, line: { open: false, words: [], shown: 0, meta: '', speaking: false, controls: false, idle: false, choices: null } };
+const TEXT_ZOOM: Record<string, number> = { Compact: .9, Roomy: 1, Large: 1.15 };
+const INIT: State = { stage: 0, prev: null, board: false, bright: 85, warm: 25, sound: 'Soft', quiet: 'Digest', text: 'Roomy', pinned: false, asked: false, taken: false, copy: 'mine', joined: false, ok: {}, checked: {}, z: 1, small: false, portrait: false, hintClosed: false, sendStep: 0, sendPick: null, callPhase: 'before', answered: 0, stepOut: false, walk: 0, walkMode: 'Both', said: {}, nudged: false, wide: {}, line: { open: false, words: [], shown: 0, meta: '', speaking: false, controls: false, idle: false, choices: null } };
 
 const ARRIVE = [
   null,
@@ -279,8 +280,10 @@ export class Desk extends Component<object, State> {
     const s = this.state, w = s.walk;
     const ct = s.line.open ? 200 : 104, rt = s.line.open ? 206 : 110;
     const hl = (i: number) => w === i ? '3px solid oklch(0.7 0.17 65)' : '3px solid transparent';
-    const main = (m: { l: number; w: number }): CSSProperties => ({ position: 'absolute', left: m.l, top: ct, width: m.w, transition: `left .3s,width .3s,top .6s ${EASE}` });
-    const rail = (m: { rail: string }, gap = 28): CSSProperties => ({ position: 'absolute', left: 1000, top: rt, width: 196, transition: `top .6s ${EASE}`, display: m.rail, flexDirection: 'column', gap, fontSize: 15 });
+    // Text size scales the reading columns; offsets are divided back so only the type grows
+    const tz = TEXT_ZOOM[s.text] ?? 1;
+    const main = (m: { l: number; w: number }): CSSProperties => ({ position: 'absolute', left: m.l / tz, top: ct / tz, width: m.w / tz, zoom: tz, transition: `left .3s,width .3s,top .6s ${EASE}` });
+    const rail = (m: { rail: string }, gap = 28): CSSProperties => ({ position: 'absolute', left: 1000 / tz, top: rt / tz, width: 196 / tz, zoom: tz, transition: `top .6s ${EASE}`, display: m.rail, flexDirection: 'column', gap, fontSize: 15 });
     const A = this.enlarge('a'), W = this.enlarge('w'), Cl = this.enlarge('c');
 
     return <div style={{ fontFamily: 'var(--font-body)', color: 'var(--color-text)', paddingBottom: 64 }}>
@@ -453,7 +456,7 @@ export class Desk extends Component<object, State> {
 
         {/* 4 CLOSE · the librarian */}
         {this.room(3, <>
-          <div style={{ position: 'absolute', left: 96, top: ct, width: 1090, transition: `top .6s ${EASE}` }}>
+          <div style={{ position: 'absolute', left: 96 / tz, top: ct / tz, width: 1090 / tz, zoom: tz, transition: `top .6s ${EASE}` }}>
             <div style={kick('var(--color-accent-2)', 13)}>END OF DAY · 16:45–17:00</div>
             <h1 style={{ margin: '6px 0 0', fontSize: 56, fontWeight: 600, lineHeight: 1.02, letterSpacing: '-.01em' }}>That's the day.</h1>
             <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr 1fr', gap: 48, marginTop: 24 }}>
