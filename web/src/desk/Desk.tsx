@@ -58,7 +58,7 @@ const VERSIONS = [
   { id: 'a' as const, name: 'A · Tightened for Rina', why: 'She prefers short — 31 words.', text: 'Rina — §4 attached: Starter, Team and Scale, each with a 14-day trial. Team covers your 40 seats. Talk at 10:30.' },
   { id: 'b' as const, name: 'B · As you wrote it, cleaned', why: 'Your full wording — 48 words.', text: 'Hi Rina, ahead of our 10:30 call I\'ve attached the pricing section. There are three tiers — Starter, Team and Scale — each with a 14-day trial. For 40 seats, Team is the natural fit; happy to walk through it together.' },
 ];
-const QA = [['What are the seat limits?', 'Team is 50 seats; Scale is unlimited. You need 40 — Team fits.'], ['Can we keep pilot pricing?', 'Pilot rate holds through Q1 on an annual plan.'], ['How fast can we start?', 'Earliest Nov 3. Legal needs ten days on the contract.'], ['Does Starter include the checklist?', 'Dana decides by 11:00 — say “yes, on Team and above” if pressed.']];
+const QA = [['What are the seat limits?', 'Team is 50 seats; Scale is unlimited. You need 40 — Team fits.'], ['Can we keep pilot pricing?', 'Pilot rate holds through Q1 on an annual plan.'], ['How fast can we start?', `Earliest ${START}. Legal needs ten days on the contract.`], ['Does Starter include the checklist?', 'Dana decides by 11:00 — say “yes, on Team and above” if pressed.']];
 // The two real alerts, as Bridge-iT Bouncer closure-gate decisions: only what
 // materially changed, why it needs you, two choices, and how it closes.
 interface Decision { title: string; changed: string; why: string; choices: { id: string; label: string; closed: string; say: string }[] }
