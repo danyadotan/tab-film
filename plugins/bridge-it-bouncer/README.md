@@ -19,3 +19,7 @@ Two skills:
 **OpenAI / Codex** read the same skills through `plugin.json` and each skill's `agents/openai.yaml`. Both manifests describe the same two skills; keep their name, version and description in step.
 
 By Danya Dotan — Bridge-iT · https://tab-at-work.com
+
+## License
+
+Apache License 2.0. See `LICENSE` and `NOTICE`.
