@@ -27,6 +27,7 @@ interface State extends Prefs {
   answered: number;
   stepOut: boolean;
   walk: number;
+  heard: number; // the furthest brief item walked through; at Light, rows stay held until then
   walkMode: 'Both' | 'Visual';
   said: Record<number, boolean>;
   nudged: boolean;
@@ -35,7 +36,7 @@ interface State extends Prefs {
 }
 
 const TEXT_ZOOM: Record<string, number> = { Compact: .9, Roomy: 1, Large: 1.15 };
-const INIT: State = { stage: 0, prev: null, board: false, bright: 85, warm: 25, sound: 'Soft', quiet: 'Digest', text: 'Roomy', pinned: false, asked: false, taken: false, copy: 'mine', joined: false, ok: {}, checked: {}, z: 1, small: false, portrait: false, hintClosed: false, sendStep: 0, sendPick: null, callPhase: 'before', answered: 0, stepOut: false, walk: 0, walkMode: 'Both', said: {}, nudged: false, wide: {}, line: { open: false, words: [], shown: 0, meta: '', speaking: false, controls: false, idle: false, choices: null } };
+const INIT: State = { stage: 0, prev: null, board: false, bright: 85, warm: 25, sound: 'Soft', quiet: 'Digest', text: 'Roomy', pace: 'Steady', pinned: false, asked: false, taken: false, copy: 'mine', joined: false, ok: {}, checked: {}, z: 1, small: false, portrait: false, hintClosed: false, sendStep: 0, sendPick: null, callPhase: 'before', answered: 0, stepOut: false, walk: 0, heard: 0, walkMode: 'Both', said: {}, nudged: false, wide: {}, line: { open: false, words: [], shown: 0, meta: '', speaking: false, controls: false, idle: false, choices: null } };
 
 const ARRIVE = [
   null,
@@ -200,7 +201,7 @@ export class Desk extends Component<object, State> {
   }
   runBrief(i: number) {
     const voice = this.state.walkMode !== 'Visual';
-    this.setState({ walk: i });
+    this.setState(st => ({ walk: i, heard: Math.max(st.heard, i) }));
     this.say(BRIEF[i - 1], (voice ? 'SPEAKING · ' : '') + i + ' OF 3', voice, () => i < 3 ? this.runBrief(i + 1) : this.walkDone(), null, true);
   }
   walkDone() { this.setState({ walk: 0 }); this.say('That\'s the three. §4 pricing is the one thing between you and noon. Pin it to the center?', '', this.state.walkMode !== 'Visual', () => this.rest(), [{ id: 'pin', label: 'Pin it' }, { id: 'no', label: 'Leave it' }]); }
@@ -218,7 +219,7 @@ export class Desk extends Component<object, State> {
     if (/dana|pricing|spec|tier|write|doc/.test(q)) { reply = 'That lives in the spec — opening §4, your copy.'; dest = 1; }
     else if (/call|rina|northwind|10:30|answer/.test(q)) { reply = 'Call room — statement pinned, answers ready.'; dest = 2; }
     else if (/day|report|tomorrow|close|did|record/.test(q)) { reply = 'Here is the day — report, tomorrow, and what I did.'; dest = 3; }
-    else if (/morning|brief|three|list/.test(q)) { reply = 'Back to your three things.'; dest = 0; }
+    else if (/morning|brief|three|list|what else|held|more/.test(q)) { reply = 'Back to your three things.'; dest = 0; this.setState({ heard: 3 }); }
     if (dest != null && dest !== this.state.stage) {
       const to = dest;
       this.keepLine = true;
@@ -281,6 +282,7 @@ export class Desk extends Component<object, State> {
   render() {
     const s = this.state, w = s.walk;
     const ct = s.line.open ? 200 : 104, rt = s.line.open ? 206 : 110;
+    const light = s.pace === 'Light';
     const hl = (i: number) => w === i ? '3px solid oklch(0.7 0.17 65)' : '3px solid transparent';
     // Text size scales the reading columns (not the narrow side rails); offsets are divided back so only the type grows
     const tz = TEXT_ZOOM[s.text] ?? 1;
@@ -302,12 +304,16 @@ export class Desk extends Component<object, State> {
               <div style={{ ...briefRow, outline: hl(1) }}>
                 <div style={{ fontSize: 48, lineHeight: 1, color: 'var(--color-accent)' }}>1</div><div style={{ fontSize: 16, color: 'var(--color-neutral-600)' }}>by 12:00</div>
                 <div><div style={{ fontSize: 30, lineHeight: 1.15 }}>Onboarding spec — ship it.</div><div style={{ fontSize: 17, marginTop: 4, color: 'var(--color-neutral-700)' }}>Sections one to three settled. <span style={{ color: 'var(--color-accent-2)' }}>§4 pricing tiers</span> still open.</div></div></div>
-              <div style={{ ...briefRow, outline: hl(2) }}>
+              <div style={{ ...briefRow, outline: hl(2), display: light && s.heard < 2 ? 'none' : 'grid' }}>
                 <div style={{ fontSize: 48, lineHeight: 1, color: 'var(--color-accent)' }}>2</div><div style={{ fontSize: 16, color: 'var(--color-neutral-600)' }}>9:30</div>
                 <div><div style={{ fontSize: 30, lineHeight: 1.15 }}>Standup — three lines, drafted.</div><div style={{ fontSize: 17, marginTop: 4, color: 'var(--color-neutral-700)' }}>The one blocker to raise: the pricing decision.</div></div></div>
-              <div style={{ ...briefRow, outline: hl(3) }}>
+              <div style={{ ...briefRow, outline: hl(3), display: light && s.heard < 3 ? 'none' : 'grid' }}>
                 <div style={{ fontSize: 48, lineHeight: 1, color: 'var(--color-accent)' }}>3</div><div style={{ fontSize: 16, color: 'var(--color-neutral-600)' }}>when free</div>
                 <div><div style={{ fontSize: 30, lineHeight: 1.15 }}>Replies — Dana first.</div><div style={{ fontSize: 17, marginTop: 4, color: 'var(--color-neutral-700)' }}>Her answer unblocks the spec. Then Omar, then Legal. Eleven others held till 14:00.</div></div></div>
+              {light && s.heard < 2 && <div style={{ fontSize: 17, color: 'var(--color-neutral-700)', padding: '6px 0 0 84px' }}>Two more held — the standup and the replies. Ask when you're ready.</div>}
+              {s.pace === 'Full' && <div style={briefRow}>
+                <div style={{ fontSize: 48, lineHeight: 1, color: 'var(--color-accent)' }}>4</div><div style={{ fontSize: 16, color: 'var(--color-neutral-600)' }}>after 14:00</div>
+                <div><div style={{ fontSize: 30, lineHeight: 1.15 }}>Digest — eleven replies.</div><div style={{ fontSize: 17, marginTop: 4, color: 'var(--color-neutral-700)' }}>None mention you directly. Ready to skim in one pass.</div></div></div>}
             </div>
             {s.pinned && <div style={{ marginTop: 36, display: 'flex', gap: 18, alignItems: 'baseline' }}>
               <div style={{ fontSize: 13, letterSpacing: '.14em', color: 'var(--color-accent-2)', fontWeight: 700, whiteSpace: 'nowrap' }}>PINNED UNTIL 12:00</div>

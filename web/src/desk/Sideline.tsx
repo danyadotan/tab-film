@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from 'react';
 import { SINCE } from './dates';
 
-export interface Prefs { bright: number; warm: number; sound: string; quiet: string; text: string }
+export interface Prefs { bright: number; warm: number; sound: string; quiet: string; text: string; pace: string }
 
 // The glossary grows with use: what keeps slipping, what is new this week, and what built up over time.
 type Kind = 'slip' | 'new' | 'kept';
@@ -19,7 +19,8 @@ const TERMS: [Kind, string, string, string][] = [
   ['kept', 'Low- / high-stakes', 'Reversible and private, TAB does. Sends, shares or changes someone else\'s day, TAB asks.', 'Since ' + SINCE],
 ];
 const KINDS: [Kind, string][] = [['slip', 'STILL SLIPPING'], ['new', 'NEW THIS WEEK'], ['kept', 'BUILT UP OVER TIME']];
-const GROUPS: [string, keyof Prefs, string[]][] = [['Sound', 'sound', ['Off', 'Soft', 'Ambient']], ['Alerts', 'quiet', ['Quiet', 'Digest', 'All']], ['Text', 'text', ['Compact', 'Roomy', 'Large']]];
+// Pace is set by the person, never inferred: how much TAB brings forward at once.
+const GROUPS: [string, keyof Prefs, string[], string?][] = [['Pace', 'pace', ['Light', 'Steady', 'Full'], 'How much TAB brings forward at once. You set it; TAB never guesses it.'], ['Sound', 'sound', ['Off', 'Soft', 'Ambient']], ['Alerts', 'quiet', ['Quiet', 'Digest', 'All']], ['Text', 'text', ['Compact', 'Roomy', 'Large']]];
 
 const panel: CSSProperties = { width: 340, height: '100%', background: '#fff', boxShadow: 'var(--shadow-lg)', padding: '40px 28px 28px', boxSizing: 'border-box', overflow: 'auto' };
 // Square-edged: the prototype declared a 999px radius with !important, which its runtime dropped — this matches what it renders.
@@ -61,7 +62,8 @@ export function Sideline({ prefs: p, onPref, backTo, onBack, onTab }: SidelinePr
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, fontSize: 16 }}>
           <div><div style={{ marginBottom: 4 }}>Brightness</div><input type="range" min={40} max={100} value={p.bright} onChange={e => onPref('bright', +e.target.value)} style={{ width: '100%', accentColor: 'var(--color-accent)' }} /></div>
           <div><div style={{ marginBottom: 4 }}>Warmth</div><input type="range" min={0} max={80} value={p.warm} onChange={e => onPref('warm', +e.target.value)} style={{ width: '100%', accentColor: 'var(--color-accent)' }} /></div>
-          {GROUPS.map(([label, key, opts]) => <div key={key}><div style={{ marginBottom: 6 }}>{label}</div>
+          {GROUPS.map(([label, key, opts, hint]) => <div key={key}><div style={{ marginBottom: 6 }}>{label}</div>
+            {hint && <div style={{ fontSize: 13, lineHeight: 1.4, color: 'var(--color-neutral-600)', margin: '-2px 0 8px' }}>{hint}</div>}
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {opts.map(o => <button key={o} onClick={() => onPref(key, o)} style={{ all: 'unset', cursor: 'pointer', padding: '5px 12px', fontSize: 15, borderRadius: 2, background: p[key] === o ? 'var(--color-accent)' : 'var(--color-neutral-200)', color: p[key] === o ? '#fff' : 'var(--color-text)' }}>{o}</button>)}
             </div></div>)}
