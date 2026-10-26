@@ -1,0 +1,39 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "bridge-it-bouncer",
+  "version": "0.1.0",
+  "description": "Verifies and consolidates AI-generated work before presenting the smallest necessary human decision.",
+  "author": {
+    "name": "Danya Dotan",
+    "url": "https://tab-at-work.com"
+  },
+  "homepage": "https://tab-at-work.com",
+  "keywords": [
+    "human-attention",
+    "approval-gate",
+    "ai-governance",
+    "privacy",
+    "execution-reliability"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Bridge-iT Bouncer",
+        "shortDescription": "Verified AI work, minimal human decisions",
+        "longDescription": "Checks agent outputs for duplication, contradictions, privacy and permission risks, routes correctable work back to agents, and surfaces only verified decisions that genuinely require human judgment.",
+        "developerName": "Danya Dotan — Bridge-iT",
+        "category": "Productivity",
+        "capabilities": [
+          "Read"
+        ],
+        "websiteURL": "https://tab-at-work.com",
+        "defaultPrompt": [
+          "Check these agent outputs and route anything that does not need my attention.",
+          "Show me only the verified decision that genuinely requires my judgment.",
+          "Verify whether this work is ready for closure."
+        ],
+        "brandColor": "#111111"
+      }
+    }
+  }
+}

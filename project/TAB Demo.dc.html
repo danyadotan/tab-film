@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<template id="__bundler_thumbnail">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#201e1d"/><rect x="30" y="44" width="40" height="5" rx="2.5" fill="#e8a33d"/><rect x="30" y="56" width="26" height="3" rx="1.5" fill="#f3f2f2" opacity=".55"/><rect x="30" y="34" width="18" height="3" rx="1.5" fill="#f3f2f2" opacity=".3"/></svg>
+</template>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/broadsheet-74f2bd77-1572-48bb-a3ab-6cfa90e647f0/styles.css">
+<script src="_ds/broadsheet-74f2bd77-1572-48bb-a3ab-6cfa90e647f0/_ds_bundle.js"></script>
+<style>body{margin:0;background:#e4e2e0}a{color:var(--color-accent-700)}a:hover{color:var(--color-accent-900)}[contenteditable]:focus{outline:none}</style>
+</helmet>
+<div style="font-family:var(--font-body);color:var(--color-text);padding-bottom:64px">
+<div style="padding:24px;display:flex;flex-wrap:wrap;gap:28px;justify-content:center;align-items:flex-start">
+
+<!-- 1 DAY · the assistant -->
+<div style="display:{{ d0 }};zoom:{{ z }}">
+<div style="font-size:30px;margin:0 0 6px;color:var(--color-neutral-600);display:{{ lab }}">1 · Day — the assistant</div>
+<div style="width:1280px;height:800px;overflow:hidden;position:relative;background:var(--color-bg);box-shadow:var(--shadow-md);font-family:var(--font-heading);filter:{{ tone }}">
+  <dc-import name="TAB Chrome" active="0" tabs="{{ tabs }}" time="Mon 5 Oct · 8:40" on-go="{{ goPage }}" hint-size="100%,56px"></dc-import>
+  <div style="position:absolute;left:{{ M.a.l }};top:{{ ct }};width:{{ M.a.w }};transition:left .3s,width .3s,top .6s cubic-bezier(.2,.8,.2,1)">
+    <div style="font-size:13px;letter-spacing:.14em;color:var(--color-accent-2);font-weight:700">MONDAY 5 OCTOBER</div>
+    <h1 style="margin:8px 0 0;font-size:64px;font-weight:600;line-height:1.02;letter-spacing:-.01em">Good morning. Here is your day.</h1>
+    <div style="display:flex;flex-direction:column;gap:14px;margin-top:34px">
+      <div style="display:grid;grid-template-columns:64px 110px 1fr;gap:20px;align-items:baseline;padding:10px 14px;margin:0 -14px;outline:{{ e1 }};outline-offset:-3px;transition:outline-color .3s">
+        <div style="font-size:48px;line-height:1;color:var(--color-accent)">1</div><div style="font-size:16px;color:var(--color-neutral-600)">by 12:00</div>
+        <div><div style="font-size:30px;line-height:1.15">Onboarding spec — ship it.</div><div style="font-size:17px;margin-top:4px;color:var(--color-neutral-700)">Sections one to three settled. <span style="color:var(--color-accent-2)">§4 pricing tiers</span> still open.</div></div></div>
+      <div style="display:grid;grid-template-columns:64px 110px 1fr;gap:20px;align-items:baseline;padding:10px 14px;margin:0 -14px;outline:{{ e2 }};outline-offset:-3px;transition:outline-color .3s">
+        <div style="font-size:48px;line-height:1;color:var(--color-accent)">2</div><div style="font-size:16px;color:var(--color-neutral-600)">9:30</div>
+        <div><div style="font-size:30px;line-height:1.15">Standup — three lines, drafted.</div><div style="font-size:17px;margin-top:4px;color:var(--color-neutral-700)">The one blocker to raise: the pricing decision.</div></div></div>
+      <div style="display:grid;grid-template-columns:64px 110px 1fr;gap:20px;align-items:baseline;padding:10px 14px;margin:0 -14px;outline:{{ e3 }};outline-offset:-3px;transition:outline-color .3s">
+        <div style="font-size:48px;line-height:1;color:var(--color-accent)">3</div><div style="font-size:16px;color:var(--color-neutral-600)">when free</div>
+        <div><div style="font-size:30px;line-height:1.15">Replies — Dana first.</div><div style="font-size:17px;margin-top:4px;color:var(--color-neutral-700)">Her answer unblocks the spec. Then Omar, then Legal. Eleven others held till 14:00.</div></div></div>
+    </div>
+    <sc-if value="{{ pinned }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:36px;display:flex;gap:18px;align-items:baseline">
+        <div style="font-size:13px;letter-spacing:.14em;color:var(--color-accent-2);font-weight:700;white-space:nowrap">PINNED UNTIL 12:00</div>
+        <div style="font-size:24px;line-height:1.2">§4 Pricing tiers — <a href="#" onClick="{{ g1 }}">open it</a></div>
+      </div>
+    </sc-if>
+  </div>
+  <div style="position:absolute;left:1000px;top:{{ rt }};width:196px;transition:top .6s cubic-bezier(.2,.8,.2,1);display:{{ M.a.rail }};flex-direction:column;gap:28px;font-size:15px">
+    <div>
+      <div style="font-size:12px;letter-spacing:.14em;font-weight:700;color:var(--color-accent-2)">TAB PROPOSES</div>
+      <p style="margin:6px 0 10px;font-size:16px;line-height:1.45">You reopened the spec three times without editing. Pin §4 to the center until noon?</p>
+      <button class="btn btn-primary" onClick="{{ pin }}" style="white-space:nowrap">{{ pinLabel }}</button>
+    </div>
+    <div>
+      <div style="font-size:12px;letter-spacing:.14em;font-weight:700;color:var(--color-neutral-700)">HELD BACK</div>
+      <p style="margin:6px 0 0;font-size:16px;line-height:1.45;color:var(--color-neutral-700)">14 weekend tabs, 11 messages, 2 duplicate docs. Filed, not closed — ask me for any of them.</p>
+    </div>
+  </div>
+  <button onClick="{{ M.a.t }}" style="position:absolute;top:66px;right:56px;z-index:15;white-space:nowrap;display:{{ enl }}" class="btn btn-ghost">{{ M.a.lab }}</button>
+  <dc-import name="TAB Sideline v3" prefs="{{ prefs }}" on-pref="{{ setPref }}" back-to="{{ backTo }}" on-back="{{ goBack }}" on-tab="{{ tabIt }}" style="position:absolute;right:0;top:56px;height:744px;z-index:20" hint-size="36px,744px"></dc-import>
+  <sc-if value="{{ on0 }}" hint-placeholder-val="{{ true }}"><dc-import name="TAB Line" top="66px" line="{{ line }}" on-next="{{ walkNext }}" on-stop="{{ lineStop }}" on-ask="{{ ask }}" on-typing="{{ typing }}" on-choice="{{ choose }}" next-label="{{ walkNextLab }}" hint-size="0px,56px"></dc-import></sc-if>
+</div></div>
+
+<!-- 2 WRITE · the editor -->
+<div style="display:{{ d1 }};zoom:{{ z }}">
+<div style="font-size:30px;margin:0 0 6px;color:var(--color-neutral-600);display:{{ lab }}">2 · Write — the editor</div>
+<div style="width:1280px;height:800px;overflow:hidden;position:relative;background:var(--color-bg);box-shadow:var(--shadow-md);font-family:var(--font-heading);filter:{{ tone }}">
+  <dc-import name="TAB Chrome" active="1" tabs="{{ tabs }}" time="Mon 5 Oct · 10:24" on-go="{{ goPage }}" hint-size="100%,56px"></dc-import>
+  <div style="position:absolute;left:{{ M.w.l }};top:{{ ct }};width:{{ M.w.w }};transition:left .3s,width .3s,top .6s cubic-bezier(.2,.8,.2,1)">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:20px">
+      <div style="display:flex;gap:4px">
+        <sc-for list="{{ copies }}" as="c" hint-placeholder-count="2">
+          <button onClick="{{ c.click }}" style="all:unset;cursor:pointer;padding:6px 14px;font-size:16px;border-radius:2px;background:{{ c.bg }};color:{{ c.fg }};white-space:nowrap">{{ c.label }}</button>
+        </sc-for>
+        <span style="padding:6px 10px;font-size:14px;color:var(--color-neutral-500);white-space:nowrap">+ one more, at most</span>
+      </div>
+      <div style="font-size:14px;color:var(--color-neutral-600);white-space:nowrap">{{ saveNote }}</div>
+    </div>
+    <div style="display:flex;gap:4px;margin-top:14px;font-size:15px;color:var(--color-neutral-700)">
+      <span style="padding:3px 9px;font-weight:700">B</span><span style="padding:3px 9px;font-style:italic">I</span><span style="padding:3px 9px;text-decoration:underline">U</span><span style="padding:3px 9px">H1</span><span style="padding:3px 9px">H2</span><span style="padding:3px 9px">¶</span><span style="padding:3px 9px">“ ”</span><span style="padding:3px 9px">§</span>
+    </div>
+    <div style="margin-top:26px;background:#fff;padding:48px 56px;min-height:420px;box-sizing:border-box;box-shadow:var(--shadow-sm)">
+      <div style="font-size:13px;letter-spacing:.14em;color:var(--color-neutral-600)">ONBOARDING SPEC · {{ copyName }}</div>
+      <h2 style="margin:10px 0 18px;font-size:34px;font-weight:600;line-height:1.1">§4 Pricing tiers</h2>
+      <sc-if value="{{ copyMine }}" hint-placeholder-val="{{ true }}">
+        <div contentEditable="true" suppressContentEditableWarning="{{ true }}" style="font-size:22px;line-height:1.55;min-height:200px;cursor:text;caret-color:var(--color-accent)">
+          <p style="margin:0 0 14px">Onboarding is offered in three tiers: Starter, Team, Scale. Trial length is 14 days across all of them.</p>
+          <p style="margin:0 0 14px">Open: does Starter include the guided checklist? Decision owner: Dana.</p>
+          <p style="margin:0;color:var(--color-neutral-500)">Keep writing here — your words, nothing generated.</p>
+        </div>
+      </sc-if>
+      <sc-if value="{{ copyDana }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:22px;line-height:1.55;min-height:200px">
+          <p style="margin:0 0 14px">Onboarding is offered in <span style="background:var(--color-accent-100)">three tiers: Starter, Team, Scale</span>. Trial length is <span style="background:var(--color-accent-100)">14 days</span> across all of them.</p>
+          <p style="margin:0 0 14px;font-style:italic;color:var(--color-neutral-700);font-family:var(--font-body)">Dana, Friday: “Northwind asked for exactly this in the pilot. Legal may push for 30 days.”</p>
+          <div style="display:flex;gap:10px;margin-top:20px"><button class="btn btn-primary" onClick="{{ takeDana }}" style="white-space:nowrap">{{ takeLab }}</button><button class="btn btn-ghost" onClick="{{ backMine }}">Back to mine</button></div>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+  <div style="position:absolute;left:1000px;top:{{ rt }};width:196px;transition:top .6s cubic-bezier(.2,.8,.2,1);display:{{ M.w.rail }};flex-direction:column;gap:28px;font-size:15px">
+    <div>
+      <div style="font-size:12px;letter-spacing:.14em;font-weight:700;color:var(--color-accent-2)">TAB PROPOSES</div>
+      <p style="margin:6px 0 10px;font-size:16px;line-height:1.45">The checklist question is Dana's. Ask her now, so it's answered before noon?</p>
+      <button class="btn btn-primary" onClick="{{ askDana }}" style="white-space:nowrap">{{ askLab }}</button>
+    </div>
+    <div>
+      <div style="font-size:12px;letter-spacing:.14em;font-weight:700;color:var(--color-neutral-700)">FOLDED AWAY</div>
+      <p style="margin:6px 0 0;font-size:16px;line-height:1.45;color:var(--color-neutral-700)">v1–v3, the Q3 memo, the cohort chart. Out of sight, one ask away.</p>
+    </div>
+  </div>
+  <button onClick="{{ M.w.t }}" style="position:absolute;top:66px;right:56px;z-index:15;white-space:nowrap;display:{{ enl }}" class="btn btn-ghost">{{ M.w.lab }}</button>
+  <dc-import name="TAB Sideline v3" prefs="{{ prefs }}" on-pref="{{ setPref }}" back-to="{{ backTo }}" on-back="{{ goBack }}" on-tab="{{ tabIt }}" style="position:absolute;right:0;top:56px;height:744px;z-index:20" hint-size="36px,744px"></dc-import>
+  <sc-if value="{{ on1 }}" hint-placeholder-val="{{ false }}"><dc-import name="TAB Line" top="66px" line="{{ line }}" on-next="{{ walkNext }}" on-stop="{{ lineStop }}" on-ask="{{ ask }}" on-typing="{{ typing }}" on-choice="{{ choose }}" next-label="{{ walkNextLab }}" hint-size="0px,56px"></dc-import></sc-if>
+</div></div>
+
+<!-- 3 CALL · the wingman -->
+<div style="display:{{ d2 }};zoom:{{ z }}">
+<div style="font-size:30px;margin:0 0 6px;color:var(--color-neutral-600);display:{{ lab }}">3 · Call — the wingman</div>
+<div style="width:1280px;height:800px;overflow:hidden;position:relative;background:var(--color-bg);box-shadow:var(--shadow-md);font-family:var(--font-heading);filter:{{ tone }}">
+  <dc-import name="TAB Chrome" active="2" tabs="{{ tabs }}" time="Mon 5 Oct · 10:30" on-go="{{ goPage }}" hint-size="100%,56px"></dc-import>
+  <div style="position:absolute;left:{{ M.c.l }};top:{{ ct }};width:{{ M.c.w }};transition:left .3s,width .3s,top .6s cubic-bezier(.2,.8,.2,1)">
+    <div style="font-size:13px;letter-spacing:.14em;color:var(--color-accent-2);font-weight:700">PINNED FOR THE WHOLE CALL</div>
+    <div style="font-size:40px;font-weight:600;line-height:1.15;margin-top:8px">We leave with a tier and a start date for the 40-seat rollout.</div>
+    <sc-if value="{{ joined }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:18px;height:180px;background:var(--color-neutral-800);display:grid;grid-template-columns:repeat(4,1fr);gap:2px;padding:2px;box-sizing:border-box">
+        <sc-for list="{{ people }}" as="t" hint-placeholder-count="4"><div style="background:var(--color-neutral-900);color:#fff;display:flex;align-items:flex-end;padding:10px 14px;font-size:14px;white-space:nowrap;overflow:hidden">{{ t }}</div></sc-for>
+      </div>
+    </sc-if>
+    <div style="margin-top:{{ qaTop }};font-size:13px;letter-spacing:.14em;color:var(--color-accent-700);font-weight:700">IF SHE ASKS · YOU ANSWER</div>
+    <div style="display:flex;flex-direction:column;gap:{{ qaGap }};margin-top:10px">
+      <sc-for list="{{ qa }}" as="q" hint-placeholder-count="4">
+        <div style="display:grid;grid-template-columns:1fr 1.3fr;gap:24px;align-items:baseline"><div style="font-size:19px;line-height:1.3;font-style:italic;font-family:var(--font-body)">“{{ q.q }}”</div><div style="font-size:19px;line-height:1.3">{{ q.a }}</div></div>
+      </sc-for>
+    </div>
+  </div>
+  <div style="position:absolute;left:1000px;top:{{ rt }};width:196px;transition:top .6s cubic-bezier(.2,.8,.2,1);display:{{ M.c.rail }};flex-direction:column;gap:24px;font-size:15px">
+    <div>
+      <div style="font-size:12px;letter-spacing:.14em;font-weight:700;color:var(--color-neutral-700)">RINA KAPLAN · NORTHWIND</div>
+      <div style="display:flex;flex-direction:column;gap:5px;margin-top:8px;line-height:1.35"><div>Signed the pilot in August; 81% activation.</div><div>Asked twice about seat limits.</div><div>Prefers short calls — last one ran 22 min.</div></div>
+    </div>
+    <div>
+      <div style="font-size:12px;letter-spacing:.14em;font-weight:700;color:var(--color-neutral-700)">SHARE FROM</div>
+      <div style="display:flex;flex-direction:column;gap:5px;margin-top:8px;align-items:flex-start"><span class="tag tag-accent">Agenda</span><span class="tag tag-accent">Pricing v4 — shareable</span><span class="tag tag-neutral">Contract — internal</span></div>
+    </div>
+    <div>
+      <div style="width:196px;aspect-ratio:16/9;background:var(--color-neutral-800);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:10px 12px;box-sizing:border-box">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;letter-spacing:.12em"><span>NORTHWIND</span><span style="width:8px;height:8px;border-radius:50%;background:oklch(0.7 0.17 65)"></span></div>
+        <div style="font-size:13px;line-height:1.3;opacity:.85">{{ vidNote }}</div>
+      </div>
+      <button class="btn {{ joinCls }}" onClick="{{ join }}" style="margin-top:10px;white-space:nowrap">{{ joinLab }}</button>
+    </div>
+  </div>
+  <button onClick="{{ M.c.t }}" style="position:absolute;top:66px;right:56px;z-index:15;white-space:nowrap;display:{{ enl }}" class="btn btn-ghost">{{ M.c.lab }}</button>
+  <dc-import name="TAB Sideline v3" prefs="{{ prefs }}" on-pref="{{ setPref }}" back-to="{{ backTo }}" on-back="{{ goBack }}" on-tab="{{ tabIt }}" style="position:absolute;right:0;top:56px;height:744px;z-index:20" hint-size="36px,744px"></dc-import>
+  <sc-if value="{{ on2 }}" hint-placeholder-val="{{ false }}"><dc-import name="TAB Line" top="66px" line="{{ line }}" on-next="{{ walkNext }}" on-stop="{{ lineStop }}" on-ask="{{ ask }}" on-typing="{{ typing }}" on-choice="{{ choose }}" next-label="{{ walkNextLab }}" hint-size="0px,56px"></dc-import></sc-if>
+</div></div>
+
+<!-- 4 CLOSE · the librarian -->
+<div style="display:{{ d3 }};zoom:{{ z }}">
+<div style="font-size:30px;margin:0 0 6px;color:var(--color-neutral-600);display:{{ lab }}">4 · Close — the librarian</div>
+<div style="width:1280px;height:800px;overflow:hidden;position:relative;background:var(--color-bg);box-shadow:var(--shadow-md);font-family:var(--font-heading);filter:{{ tone }}">
+  <dc-import name="TAB Chrome" active="3" tabs="{{ tabs }}" time="Mon 5 Oct · 17:48" on-go="{{ goPage }}" hint-size="100%,56px"></dc-import>
+  <div style="position:absolute;left:96px;top:{{ ct }};width:1090px;transition:top .6s cubic-bezier(.2,.8,.2,1)">
+    <h1 style="margin:0;font-size:64px;font-weight:600;line-height:1.02;letter-spacing:-.01em">That's the day.</h1>
+    <div style="display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:48px;margin-top:30px">
+      <div>
+        <div style="font-size:12px;letter-spacing:.14em;font-weight:700;color:var(--color-neutral-700)">REPORT</div>
+        <div style="display:flex;flex-direction:column;gap:14px;margin-top:12px">
+          <div style="display:flex;gap:14px;align-items:baseline"><span style="font-size:40px;line-height:1;color:var(--color-accent);width:120px">11:42</span><span style="font-size:17px">spec sent, 18 min early</span></div>
+          <div style="display:flex;gap:14px;align-items:baseline"><span style="font-size:40px;line-height:1;color:var(--color-accent);width:120px">Team</span><span style="font-size:17px">tier agreed with Northwind; start Nov 3</span></div>
+          <div style="display:flex;gap:14px;align-items:baseline"><span style="font-size:40px;line-height:1;color:var(--color-accent);width:120px">2</span><span style="font-size:17px">decisions left to you, both made</span></div>
+        </div>
+        <div style="font-size:12px;letter-spacing:.14em;font-weight:700;color:var(--color-neutral-700);margin-top:34px">TOMORROW · ALREADY FILED</div>
+        <div style="font-size:17px;line-height:1.5;margin-top:8px">Legal review first (comment 2 on trial length), then the retro at 11:00. Room set to your Tuesday.</div>
+      </div>
+      <div>
+        <div style="font-size:12px;letter-spacing:.14em;font-weight:700;color:var(--color-accent-2)">REAL ALERTS · 2</div>
+        <div style="display:flex;flex-direction:column;gap:14px;margin-top:12px">
+          <sc-for list="{{ alerts }}" as="a" hint-placeholder-count="2">
+            <div><div style="font-size:19px;line-height:1.3">{{ a.t }}</div><div style="font-size:15px;color:var(--color-neutral-600);font-style:italic;margin:3px 0 8px">{{ a.why }}</div><button class="btn {{ a.cls }}" onClick="{{ a.yes }}" style="white-space:nowrap">{{ a.lab }}</button></div>
+          </sc-for>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:12px;letter-spacing:.14em;font-weight:700;color:oklch(0.5 0.15 55)">ADDED VALUE · TRACED</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+          <sc-for list="{{ did }}" as="d" hint-placeholder-count="5">
+            <div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><div style="font-size:16px;line-height:1.3;color:{{ d.c }}">{{ d.t }}</div><div style="font-size:13px;color:var(--color-neutral-600);font-style:italic">{{ d.why }}</div></div><button onClick="{{ d.check }}" title="Reviewed" style="all:unset;cursor:pointer;flex:none;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:{{ d.c }}" style-hover="background:var(--color-accent-100)"><svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor"><path d="M229.66 77.66l-128 128a8 8 0 0 1-11.32 0l-56-56a8 8 0 0 1 11.32-11.32L96 188.69 218.34 66.34a8 8 0 0 1 11.32 11.32Z"/></svg></button></div>
+          </sc-for>
+        </div>
+        <div style="font-size:13px;color:var(--color-neutral-600);margin-top:10px">Every line reversible for 7 days. Check means you looked.</div>
+      </div>
+    </div>
+    <div style="margin-top:44px;display:flex;gap:18px;align-items:center">
+      <button class="btn btn-primary" onClick="{{ g0 }}" style="font-size:18px;padding:12px 24px;white-space:nowrap">Goodbye — close the edition</button>
+      <span style="font-size:16px;font-style:italic;color:var(--color-neutral-600);font-family:var(--font-body)">Brightness, warmth and sound return to how you had them.</span>
+    </div>
+  </div>
+  <dc-import name="TAB Sideline v3" prefs="{{ prefs }}" on-pref="{{ setPref }}" back-to="{{ backTo }}" on-back="{{ goBack }}" on-tab="{{ tabIt }}" style="position:absolute;right:0;top:56px;height:744px;z-index:20" hint-size="36px,744px"></dc-import>
+  <sc-if value="{{ on3 }}" hint-placeholder-val="{{ false }}"><dc-import name="TAB Line" top="66px" line="{{ line }}" on-next="{{ walkNext }}" on-stop="{{ lineStop }}" on-ask="{{ ask }}" on-typing="{{ typing }}" on-choice="{{ choose }}" next-label="{{ walkNextLab }}" hint-size="0px,56px"></dc-import></sc-if>
+</div></div>
+
+</div>
+<div style="position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--color-bg);display:flex;align-items:center;gap:16px;padding:10px 24px;flex-wrap:wrap;box-shadow:var(--shadow-sm)">
+  <div style="font-size:11px;letter-spacing:.14em;color:var(--color-neutral-600);font-weight:700;white-space:nowrap">DEMO · FOUR ROOMS</div>
+  <div style="display:flex;gap:4px;flex-wrap:wrap;flex:1">
+    <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
+      <button onClick="{{ s.go }}" style="all:unset;cursor:pointer;padding:4px 10px;font-size:14px;border-radius:2px;background:{{ s.bg }};color:{{ s.fg }};white-space:nowrap">{{ s.n }} · {{ s.label }}</button>
+    </sc-for>
+  </div>
+  <button class="btn btn-ghost" onClick="{{ restart }}" style="white-space:nowrap">Restart demo</button>
+  <button class="btn btn-ghost" onClick="{{ toggleBoard }}">{{ boardLabel }}</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  INIT = { stage: 0, prev: null, board: false, bright: 85, warm: 25, sound: 'Soft', quiet: 'Digest', text: 'Roomy', motion: 'Reduced', pinned: false, asked: false, taken: false, copy: 'mine', joined: false, ok: {}, checked: {}, z: 1, walk: 0, walkMode: 'Both', said: {}, nudged: false, wide: {}, line: { open: false, words: [], shown: 0, meta: '', speaking: false, controls: false, idle: false, choices: null } };
+  state = { ...this.INIT };
+  componentDidMount() { this.fit = () => this.setState({ z: Math.min(1, (window.innerWidth - 56) / 1280) }); this.fit(); window.addEventListener('resize', this.fit); if (window.speechSynthesis) speechSynthesis.getVoices(); this.lastStage = 0; this.arrive(0); }
+  componentWillUnmount() { window.removeEventListener('resize', this.fit); this.stopLine(); clearTimeout(this.nt); }
+  componentDidUpdate() {
+    const st = this.state.stage;
+    if (st !== this.lastStage) { this.lastStage = st; clearTimeout(this.nt); if (this.state.walk) this.walkStop(); else if (this.state.line.open && !this.keepLine) this.closeLine(); this.keepLine = false; if (!this.state.said[st]) this.arrive(st); if (st === 1 && !this.state.nudged) this.nt = setTimeout(() => this.nudge(), 14000); }
+  }
+  ARRIVE = [
+    null,
+    'Your words, your copies — two on the table, never twenty. I keep the third for Legal.',
+    'I\'m your second screen. Her likely questions are on the left with your answers. I\'m on notes, off camera.',
+    'That\'s the day. Two alerts that are real, nothing else. The room resets when you go.'
+  ];
+  arrive(st) {
+    this.setState(s => ({ said: { ...s.said, [st]: true } }));
+    if (st === 0) { this.lt = setTimeout(() => this.say('Good morning. Three things today. Want me to take you through them?', '', false, () => this.rest(), [{ id: 'both', label: 'Out loud + on screen' }, { id: 'visual', label: 'On screen only' }, { id: 'no', label: 'I\'ve got it' }]), 900); return; }
+    this.lt = setTimeout(() => this.say(this.ARRIVE[st], '', false, () => this.rest()), 700);
+  }
+  nudge() { if (this.state.stage !== 1 || this.state.nudged) return; this.setState({ nudged: true }); this.say('Northwind in five minutes. I hold the spec exactly here — nothing to save. Go when ready.', '10:25', this.voiceOK, () => this.rest(), [{ id: 'call', label: 'Take me there' }, { id: 'later', label: 'Two more minutes' }]); }
+  choose(id) {
+    if (id === 'both' || id === 'visual') { this.voiceOK = id === 'both'; this.setState({ walkMode: id === 'both' ? 'Both' : 'Visual' }); this.runBrief(1); }
+    else if (id === 'pin') { this.setState({ pinned: true }); this.say('Pinned. §4 sits at the center until noon; everything else is held.', 'DONE', false, () => this.rest()); }
+    else if (id === 'call') { this.keepLine = true; this.setState(s => ({ stage: 2, prev: s.stage })); this.rt = setTimeout(() => this.say('Here. Statement pinned, answers ready. Join when she\'s in.', '', false, () => this.rest()), 800); }
+    else this.rest();
+  }
+  rest() { this.setLine({ idle: true, controls: false, speaking: false, choices: null }); this.armClose(); }
+  armClose() { clearTimeout(this.ct); this.ct = setTimeout(() => { if (!this.typingNow) this.setLine({ open: false, idle: false }); else this.armClose(); }, 7000); }
+  stopLine() { clearTimeout(this.lt); clearTimeout(this.rt); clearInterval(this.li); this.gen = (this.gen || 0) + 1; if (this.u) { this.u.onend = this.u.onerror = this.u.onboundary = null; this.u = null; } if (window.speechSynthesis) speechSynthesis.cancel(); }
+  setLine(patch) { this.setState(st => ({ line: { ...st.line, ...patch } })); }
+  closeLine() { this.stopLine(); clearTimeout(this.ct); this.setLine({ open: false, speaking: false, controls: false, idle: false, choices: null }); }
+  say(text, meta, voice, done, choices, controls) {
+    this.stopLine(); clearTimeout(this.ct);
+    const gen = this.gen, words = text.split(' ');
+    this.setLine({ open: true, words, shown: 0, meta, speaking: voice, controls: !!controls, idle: false, choices: choices || null });
+    let n = 0, ended = false;
+    const show = k => { if (gen !== this.gen) return; n = Math.max(n, k); this.setLine({ shown: Math.min(n, words.length) }); };
+    const li = setInterval(() => { show(n + 1); if (n >= words.length) finish(); }, voice ? 330 : 170); this.li = li;
+    const finish = () => { if (ended || gen !== this.gen) return; ended = true; clearInterval(li); show(words.length); this.setLine({ speaking: false }); this.lt = setTimeout(() => { if (gen === this.gen && !(choices && choices.length)) done(); }, 2600); };
+    if (voice && window.speechSynthesis) {
+      const u = new SpeechSynthesisUtterance(text), vs = speechSynthesis.getVoices(); u.rate = .92; this.u = u;
+      const v = vs.find(v => /en/i.test(v.lang) && /Samantha|Google UK English Female|Karen|Moira|Female/i.test(v.name)) || vs.find(v => /en/i.test(v.lang));
+      if (v) u.voice = v;
+      u.onboundary = e => { if (e.name === 'word') show(text.slice(0, e.charIndex).split(' ').length); };
+      u.onend = finish; u.onerror = finish;
+      speechSynthesis.speak(u);
+    }
+  }
+  runBrief(i) {
+    const W = ['One. Onboarding spec, due at noon. Sections one to three are settled; only pricing tiers are open.', 'Two. Standup at nine thirty. Your three lines are drafted; the one blocker to raise is pricing.', 'Three. Replies. Dana first — her answer unblocks the spec. Then Omar, then Legal.'];
+    const voice = this.state.walkMode !== 'Visual';
+    this.setState({ walk: i });
+    this.say(W[i - 1], (voice ? 'SPEAKING · ' : '') + i + ' OF 3', voice, () => i < 3 ? this.runBrief(i + 1) : this.walkDone(), null, true);
+  }
+  walkDone() { this.setState({ walk: 0 }); this.say('That\'s the three. §4 pricing is the one thing between you and noon. Pin it to the center?', '', this.state.walkMode !== 'Visual', () => this.rest(), [{ id: 'pin', label: 'Pin it' }, { id: 'no', label: 'Leave it' }]); }
+  walkStop() { this.closeLine(); this.setState({ walk: 0 }); }
+  tabIt() { this.say('Yes? Say it or type it — small things I do, big things I bring back to you.', 'LISTENING', false, () => this.rest()); }
+  ask(t) {
+    const q = t.toLowerCase(); let reply = 'Noted — I\'ll do it and it goes on the day\'s record.', dest = null;
+    if (/dana|pricing|spec|tier|write|doc/.test(q)) { reply = 'That lives in the spec — opening §4, your copy.'; dest = 1; }
+    else if (/call|rina|northwind|10:30|answer/.test(q)) { reply = 'Call room — statement pinned, answers ready.'; dest = 2; }
+    else if (/day|report|tomorrow|close|did|record/.test(q)) { reply = 'Here is the day — report, tomorrow, and what I did.'; dest = 3; }
+    else if (/morning|brief|three|list/.test(q)) { reply = 'Back to your three things.'; dest = 0; }
+    if (dest != null && dest !== this.state.stage) { this.keepLine = true; this.setState(s => ({ stage: dest, prev: s.stage, said: { ...s.said, [dest]: true } })); this.rt = setTimeout(() => this.say(reply, 'DONE', false, () => this.rest()), 800); }
+    else this.say(reply, 'DONE', false, () => this.rest());
+  }
+  renderVals() {
+    const s = this.state, w = s.walk;
+    const nav = n => this.setState(st => st.stage === n ? { board: false } : { stage: n, prev: st.stage, board: false });
+    const go = n => e => { e && e.preventDefault && e.preventDefault(); nav(n); };
+    const names = ['Day', 'Write', 'Call', 'Close'], who = ['the assistant', 'the editor', 'the wingman', 'the librarian'];
+    const grp = (label, key, opts) => ({ label, opts: opts.map(o => ({ label: o, click: () => this.setState({ [key]: o }) })) });
+    const d = {}, g = {}; for (let i = 0; i < 4; i++) { d['d' + i] = (s.board || s.stage === i) ? 'block' : 'none'; d['on' + i] = s.stage === i; g['g' + i] = go(i); }
+    const hl = i => w === i ? '3px solid oklch(0.7 0.17 65)' : '3px solid transparent';
+    const M = {}; ['a', 'w', 'c'].forEach(k => { const on = !!s.wide[k]; M[k] = { l: on ? '96px' : '112px', w: on ? '1090px' : '850px', rail: on ? 'none' : 'flex', lab: on ? '↙ Side column' : '↗ Enlarge', t: () => this.setState(st => ({ wide: { ...st.wide, [k]: !st.wide[k] } })) }; });
+    const DID = [['Folded 14 weekend tabs into three things', 'Same goal, one place'], ['Muted #launch-chat until 10:00', '14 messages, none mention you'], ['Snapshotted spec v4 before Dana\'s copy', 'Your way back'], ['Held the spec through the call', 'Nothing to save, nothing lost'], ['Moved 11 replies to the 14:00 digest', 'Your Monday setting']];
+    return {
+      ...d, ...g, M, ct: s.line.open ? '200px' : '104px', rt: s.line.open ? '206px' : '110px', enl: s.line.open ? 'none' : 'inline-flex', z: s.board ? Math.min(.44, s.z * .44) : s.z, lab: s.board ? 'block' : 'none', line: s.line,
+      tabs: [['Day', '3 things'], ['Write', 'spec v4 · 2 copies'], ['Call', '10:30 Northwind'], ['Close', '17:48']],
+      steps: names.map((n, i) => ({ n: i + 1, label: n + ' — ' + who[i], go: go(i), bg: !s.board && s.stage === i ? 'var(--color-accent)' : 'transparent', fg: !s.board && s.stage === i ? '#fff' : 'var(--color-text)' })),
+      boardLabel: s.board ? 'Back to demo' : 'All four', toggleBoard: () => this.setState({ board: !s.board }),
+      restart: () => { this.closeLine(); clearTimeout(this.nt); this.lastStage = 0; this.setState({ ...this.INIT, z: s.z }, () => this.arrive(0)); },
+      tone: `brightness(${(s.bright / 100 + .1).toFixed(2)}) sepia(${(s.warm / 160).toFixed(2)})`,
+      prefs: { bright: s.bright, warm: s.warm, sound: s.sound, quiet: s.quiet, text: s.text, motion: s.motion }, setPref: (k, v) => this.setState({ [k]: v }),
+      backTo: s.prev != null ? names[s.prev] : '', goBack: () => s.prev != null && this.setState({ stage: s.prev, prev: s.stage, board: false }),
+      goPage: i => nav(i), tabIt: () => this.tabIt(), ask: t => this.ask(t), choose: id => this.choose(id), typing: on => { this.typingNow = on; if (!on) this.armClose(); },
+      e1: hl(1), e2: hl(2), e3: hl(3),
+      walkNextLab: w === 3 ? 'Done' : 'Next', walkNext: () => w === 3 ? this.walkDone() : this.runBrief(w + 1), lineStop: () => w ? this.walkStop() : this.closeLine(),
+      pinned: s.pinned, pinLabel: s.pinned ? 'Pinned ✓' : 'Pin it', pin: () => { if (!s.pinned) this.choose('pin'); },
+      copies: [['mine', 'Yours · v4 · 10:12'], ['dana', 'Dana\'s · Fri']].map(c => ({ label: c[1], click: () => this.setState({ copy: c[0] }), bg: s.copy === c[0] ? 'var(--color-accent)' : 'var(--color-neutral-200)', fg: s.copy === c[0] ? '#fff' : 'var(--color-text)' })),
+      copyMine: s.copy === 'mine', copyDana: s.copy === 'dana', copyName: s.copy === 'mine' ? 'YOUR COPY' : 'DANA\'S COPY · READ ONLY', saveNote: s.copy === 'mine' ? 'Saved as you type · v4' : 'Comparing · yours untouched',
+      takeLab: s.taken ? 'Taken into yours ✓' : 'Take her wording', takeDana: () => { this.setState({ taken: true, copy: 'mine' }); this.say('Taken. Her two phrases are in your copy; v4 before that is one ask away.', 'DONE', false, () => this.rest()); }, backMine: () => this.setState({ copy: 'mine' }),
+      askLab: s.asked ? 'Asked ✓' : 'Ask Dana for me', askDana: () => { this.setState({ asked: true }); this.say('Sent to Dana: “Does Starter include the guided checklist? Need it by 11:00.” Her answer lands here.', 'DONE', false, () => this.rest()); },
+      people: ['You', 'Rina Kaplan · Northwind', 'Tom Ruiz · Northwind', 'Dana'], joined: s.joined, qaTop: s.joined ? '16px' : '36px', qaGap: s.joined ? '8px' : '12px',
+      qa: [['What are the seat limits?', 'Team is 50 seats; Scale is unlimited. You need 40 — Team fits.'], ['Can we keep pilot pricing?', 'Pilot rate holds through Q1 on an annual plan.'], ['How fast can we start?', 'Earliest Nov 3. Legal needs ten days on the contract.'], ['Does Starter include the checklist?', 'Dana decides by 11:00 — say “yes, on Team and above” if pressed.']].map(x => ({ q: x[0], a: x[1] })),
+      vidNote: s.joined ? 'Live · TAB on notes, off camera' : 'Waiting room · camera off until you join', joinLab: s.joined ? 'Leave' : 'Join · expands to center', joinCls: s.joined ? 'btn-secondary' : 'btn-primary',
+      join: () => { const j = !s.joined; this.setState({ joined: j }); if (j) this.say('You\'re in. Say “TAB, dial-in” if audio drops. The answers stay under the video.', 'LIVE', false, () => this.rest()); },
+      alerts: [['Legal comment 2 still conflicts with the 14-day trial', 'Unresolved in the sent spec — Legal reviews tomorrow', 'Add to tomorrow'], ['Omar\'s 1:1 moved to 14:00 — pending his OK', 'Changes someone else\'s calendar; you approved, he hasn\'t', 'Nudge Omar']].map((a, i) => ({ t: a[0], why: a[1], cls: s.ok[i] ? 'btn-secondary' : 'btn-primary', lab: s.ok[i] ? 'Done ✓' : a[2], yes: () => this.setState({ ok: { ...s.ok, [i]: true } }) })),
+      did: DID.map((r, i) => { const ck = s.checked[i]; return { t: r[0], why: r[1], c: ck ? 'var(--color-accent-700)' : 'var(--color-text)', check: () => this.setState({ checked: { ...s.checked, [i]: !ck } }) }; })
+    };
+  }
+}
+</script>
+</body>
+</html>
