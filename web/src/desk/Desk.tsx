@@ -58,7 +58,7 @@ const VERSIONS = [
   { id: 'a' as const, name: 'A · Tightened for Rina', why: 'She prefers short — 31 words.', text: 'Rina — §4 attached: Starter, Team and Scale, each with a 14-day trial. Team covers your 40 seats. Talk at 10:30.' },
   { id: 'b' as const, name: 'B · As you wrote it, cleaned', why: 'Your full wording — 48 words.', text: 'Hi Rina, ahead of our 10:30 call I\'ve attached the pricing section. There are three tiers — Starter, Team and Scale — each with a 14-day trial. For 40 seats, Team is the natural fit; happy to walk through it together.' },
 ];
-const QA = [['What are the seat limits?', 'Team is 50 seats; Scale is unlimited. You need 40 — Team fits.'], ['Can we keep pilot pricing?', 'Pilot rate holds through Q1 on an annual plan.'], ['How fast can we start?', 'Earliest Nov 3. Legal needs ten days on the contract.'], ['Does Starter include the checklist?', 'Dana decides by 11:00 — say “yes, on Team and above” if pressed.']];
+const QA = [['What are the seat limits?', 'Team is 50 seats; Scale is unlimited. You need 40 — Team fits.'], ['Can we keep pilot pricing?', 'Pilot rate holds through Q1 on an annual plan.'], ['How fast can we start?', `Earliest ${START}. Legal needs ten days on the contract.`], ['Does Starter include the checklist?', 'Dana decides by 11:00 — say “yes, on Team and above” if pressed.']];
 // The two real alerts, as Bridge-iT Bouncer closure-gate decisions: only what
 // materially changed, why it needs you, two choices, and how it closes.
 interface Decision { title: string; changed: string; why: string; choices: { id: string; label: string; closed: string; say: string }[] }
@@ -88,7 +88,8 @@ const DID = [['Folded 14 weekend tabs into three things', 'Same goal, one place'
 
 const EASE = 'cubic-bezier(.2,.8,.2,1)';
 const kick = (color: string, size = 12): CSSProperties => ({ fontSize: size, letterSpacing: '.14em', fontWeight: 700, color });
-const roomBox: CSSProperties = { width: 1280, height: 800, overflow: 'hidden', position: 'relative', background: 'var(--color-bg)', boxShadow: 'var(--shadow-md)', fontFamily: 'var(--font-heading)' };
+const ROOM_H = 800;
+const roomBox: CSSProperties = { width: 1280, height: ROOM_H, overflow: 'hidden', position: 'relative', background: 'var(--color-bg)', boxShadow: 'var(--shadow-md)', fontFamily: 'var(--font-heading)' };
 const briefRow: CSSProperties = { display: 'grid', gridTemplateColumns: '64px 110px 1fr', gap: 20, alignItems: 'baseline', padding: '10px 14px', margin: '0 -14px', outlineOffset: -3, transition: 'outline-color .3s' };
 
 /**
@@ -281,10 +282,12 @@ export class Desk extends Component<object, State> {
     const s = this.state, w = s.walk;
     const ct = s.line.open ? 200 : 104, rt = s.line.open ? 206 : 110;
     const hl = (i: number) => w === i ? '3px solid oklch(0.7 0.17 65)' : '3px solid transparent';
-    // Text size scales the reading columns; offsets are divided back so only the type grows
+    // Text size scales the reading columns (not the narrow side rails); offsets are divided back so only the type grows
     const tz = TEXT_ZOOM[s.text] ?? 1;
-    const main = (m: { l: number; w: number }): CSSProperties => ({ position: 'absolute', left: m.l / tz, top: ct / tz, width: m.w / tz, zoom: tz, transition: `left .3s,width .3s,top .6s ${EASE}` });
-    const rail = (m: { rail: string }, gap = 28): CSSProperties => ({ position: 'absolute', left: 1000 / tz, top: rt / tz, width: 196 / tz, zoom: tz, transition: `top .6s ${EASE}`, display: m.rail, flexDirection: 'column', gap, fontSize: 15 });
+    // At Large a column can outgrow the room; it scrolls inside instead of running off the bottom
+    const clampH = (top: number): CSSProperties => tz > 1 ? { maxHeight: (ROOM_H - 12 - top) / tz, overflowY: 'auto', overflowX: 'hidden' } : {};
+    const main = (m: { l: number; w: number }): CSSProperties => ({ position: 'absolute', left: m.l / tz, top: ct / tz, width: m.w / tz, zoom: tz, ...clampH(ct), transition: `left .3s,width .3s,top .6s ${EASE}` });
+    const rail = (m: { rail: string }, gap = 28): CSSProperties => ({ position: 'absolute', left: 1000, top: rt, width: 196, transition: `top .6s ${EASE}`, display: m.rail, flexDirection: 'column', gap, fontSize: 15 });
     const A = this.enlarge('a'), W = this.enlarge('w'), Cl = this.enlarge('c');
 
     return <div style={{ fontFamily: 'var(--font-body)', color: 'var(--color-text)', paddingBottom: 64 }}>
@@ -457,7 +460,7 @@ export class Desk extends Component<object, State> {
 
         {/* 4 CLOSE · the librarian */}
         {this.room(3, <>
-          <div style={{ position: 'absolute', left: 96 / tz, top: ct / tz, width: 1090 / tz, zoom: tz, transition: `top .6s ${EASE}` }}>
+          <div style={{ position: 'absolute', left: 96 / tz, top: ct / tz, width: 1090 / tz, zoom: tz, ...clampH(ct), transition: `top .6s ${EASE}` }}>
             <div style={kick('var(--color-accent-2)', 13)}>END OF DAY · 16:45–17:00</div>
             <h1 style={{ margin: '6px 0 0', fontSize: 56, fontWeight: 600, lineHeight: 1.02, letterSpacing: '-.01em' }}>That's the day.</h1>
             <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr 1fr', gap: 48, marginTop: 24 }}>
