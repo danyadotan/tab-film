@@ -283,8 +283,8 @@ export class Desk extends Component<object, State> {
     const hl = (i: number) => w === i ? '3px solid oklch(0.7 0.17 65)' : '3px solid transparent';
     // Text size scales the reading columns; offsets are divided back so only the type grows
     const tz = TEXT_ZOOM[s.text] ?? 1;
-    const main = (m: { l: number; w: number }): CSSProperties => ({ position: 'absolute', left: m.l / tz, top: ct / tz, width: m.w / tz, zoom: tz, transition: `left .3s,width .3s,top .6s ${EASE}` });
-    const rail = (m: { rail: string }, gap = 28): CSSProperties => ({ position: 'absolute', left: 1000 / tz, top: rt / tz, width: 196 / tz, zoom: tz, transition: `top .6s ${EASE}`, display: m.rail, flexDirection: 'column', gap, fontSize: 15 });
+    const main = (m: { l: number; w: number }): CSSProperties => ({ position: 'absolute', left: m.l / tz, top: ct / tz, width: m.w / tz, zoom: tz, maxHeight: (800 - ct - 16) / tz, overflowY: 'auto', transition: `left .3s,width .3s,top .6s ${EASE}` });
+    const rail = (m: { rail: string }, gap = 28): CSSProperties => ({ position: 'absolute', left: 1000 / tz, top: rt / tz, width: 196 / tz, zoom: tz, maxHeight: (800 - rt - 16) / tz, overflowY: 'auto', transition: `top .6s ${EASE}`, display: m.rail, flexDirection: 'column', gap, fontSize: 15 });
     const A = this.enlarge('a'), W = this.enlarge('w'), Cl = this.enlarge('c');
 
     return <div style={{ fontFamily: 'var(--font-body)', color: 'var(--color-text)', paddingBottom: 64 }}>
@@ -457,7 +457,7 @@ export class Desk extends Component<object, State> {
 
         {/* 4 CLOSE · the librarian */}
         {this.room(3, <>
-          <div style={{ position: 'absolute', left: 96 / tz, top: ct / tz, width: 1090 / tz, zoom: tz, transition: `top .6s ${EASE}` }}>
+          <div style={{ position: 'absolute', left: 96 / tz, top: ct / tz, width: 1090 / tz, zoom: tz, maxHeight: (800 - ct - 16) / tz, overflowY: 'auto', transition: `top .6s ${EASE}` }}>
             <div style={kick('var(--color-accent-2)', 13)}>END OF DAY · 16:45–17:00</div>
             <h1 style={{ margin: '6px 0 0', fontSize: 56, fontWeight: 600, lineHeight: 1.02, letterSpacing: '-.01em' }}>That's the day.</h1>
             <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr 1fr', gap: 48, marginTop: 24 }}>
