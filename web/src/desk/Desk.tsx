@@ -206,8 +206,8 @@ export class Desk extends Component<object, State> {
   ask = (t: string) => {
     const q = t.toLowerCase();
     let reply = 'Noted — I\'ll do it and it goes on the day\'s record.', dest: number | null = null;
-    // a sign-off closes the line instead of being taken as a task
-    if (/thank|bye|catch up|see you|that'?s all|done for now|good for now|תודה|ביי|נדבר/.test(q)) {
+    // a sign-off closes the line instead of being taken as a task; a request in the same breath ("show me the spec, thanks") still routes
+    if (!/show|open|take me|go to|bring|pull up/.test(q) && /thank|bye|catch up|see you|that'?s all|done for now|good for now|תודה|ביי|נדבר/.test(q)) {
       const at = q.match(/\b\d{1,2}:\d{2}\b/)?.[0] ?? (/close|end of day/.test(q) ? '16:45' : null);
       this.say(at ? `Good. I'll stay quiet until ${at} — the day will be ready to close.` : 'Good. I\'ll stay quiet — press TAB when you need me.', 'DONE', false, this.closeLine);
       return;
