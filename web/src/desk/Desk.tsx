@@ -221,6 +221,15 @@ export class Desk extends Component<object, State> {
   // ——— navigation ———
   nav = (n: number) => this.setState(st => st.stage === n ? { ...st, board: false } : { ...st, stage: n, prev: st.stage, board: false });
   go = (n: number) => (e?: MouseEvent) => { e?.preventDefault(); this.nav(n); };
+  setCallPhase = (phase: State['callPhase']) => {
+    if (phase === this.state.callPhase) return;
+    if (phase === 'live') this.joinCall();
+    else if (phase === 'after') this.leaveCall();
+    else {
+      this.answerT.forEach(clearTimeout);
+      this.setState({ callPhase: 'before', answered: 0 });
+    }
+  };
   joinCall = () => {
     this.answerT.forEach(clearTimeout);
     this.setState({ callPhase: 'live', answered: 0 });
@@ -387,7 +396,7 @@ export class Desk extends Component<object, State> {
             <div style={{ fontSize: 13, letterSpacing: '.14em', color: 'var(--color-accent-2)', fontWeight: 700 }}>PINNED FOR THE WHOLE CALL</div>
             <div style={{ fontSize: 34, fontWeight: 600, lineHeight: 1.15, marginTop: 8 }}>We leave with a tier and a start date for the 40-seat rollout.</div>
             <div style={{ display: 'flex', gap: 4, marginTop: 14 }}>
-              {(['before', 'live', 'after'] as const).map((ph, i) => <button key={ph} onClick={() => this.setState({ callPhase: ph, answered: ph === 'before' ? 0 : ph === 'after' ? ASK.length : s.answered })} style={{ all: 'unset', cursor: 'pointer', padding: '4px 12px', fontSize: 13, letterSpacing: '.12em', fontWeight: 700, borderRadius: 2, background: s.callPhase === ph ? 'var(--color-accent)' : 'var(--color-neutral-200)', color: s.callPhase === ph ? '#fff' : 'var(--color-neutral-700)' }}>{i + 1} · {['BEFORE', 'DURING', 'AFTER'][i]}</button>)}
+              {(['before', 'live', 'after'] as const).map((ph, i) => <button key={ph} onClick={() => this.setCallPhase(ph)} style={{ all: 'unset', cursor: 'pointer', padding: '4px 12px', fontSize: 13, letterSpacing: '.12em', fontWeight: 700, borderRadius: 2, background: s.callPhase === ph ? 'var(--color-accent)' : 'var(--color-neutral-200)', color: s.callPhase === ph ? '#fff' : 'var(--color-neutral-700)' }}>{i + 1} · {['BEFORE', 'DURING', 'AFTER'][i]}</button>)}
             </div>
             {s.callPhase === 'before' && <>
               <div style={{ ...kick('var(--color-neutral-700)', 13), marginTop: 18 }}>FROM THE LAST CALL · AUG 28</div>
