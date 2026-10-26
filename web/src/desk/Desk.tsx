@@ -20,6 +20,11 @@ interface State extends Prefs {
   small: boolean;
   portrait: boolean;
   hintClosed: boolean;
+  sendStep: 0 | 1 | 2;
+  sendPick: 'a' | 'b' | null;
+  callPhase: 'before' | 'live' | 'after';
+  answered: number;
+  stepOut: boolean;
   walk: number;
   walkMode: 'Both' | 'Visual';
   said: Record<number, boolean>;
@@ -28,19 +33,29 @@ interface State extends Prefs {
   line: LineState;
 }
 
-const INIT: State = { stage: 0, prev: null, board: false, bright: 85, warm: 25, sound: 'Soft', quiet: 'Digest', text: 'Roomy', motion: 'Reduced', pinned: false, asked: false, taken: false, copy: 'mine', joined: false, ok: {}, checked: {}, z: 1, small: false, portrait: false, hintClosed: false, walk: 0, walkMode: 'Both', said: {}, nudged: false, wide: {}, line: { open: false, words: [], shown: 0, meta: '', speaking: false, controls: false, idle: false, choices: null } };
+const INIT: State = { stage: 0, prev: null, board: false, bright: 85, warm: 25, sound: 'Soft', quiet: 'Digest', text: 'Roomy', motion: 'Reduced', pinned: false, asked: false, taken: false, copy: 'mine', joined: false, ok: {}, checked: {}, z: 1, small: false, portrait: false, hintClosed: false, sendStep: 0, sendPick: null, callPhase: 'before', answered: 0, stepOut: false, walk: 0, walkMode: 'Both', said: {}, nudged: false, wide: {}, line: { open: false, words: [], shown: 0, meta: '', speaking: false, controls: false, idle: false, choices: null } };
 
 const ARRIVE = [
   null,
   'Your words, your copies — two on the table, never twenty. I keep the third for Legal.',
-  'I\'m your second screen. Her likely questions are on the left with your answers. I\'m on notes, off camera.',
-  'That\'s the day. Two alerts that are real, nothing else. The room resets when you go.',
+  'I\'m your second screen: last call\'s notes, your three questions and her likely ones, all on the left. I\'m on notes, off camera.',
+  'It\'s 16:45 — that\'s the day. Two alerts that are real, nothing else. The room resets when you go.',
 ];
 const BRIEF = ['One. Onboarding spec, due at noon. Sections one to three are settled; only pricing tiers are open.', 'Two. Standup at nine thirty. Your three lines are drafted; the one blocker to raise is pricing.', 'Three. Replies. Dana first — her answer unblocks the spec. Then Omar, then Legal.'];
 const NAMES = ['Day', 'Write', 'Call', 'Close'], WHO = ['the assistant', 'the editor', 'the wingman', 'the librarian'];
-const TABS = [['Day', '3 things'], ['Write', 'spec v4 · 2 copies'], ['Call', '10:30 Northwind'], ['Close', '17:48']];
-const TIMES = ['Mon 5 Oct · 8:40', 'Mon 5 Oct · 10:24', 'Mon 5 Oct · 10:30', 'Mon 5 Oct · 17:48'];
+const TABS = [['Day', '3 things'], ['Write', 'spec v4 · 2 copies'], ['Call', '10:30 Northwind'], ['Close', '16:45']];
+const TIMES = ['Mon 5 Oct · 8:40', 'Mon 5 Oct · 10:24', 'Mon 5 Oct · 10:30', 'Mon 5 Oct · 16:45'];
 const PEOPLE = ['You', 'Rina Kaplan · Northwind', 'Tom Ruiz · Northwind', 'Dana'];
+// Call: the three phases of one meeting. Before = last call + what to ask; during = answers as they come; after = follow-up + filing.
+const LAST_CALL = ['Asked twice about seat limits — she needs 40.', 'Wants to start before the year ends.', 'Prefers short calls — the last one ran 22 min.'];
+const ASK = [['Which tier do we sign — Team, for 40 seats?', 'Team, 40 seats — agreed.'], ['Can we fix the start date at Nov 3?', 'Nov 3 — agreed, once Legal has its ten days.'], ['Who signs on Northwind\'s side?', 'Rina signs; Tom Ruiz approves the budget.']];
+const FOLLOW = [['Send Rina the order form', 'You · today'], ['Contract review, ten days', 'Legal · by Nov 3'], ['Confirm the checklist on Team', 'Dana · 11:00']];
+// Write: what TAB checked before the send, and the two versions of the employee's own words.
+const CHECKS: [string, string, boolean][] = [['“14-day trial”', 'matches the contract draft', true], ['“Team: up to 50 seats”', 'matches the price list', true], ['“Starter includes the checklist”', 'not confirmed — Dana decides by 11:00, so it is left out of both', false]];
+const VERSIONS = [
+  { id: 'a' as const, name: 'A · Tightened for Rina', why: 'She prefers short — 31 words.', text: 'Rina — §4 attached: Starter, Team and Scale, each with a 14-day trial. Team covers your 40 seats. Talk at 10:30.' },
+  { id: 'b' as const, name: 'B · As you wrote it, cleaned', why: 'Your full wording — 48 words.', text: 'Hi Rina, ahead of our 10:30 call I\'ve attached the pricing section. There are three tiers — Starter, Team and Scale — each with a 14-day trial. For 40 seats, Team is the natural fit; happy to walk through it together.' },
+];
 const QA = [['What are the seat limits?', 'Team is 50 seats; Scale is unlimited. You need 40 — Team fits.'], ['Can we keep pilot pricing?', 'Pilot rate holds through Q1 on an annual plan.'], ['How fast can we start?', 'Earliest Nov 3. Legal needs ten days on the contract.'], ['Does Starter include the checklist?', 'Dana decides by 11:00 — say “yes, on Team and above” if pressed.']];
 // The two real alerts, as Bridge-iT Bouncer closure-gate decisions: only what
 // materially changed, why it needs you, two choices, and how it closes.
@@ -66,7 +81,7 @@ const ALERTS: Decision[] = [
   },
 ];
 // What the bouncer did with today's agent work before any of it reached you.
-const GATE = [['25', 'passed silently'], ['16', 'consolidated'], ['3', 'returned to their agents'], ['2', 'brought to you']];
+const GATE = [['25', 'passed silently'], ['16', 'consolidated'], ['3', 'returned to their agents'], ['3', 'brought to you']];
 const DID = [['Folded 14 weekend tabs into three things', 'Same goal, one place'], ['Muted #launch-chat until 10:00', '14 messages, none mention you'], ['Snapshotted spec v4 before Dana\'s copy', 'Your way back'], ['Held the spec through the call', 'Nothing to save, nothing lost'], ['Moved 11 replies to the 14:00 digest', 'Your Monday setting']];
 
 const EASE = 'cubic-bezier(.2,.8,.2,1)';
@@ -100,15 +115,24 @@ export class Desk extends Component<object, State> {
   private keepLine = false;
   private typingNow = false;
   private voiceOK = false;
+  private answerT: number[] = [];
+  // T steps TAB out of the desk (and back); Esc returns. Ignored while typing.
+  private onKey = (e: KeyboardEvent) => {
+    const el = e.target as HTMLElement | null;
+    if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)) return;
+    if (e.key === 't' || e.key === 'T') this.setState(st => ({ stepOut: !st.stepOut }));
+    else if (e.key === 'Escape' && this.state.stepOut) this.setState({ stepOut: false });
+  };
 
   componentDidMount() {
     this.fit();
     window.addEventListener('resize', this.fit);
+    window.addEventListener('keydown', this.onKey);
     if (window.speechSynthesis) speechSynthesis.getVoices();
     this.lastStage = 0;
     this.arrive(0);
   }
-  componentWillUnmount() { window.removeEventListener('resize', this.fit); this.stopLine(); clearTimeout(this.nudgeT); clearTimeout(this.closeT); }
+  componentWillUnmount() { window.removeEventListener('resize', this.fit); window.removeEventListener('keydown', this.onKey); this.answerT.forEach(clearTimeout); this.stopLine(); clearTimeout(this.nudgeT); clearTimeout(this.closeT); }
   componentDidUpdate() {
     const st = this.state.stage;
     if (st === this.lastStage) return;
@@ -117,7 +141,7 @@ export class Desk extends Component<object, State> {
     if (this.state.walk) this.walkStop(); else if (this.state.line.open && !this.keepLine) this.closeLine();
     this.keepLine = false;
     if (!this.state.said[st]) this.arrive(st);
-    if (st === 1 && !this.state.nudged) this.nudgeT = window.setTimeout(() => this.nudge(), 14000);
+    if (st === 1 && !this.state.nudged && this.state.callPhase === 'before') this.nudgeT = window.setTimeout(() => this.nudge(), 14000);
   }
 
   // ——— the line ———
@@ -197,7 +221,22 @@ export class Desk extends Component<object, State> {
   // ——— navigation ———
   nav = (n: number) => this.setState(st => st.stage === n ? { ...st, board: false } : { ...st, stage: n, prev: st.stage, board: false });
   go = (n: number) => (e?: MouseEvent) => { e?.preventDefault(); this.nav(n); };
-  restart = () => { this.closeLine(); clearTimeout(this.nudgeT); this.lastStage = 0; this.setState(({ z, small, portrait, hintClosed }) => ({ ...INIT, z, small, portrait, hintClosed }), () => this.arrive(0)); };
+  joinCall = () => {
+    this.answerT.forEach(clearTimeout);
+    this.setState({ callPhase: 'live', answered: 0 });
+    this.answerT = [5000, 10000, 15000].map((ms, i) => window.setTimeout(() => this.setState({ answered: i + 1 }), ms));
+    this.say('You\'re in. Say “TAB, dial-in” if audio drops. I note her answers under your questions as they come.', 'LIVE', false, () => this.rest());
+  };
+  leaveCall = () => {
+    this.answerT.forEach(clearTimeout);
+    this.setState({ callPhase: 'after', answered: ASK.length });
+    this.say('Filed under Northwind › Calls. Three follow-ups: one is yours, the other two went to their owners.', 'DONE', false, () => this.rest());
+  };
+  sendVersion = (v: 'a' | 'b') => {
+    this.setState({ sendStep: 2, sendPick: v });
+    this.say(`Sent — version ${v.toUpperCase()}, your words. A copy is filed under Northwind; nothing else left your desk.`, 'DONE', false, () => this.rest());
+  };
+  restart = () => { this.answerT.forEach(clearTimeout); this.closeLine(); clearTimeout(this.nudgeT); this.lastStage = 0; this.setState(({ z, small, portrait, hintClosed }) => ({ ...INIT, z, small, portrait, hintClosed }), () => this.arrive(0)); };
 
   // ——— render ———
   room(i: number, children: ReactNode) {
@@ -275,12 +314,41 @@ export class Desk extends Component<object, State> {
                 {([['mine', 'Yours · v4 · 10:12'], ['dana', 'Dana\'s · Fri']] as const).map(c => <button key={c[0]} onClick={() => this.setState({ copy: c[0] })} style={{ all: 'unset', cursor: 'pointer', padding: '6px 14px', fontSize: 16, borderRadius: 2, background: s.copy === c[0] ? 'var(--color-accent)' : 'var(--color-neutral-200)', color: s.copy === c[0] ? '#fff' : 'var(--color-text)', whiteSpace: 'nowrap' }}>{c[1]}</button>)}
                 <span style={{ padding: '6px 10px', fontSize: 14, color: 'var(--color-neutral-500)', whiteSpace: 'nowrap' }}>+ one more, at most</span>
               </div>
-              <div style={{ fontSize: 14, color: 'var(--color-neutral-600)', whiteSpace: 'nowrap' }}>{s.copy === 'mine' ? 'Saved as you type · v4' : 'Comparing · yours untouched'}</div>
+              <div style={{ display: 'flex', gap: 12, alignItems: 'baseline' }}>
+                <div style={{ fontSize: 14, color: 'var(--color-neutral-600)', whiteSpace: 'nowrap' }}>{s.copy === 'mine' ? 'Saved as you type · v4' : 'Comparing · yours untouched'}</div>
+                {s.copy === 'mine' && s.sendStep === 0 && <button className="btn btn-primary" onClick={() => { this.setState({ sendStep: 1 }); this.say('Checked and cleaned — your words stay yours. Two versions below; pick one to send.', '', false, () => this.rest()); }} style={{ whiteSpace: 'nowrap' }}>Ready to send →</button>}
+              </div>
             </div>
-            <div style={{ display: 'flex', gap: 4, marginTop: 14, fontSize: 15, color: 'var(--color-neutral-700)' }}>
+            {s.sendStep === 0 && <div style={{ display: 'flex', gap: 4, marginTop: 14, fontSize: 15, color: 'var(--color-neutral-700)' }}>
               <span style={{ padding: '3px 9px', fontWeight: 700 }}>B</span><span style={{ padding: '3px 9px', fontStyle: 'italic' }}>I</span><span style={{ padding: '3px 9px', textDecoration: 'underline' }}>U</span><span style={{ padding: '3px 9px' }}>H1</span><span style={{ padding: '3px 9px' }}>H2</span><span style={{ padding: '3px 9px' }}>¶</span><span style={{ padding: '3px 9px' }}>“ ”</span><span style={{ padding: '3px 9px' }}>§</span>
-            </div>
-            <div style={{ marginTop: 26, background: '#fff', padding: '48px 56px', minHeight: 420, boxSizing: 'border-box', boxShadow: 'var(--shadow-sm)' }}>
+            </div>}
+            {s.sendStep > 0 && <div style={{ marginTop: 12, background: '#fff', padding: '20px 32px', boxSizing: 'border-box', boxShadow: 'var(--shadow-sm)' }}>
+              <div style={kick('var(--color-neutral-600)', 13)}>TO RINA KAPLAN · NORTHWIND · §4 ATTACHED</div>
+              {s.sendStep === 1 && <>
+                <div style={{ ...kick('var(--color-accent-700)', 12), marginTop: 14 }}>TAB CHECKED · YOUR WORDS UNCHANGED</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8 }}>
+                  {CHECKS.map(c => <div key={c[0]} style={{ fontSize: 16, lineHeight: 1.35 }}><span style={{ color: c[2] ? 'var(--color-accent-700)' : 'oklch(0.5 0.15 55)', fontWeight: 700, marginRight: 8 }}>{c[2] ? '✓' : '!'}</span>{c[0]} <span style={{ color: 'var(--color-neutral-600)' }}>— {c[1]}</span></div>)}
+                </div>
+                <div style={{ fontSize: 13, fontStyle: 'italic', color: 'var(--color-neutral-600)', marginTop: 8 }}>Shredded: the v3 paragraph on annual discounts (superseded) and two repeated sentences.</div>
+                <div style={{ ...kick('var(--color-accent-2)', 12), marginTop: 18 }}>SEND ONE · APPROVAL 1 OF 3 TODAY</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 10 }}>
+                  {VERSIONS.map(v => <div key={v.id} style={{ border: '1px solid var(--color-divider)', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <div style={{ fontSize: 16, fontWeight: 600 }}>{v.name}</div>
+                    <div style={{ fontSize: 15, lineHeight: 1.45, flex: 1 }}>{v.text}</div>
+                    <div style={{ fontSize: 13, fontStyle: 'italic', color: 'var(--color-neutral-600)' }}>{v.why}</div>
+                    <button className={`btn ${v.id === 'a' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => this.sendVersion(v.id)} style={{ alignSelf: 'flex-start', whiteSpace: 'nowrap' }}>Send {v.id.toUpperCase()}</button>
+                  </div>)}
+                </div>
+                <button className="btn btn-ghost" onClick={() => this.setState({ sendStep: 0 })} style={{ marginTop: 4 }}>Back to editing</button>
+              </>}
+              {s.sendStep === 2 && <>
+                <div style={{ fontSize: 28, fontWeight: 600, marginTop: 12 }}>Sent · 10:26 ✓</div>
+                <div style={{ fontSize: 17, lineHeight: 1.5, marginTop: 12, paddingLeft: 14, borderLeft: '3px solid var(--color-accent-200)' }}>{VERSIONS.find(v => v.id === s.sendPick)?.text}</div>
+                <div style={{ fontSize: 14, color: 'var(--color-neutral-600)', marginTop: 12 }}>Your words, version {s.sendPick?.toUpperCase()}. Copy filed under Northwind › Emails. The unconfirmed checklist line stayed out.</div>
+                <button className="btn btn-ghost" onClick={() => this.setState({ sendStep: 0 })} style={{ marginTop: 12 }}>Back to the spec</button>
+              </>}
+            </div>}
+            {s.sendStep === 0 && <div style={{ marginTop: 26, background: '#fff', padding: '48px 56px', minHeight: 420, boxSizing: 'border-box', boxShadow: 'var(--shadow-sm)' }}>
               <div style={{ fontSize: 13, letterSpacing: '.14em', color: 'var(--color-neutral-600)' }}>ONBOARDING SPEC · {s.copy === 'mine' ? 'YOUR COPY' : 'DANA\'S COPY · READ ONLY'}</div>
               <h2 style={{ margin: '10px 0 18px', fontSize: 34, fontWeight: 600, lineHeight: 1.1 }}>§4 Pricing tiers</h2>
               {s.copy === 'mine' && <div contentEditable suppressContentEditableWarning style={{ fontSize: 22, lineHeight: 1.55, minHeight: 200, cursor: 'text', caretColor: 'var(--color-accent)' }}>
@@ -296,7 +364,7 @@ export class Desk extends Component<object, State> {
                   <button className="btn btn-ghost" onClick={() => this.setState({ copy: 'mine' })}>Back to mine</button>
                 </div>
               </div>}
-            </div>
+            </div>}
           </div>
           <div style={rail(W)}>
             <div>
@@ -317,19 +385,41 @@ export class Desk extends Component<object, State> {
         {this.room(2, <>
           <div style={main(Cl)}>
             <div style={{ fontSize: 13, letterSpacing: '.14em', color: 'var(--color-accent-2)', fontWeight: 700 }}>PINNED FOR THE WHOLE CALL</div>
-            <div style={{ fontSize: 40, fontWeight: 600, lineHeight: 1.15, marginTop: 8 }}>We leave with a tier and a start date for the 40-seat rollout.</div>
-            {s.joined && <div style={{ marginTop: 18, height: 180, background: 'var(--color-neutral-800)', display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 2, padding: 2, boxSizing: 'border-box' }}>
-              {PEOPLE.map(t => <div key={t} style={{ background: 'var(--color-neutral-900)', color: '#fff', display: 'flex', alignItems: 'flex-end', padding: '10px 14px', fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden' }}>{t}</div>)}
-            </div>}
-            <div style={{ marginTop: s.joined ? 16 : 36, fontSize: 13, letterSpacing: '.14em', color: 'var(--color-accent-700)', fontWeight: 700 }}>IF SHE ASKS · YOU ANSWER</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: s.joined ? 8 : 12, marginTop: 10 }}>
-              {QA.map(q => <div key={q[0]} style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr', gap: 24, alignItems: 'baseline' }}><div style={{ fontSize: 19, lineHeight: 1.3, fontStyle: 'italic', fontFamily: 'var(--font-body)' }}>“{q[0]}”</div><div style={{ fontSize: 19, lineHeight: 1.3 }}>{q[1]}</div></div>)}
+            <div style={{ fontSize: 34, fontWeight: 600, lineHeight: 1.15, marginTop: 8 }}>We leave with a tier and a start date for the 40-seat rollout.</div>
+            <div style={{ display: 'flex', gap: 4, marginTop: 14 }}>
+              {(['before', 'live', 'after'] as const).map((ph, i) => <button key={ph} onClick={() => this.setState({ callPhase: ph, answered: ph === 'before' ? 0 : ph === 'after' ? ASK.length : s.answered })} style={{ all: 'unset', cursor: 'pointer', padding: '4px 12px', fontSize: 13, letterSpacing: '.12em', fontWeight: 700, borderRadius: 2, background: s.callPhase === ph ? 'var(--color-accent)' : 'var(--color-neutral-200)', color: s.callPhase === ph ? '#fff' : 'var(--color-neutral-700)' }}>{i + 1} · {['BEFORE', 'DURING', 'AFTER'][i]}</button>)}
             </div>
+            {s.callPhase === 'before' && <>
+              <div style={{ ...kick('var(--color-neutral-700)', 13), marginTop: 18 }}>FROM THE LAST CALL · AUG 28</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 6 }}>{LAST_CALL.map(t => <div key={t} style={{ fontSize: 17, lineHeight: 1.35 }}>· {t}</div>)}</div>
+              <div style={{ ...kick('var(--color-accent-2)', 13), marginTop: 16 }}>ASK HER · BEFORE YOU HANG UP</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 6 }}>{ASK.map((q, i) => <div key={q[0]} style={{ fontSize: 17, lineHeight: 1.35 }}><span style={{ color: 'var(--color-accent)', marginRight: 8 }}>{i + 1}</span>{q[0]}</div>)}</div>
+            </>}
+            {s.callPhase === 'live' && <>
+              <div style={{ marginTop: 14, height: 130, background: 'var(--color-neutral-800)', display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 2, padding: 2, boxSizing: 'border-box' }}>
+                {PEOPLE.map(t => <div key={t} style={{ background: 'var(--color-neutral-900)', color: '#fff', display: 'flex', alignItems: 'flex-end', padding: '10px 14px', fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden' }}>{t}</div>)}
+              </div>
+              <div style={{ ...kick('var(--color-accent-2)', 13), marginTop: 14 }}>YOUR QUESTIONS · HER ANSWERS AS THEY COME</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 6 }}>{ASK.map((q, i) => <div key={q[0]} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, alignItems: 'baseline', fontSize: 16, lineHeight: 1.3 }}><div><span style={{ color: 'var(--color-accent)', marginRight: 8 }}>{i + 1}</span>{q[0]}</div><div style={{ color: i < s.answered ? 'var(--color-accent-700)' : 'var(--color-neutral-400)', fontStyle: i < s.answered ? 'normal' : 'italic' }}>{i < s.answered ? `✓ ${q[1]}` : 'listening…'}</div></div>)}</div>
+            </>}
+            {s.callPhase === 'after' && <>
+              <div style={{ ...kick('var(--color-neutral-700)', 13), marginTop: 18 }}>WHAT YOU HEARD · CALL ENDED 10:52</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 6 }}>{ASK.map(q => <div key={q[0]} style={{ fontSize: 17, lineHeight: 1.35, color: 'var(--color-accent-700)' }}>✓ <span style={{ color: 'var(--color-text)' }}>{q[1]}</span></div>)}</div>
+              <div style={{ ...kick('var(--color-accent-2)', 13), marginTop: 16 }}>FOLLOW-UP</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 6 }}>{FOLLOW.map(f => <div key={f[0]} style={{ display: 'grid', gridTemplateColumns: '1fr 180px', gap: 20, fontSize: 17, lineHeight: 1.35 }}><div>{f[0]}</div><div style={{ color: 'var(--color-neutral-600)' }}>{f[1]}</div></div>)}</div>
+              <div style={{ fontSize: 15, color: 'var(--color-neutral-600)', fontStyle: 'italic', marginTop: 14 }}>Summary filed under Northwind › Calls › 5 Oct. Reversible for 7 days.</div>
+            </>}
+            {s.callPhase !== 'after' && <>
+              <div style={{ ...kick('var(--color-accent-700)', 13), marginTop: 16 }}>IF SHE ASKS · YOU ANSWER</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: s.callPhase === 'live' ? 4 : 6, marginTop: 6 }}>
+                {QA.map(q => <div key={q[0]} style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr', gap: 20, alignItems: 'baseline', fontSize: s.callPhase === 'live' ? 15 : 16, lineHeight: 1.3 }}><div style={{ fontStyle: 'italic', fontFamily: 'var(--font-body)' }}>“{q[0]}”</div><div>{q[1]}</div></div>)}
+              </div>
+            </>}
           </div>
           <div style={rail(Cl, 24)}>
             <div>
-              <div style={kick('var(--color-neutral-700)')}>RINA KAPLAN · NORTHWIND</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginTop: 8, lineHeight: 1.35 }}><div>Signed the pilot in August; 81% activation.</div><div>Asked twice about seat limits.</div><div>Prefers short calls — last one ran 22 min.</div></div>
+              <div style={kick('var(--color-neutral-700)')}>ON THE CALL</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8, lineHeight: 1.3 }}><div><b style={{ fontWeight: 600 }}>Rina Kaplan</b><br /><span style={{ color: 'var(--color-neutral-600)' }}>Head of Ops · signed the pilot, 81% activation</span></div><div><b style={{ fontWeight: 600 }}>Tom Ruiz</b><br /><span style={{ color: 'var(--color-neutral-600)' }}>Finance · approves the budget</span></div><div><b style={{ fontWeight: 600 }}>Dana</b><br /><span style={{ color: 'var(--color-neutral-600)' }}>Your side · owns the checklist</span></div></div>
             </div>
             <div>
               <div style={kick('var(--color-neutral-700)')}>SHARE FROM</div>
@@ -338,9 +428,9 @@ export class Desk extends Component<object, State> {
             <div>
               <div style={{ width: 196, aspectRatio: '16/9', background: 'var(--color-neutral-800)', color: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '10px 12px', boxSizing: 'border-box' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, letterSpacing: '.12em' }}><span>NORTHWIND</span><span style={{ width: 8, height: 8, borderRadius: '50%', background: 'oklch(0.7 0.17 65)' }}></span></div>
-                <div style={{ fontSize: 13, lineHeight: 1.3, opacity: .85 }}>{s.joined ? 'Live · TAB on notes, off camera' : 'Waiting room · camera off until you join'}</div>
+                <div style={{ fontSize: 13, lineHeight: 1.3, opacity: .85 }}>{s.callPhase === 'live' ? 'Live · TAB on notes, off camera' : s.callPhase === 'after' ? 'Call ended · 10:52' : 'Waiting room · camera off until you join'}</div>
               </div>
-              <button className={`btn ${s.joined ? 'btn-secondary' : 'btn-primary'}`} onClick={() => { const j = !s.joined; this.setState({ joined: j }); if (j) this.say('You\'re in. Say “TAB, dial-in” if audio drops. The answers stay under the video.', 'LIVE', false, () => this.rest()); }} style={{ marginTop: 10, whiteSpace: 'nowrap' }}>{s.joined ? 'Leave' : 'Join · expands to center'}</button>
+              <button className={`btn ${s.callPhase === 'live' ? 'btn-secondary' : 'btn-primary'}`} onClick={() => s.callPhase === 'live' ? this.leaveCall() : this.joinCall()} style={{ marginTop: 10, whiteSpace: 'nowrap' }}>{s.callPhase === 'live' ? 'Leave · file the call' : s.callPhase === 'after' ? 'Rejoin' : 'Join · expands to center'}</button>
             </div>
           </div>
           {Cl.button}
@@ -349,12 +439,13 @@ export class Desk extends Component<object, State> {
         {/* 4 CLOSE · the librarian */}
         {this.room(3, <>
           <div style={{ position: 'absolute', left: 96, top: ct, width: 1090, transition: `top .6s ${EASE}` }}>
-            <h1 style={{ margin: 0, fontSize: 64, fontWeight: 600, lineHeight: 1.02, letterSpacing: '-.01em' }}>That's the day.</h1>
-            <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr 1fr', gap: 48, marginTop: 30 }}>
+            <div style={kick('var(--color-accent-2)', 13)}>END OF DAY · 16:45–17:00</div>
+            <h1 style={{ margin: '6px 0 0', fontSize: 56, fontWeight: 600, lineHeight: 1.02, letterSpacing: '-.01em' }}>That's the day.</h1>
+            <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr 1fr', gap: 48, marginTop: 24 }}>
               <div>
                 <div style={kick('var(--color-neutral-700)')}>REPORT</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 12 }}>
-                  {[['11:42', 'spec sent, 18 min early'], ['Team', 'tier agreed with Northwind; start Nov 3'], ['2', 'decisions left to you, both made']].map(r => <div key={r[0]} style={{ display: 'flex', gap: 14, alignItems: 'baseline' }}><span style={{ fontSize: 40, lineHeight: 1, color: 'var(--color-accent)', width: 120 }}>{r[0]}</span><span style={{ fontSize: 17 }}>{r[1]}</span></div>)}
+                  {[['11:42', 'spec sent, 18 min early'], ['Team', 'tier agreed with Northwind; start Nov 3'], ['3', `approvals asked of you today: ${s.sendStep === 2 ? 'the send is done' : 'the send is waiting'}, two below`]].map(r => <div key={r[0]} style={{ display: 'flex', gap: 14, alignItems: 'baseline' }}><span style={{ fontSize: 40, lineHeight: 1, color: 'var(--color-accent)', width: 120 }}>{r[0]}</span><span style={{ fontSize: 17 }}>{r[1]}</span></div>)}
                 </div>
                 <div style={{ ...kick('var(--color-neutral-700)'), marginTop: 34 }}>TOMORROW · ALREADY FILED</div>
                 <div style={{ fontSize: 17, lineHeight: 1.5, marginTop: 8 }}>Legal review first (comment 2 on trial length), then the retro at 11:00. Room set to your Tuesday.</div>
@@ -407,9 +498,27 @@ export class Desk extends Component<object, State> {
         <div style={{ display: 'flex', gap: 4, flexWrap: s.small ? 'nowrap' : 'wrap', flex: 1 }}>
           {NAMES.map((n, i) => { const on = !s.board && s.stage === i; return <button key={n} onClick={this.go(i)} style={{ all: 'unset', cursor: 'pointer', padding: s.small ? '6px 8px' : '4px 10px', fontSize: s.small ? 13 : 14, borderRadius: 2, background: on ? 'var(--color-accent)' : 'transparent', color: on ? '#fff' : 'var(--color-text)', whiteSpace: 'nowrap' }}>{i + 1} · {n}{s.small ? '' : ` — ${WHO[i]}`}</button>; })}
         </div>
+        <button className="btn btn-ghost" onClick={() => this.setState({ stepOut: true })} title="TAB steps out of the desk (T)" style={{ whiteSpace: 'nowrap', fontSize: s.small ? 13 : undefined, color: 'oklch(0.5 0.15 55)' }}>● TAB</button>
         <button className="btn btn-ghost" onClick={this.restart} style={{ whiteSpace: 'nowrap', fontSize: s.small ? 13 : undefined }}>{s.small ? 'Restart' : 'Restart demo'}</button>
         <button className="btn btn-ghost" onClick={() => this.setState({ board: !s.board })} style={{ whiteSpace: 'nowrap', fontSize: s.small ? 13 : undefined }}>{s.board ? 'Back to demo' : s.small ? 'All 4' : 'All four'}</button>
       </div>
+
+      {/* TAB steps out of the desk: the amber tab leaves the edge and stands on its own. */}
+      {s.stepOut && <div className="tab-out-backdrop" onClick={() => this.setState({ stepOut: false })} style={{ position: 'fixed', inset: 0, zIndex: 70, background: 'color-mix(in srgb, var(--color-bg) 88%, transparent)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, fontFamily: 'var(--font-heading)' }}>
+        <div className="tab-out-card" onClick={e => e.stopPropagation()} style={{ maxWidth: 760, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 18 }}>
+          <div style={{ background: 'oklch(0.7 0.17 65)', color: '#fff', fontWeight: 700, letterSpacing: '.24em', fontSize: 56, padding: '10px 28px 10px 34px' }}>TAB</div>
+          <div style={kick('var(--color-accent-2)', 14)}>A CO-WORKER, NOT A FEATURE</div>
+          <div style={{ fontSize: 44, fontWeight: 600, lineHeight: 1.08 }}>TAB isn't the desk. It's who works beside you at it.</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 21, lineHeight: 1.35 }}>
+            <div><b style={{ color: 'oklch(0.5 0.15 55)' }}>One voice</b> — a single line, once per room.</div>
+            <div><b style={{ color: 'oklch(0.5 0.15 55)' }}>One place</b> — the amber tab at the edge of any screen.</div>
+            <div><b style={{ color: 'oklch(0.5 0.15 55)' }}>One color</b> — amber, TAB's alone.</div>
+          </div>
+          <div style={{ fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: 19, lineHeight: 1.4, color: 'var(--color-neutral-700)' }}>TAB@Work is one desk it works at. It measures friction in the flow of work — never feelings.</div>
+          <button className="btn btn-primary" onClick={() => this.setState({ stepOut: false })}>Back to the desk</button>
+          <div style={{ fontSize: 13, color: 'var(--color-neutral-600)' }}>Press T or Esc to return.</div>
+        </div>
+      </div>}
 
       {/* Phones held upright: the desk is a 1280×800 desktop, so suggest turning sideways. */}
       {s.portrait && !s.hintClosed && <div style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'color-mix(in srgb, var(--color-bg) 96%, transparent)', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 28px', gap: 14, fontFamily: 'var(--font-heading)' }}>
