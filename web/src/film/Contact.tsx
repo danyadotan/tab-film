@@ -8,6 +8,7 @@ export const CONTACT = {
   name: 'Danya Dotan',
   org: 'Bridge-iT',
   linkedin: 'https://linkedin.com/in/danya-dotan/',
+  desk: 'https://tab-at-work.com',
   email: 'danya@dynamicbridge.io',
 };
 
@@ -21,7 +22,7 @@ const BULLETINS: [string, string, string, string][] = [
 // The QR code as one SVG path, built once; 4-module quiet zone.
 const QR = (() => {
   const q = qrcode(0, 'M');
-  q.addData(CONTACT.linkedin);
+  q.addData(CONTACT.desk);
   q.make();
   const n = q.getModuleCount();
   let d = '';
@@ -40,7 +41,7 @@ function Rules({ p }: { p: number }) {
   </div>;
 }
 
-/** The held last frame: three bulletins from the film, then how to reach Danya. */
+/** The held last frame: three bulletins from the film, then how to reach Danya and where to try the desk. */
 export function Contact() {
   const { T } = useFilm();
   const link = { color: C.ink, textDecoration: 'none' };
@@ -77,11 +78,11 @@ export function Contact() {
             <a href={`mailto:${CONTACT.email}`} onClick={keep} style={{ ...link, fontSize: 32, display: 'block', marginTop: 4 }}>{CONTACT.email}</a>
           </div>
         </div>
-        <a href={CONTACT.linkedin} target="_blank" rel="noopener noreferrer" onClick={keep} style={{ marginLeft: 'auto', textAlign: 'center', color: C.n6, textDecoration: 'none', ...rise(T, AT + 3.6) }}>
-          <svg width={248} height={248} viewBox={`0 0 ${QR.size} ${QR.size}`} shapeRendering="crispEdges" style={{ display: 'block', background: '#fff', boxShadow: 'var(--shadow-sm)' }} role="img" aria-label="QR code to Danya Dotan's LinkedIn profile">
+        <a href={CONTACT.desk} target="_blank" rel="noopener noreferrer" onClick={keep} style={{ marginLeft: 'auto', textAlign: 'center', color: C.n6, textDecoration: 'none', ...rise(T, AT + 3.6) }}>
+          <svg width={248} height={248} viewBox={`0 0 ${QR.size} ${QR.size}`} shapeRendering="crispEdges" style={{ display: 'block', background: '#fff', boxShadow: 'var(--shadow-sm)' }} role="img" aria-label="QR code to TAB Desk at tab-at-work.com">
             <path d={QR.d} fill={C.ink} />
           </svg>
-          <div style={{ fontFamily: BODY, fontStyle: 'italic', fontSize: 18, marginTop: 12 }}>Scan to connect on LinkedIn</div>
+          <div style={{ fontFamily: BODY, fontStyle: 'italic', fontSize: 18, marginTop: 12 }}>Scan to try the desk · tab-at-work.com</div>
         </a>
       </div>
     </div>
