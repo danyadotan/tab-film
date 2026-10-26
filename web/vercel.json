@@ -1,8 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [
-    { "source": "/", "has": [{ "type": "host", "value": "tab-at-work.com" }], "destination": "/desk.html" },
-    { "source": "/", "has": [{ "type": "host", "value": "www.tab-at-work.com" }], "destination": "/desk.html" },
-    { "source": "/film", "destination": "/index.html" }
+  "routes": [
+    { "src": "^/$", "has": [{ "type": "host", "value": "tab-at-work.com" }], "dest": "/desk.html" },
+    { "src": "^/$", "has": [{ "type": "host", "value": "www.tab-at-work.com" }], "dest": "/desk.html" },
+    { "src": "^/film/?$", "dest": "/index.html" }
   ]
 }
