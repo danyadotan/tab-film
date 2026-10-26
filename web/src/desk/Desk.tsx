@@ -197,7 +197,7 @@ export class Desk extends Component<object, State> {
   // ——— navigation ———
   nav = (n: number) => this.setState(st => st.stage === n ? { ...st, board: false } : { ...st, stage: n, prev: st.stage, board: false });
   go = (n: number) => (e?: MouseEvent) => { e?.preventDefault(); this.nav(n); };
-  restart = () => { this.closeLine(); clearTimeout(this.nudgeT); this.lastStage = 0; this.setState({ ...INIT, z: this.state.z }, () => this.arrive(0)); };
+  restart = () => { this.closeLine(); clearTimeout(this.nudgeT); this.lastStage = 0; this.setState(({ z, small, portrait, hintClosed }) => ({ ...INIT, z, small, portrait, hintClosed }), () => this.arrive(0)); };
 
   // ——— render ———
   room(i: number, children: ReactNode) {
