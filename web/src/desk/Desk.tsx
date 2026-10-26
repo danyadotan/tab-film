@@ -1,6 +1,7 @@
 import { Component, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
 import { Chrome } from './Chrome';
 import { Line, type Choice, type LineState } from './Line';
+import { DAY_MONTH, LAST_CALL_DATE, LONG, SHORT, START, TOMORROW } from './dates';
 import { Sideline, type Prefs } from './Sideline';
 
 type Room = 'a' | 'w' | 'c';
@@ -33,7 +34,8 @@ interface State extends Prefs {
   line: LineState;
 }
 
-const INIT: State = { stage: 0, prev: null, board: false, bright: 85, warm: 25, sound: 'Soft', quiet: 'Digest', text: 'Roomy', motion: 'Reduced', pinned: false, asked: false, taken: false, copy: 'mine', joined: false, ok: {}, checked: {}, z: 1, small: false, portrait: false, hintClosed: false, sendStep: 0, sendPick: null, callPhase: 'before', answered: 0, stepOut: false, walk: 0, walkMode: 'Both', said: {}, nudged: false, wide: {}, line: { open: false, words: [], shown: 0, meta: '', speaking: false, controls: false, idle: false, choices: null } };
+const TEXT_ZOOM: Record<string, number> = { Compact: .9, Roomy: 1, Large: 1.15 };
+const INIT: State = { stage: 0, prev: null, board: false, bright: 85, warm: 25, sound: 'Soft', quiet: 'Digest', text: 'Roomy', pinned: false, asked: false, taken: false, copy: 'mine', joined: false, ok: {}, checked: {}, z: 1, small: false, portrait: false, hintClosed: false, sendStep: 0, sendPick: null, callPhase: 'before', answered: 0, stepOut: false, walk: 0, walkMode: 'Both', said: {}, nudged: false, wide: {}, line: { open: false, words: [], shown: 0, meta: '', speaking: false, controls: false, idle: false, choices: null } };
 
 const ARRIVE = [
   null,
@@ -44,19 +46,19 @@ const ARRIVE = [
 const BRIEF = ['One. Onboarding spec, due at noon. Sections one to three are settled; only pricing tiers are open.', 'Two. Standup at nine thirty. Your three lines are drafted; the one blocker to raise is pricing.', 'Three. Replies. Dana first — her answer unblocks the spec. Then Omar, then Legal.'];
 const NAMES = ['Day', 'Write', 'Call', 'Close'], WHO = ['the assistant', 'the editor', 'the wingman', 'the librarian'];
 const TABS = [['Day', '3 things'], ['Write', 'spec v4 · 2 copies'], ['Call', '10:30 Northwind'], ['Close', '16:45']];
-const TIMES = ['Mon 5 Oct · 8:40', 'Mon 5 Oct · 10:24', 'Mon 5 Oct · 10:30', 'Mon 5 Oct · 16:45'];
+const TIMES = ['8:40', '10:24', '10:30', '16:45'].map(t => `${SHORT} · ${t}`);
 const PEOPLE = ['You', 'Rina Kaplan · Northwind', 'Tom Ruiz · Northwind', 'Dana'];
 // Call: the three phases of one meeting. Before = last call + what to ask; during = answers as they come; after = follow-up + filing.
 const LAST_CALL = ['Asked twice about seat limits — she needs 40.', 'Wants to start before the year ends.', 'Prefers short calls — the last one ran 22 min.'];
-const ASK = [['Which tier do we sign — Team, for 40 seats?', 'Team, 40 seats — agreed.'], ['Can we fix the start date at Nov 3?', 'Nov 3 — agreed, once Legal has its ten days.'], ['Who signs on Northwind\'s side?', 'Rina signs; Tom Ruiz approves the budget.']];
-const FOLLOW = [['Send Rina the order form', 'You · today'], ['Contract review, ten days', 'Legal · by Nov 3'], ['Confirm the checklist on Team', 'Dana · 11:00']];
+const ASK = [['Which tier do we sign — Team, for 40 seats?', 'Team, 40 seats — agreed.'], [`Can we fix the start date at ${START}?`, `${START} — agreed, once Legal has its ten days.`], ['Who signs on Northwind\'s side?', 'Rina signs; Tom Ruiz approves the budget.']];
+const FOLLOW = [['Send Rina the order form', 'You · today'], ['Contract review, ten days', `Legal · by ${START}`], ['Confirm the checklist on Team', 'Dana · 11:00']];
 // Write: what TAB checked before the send, and the two versions of the employee's own words.
 const CHECKS: [string, string, boolean][] = [['“14-day trial”', 'matches the contract draft', true], ['“Team: up to 50 seats”', 'matches the price list', true], ['“Starter includes the checklist”', 'not confirmed — Dana decides by 11:00, so it is left out of both', false]];
 const VERSIONS = [
   { id: 'a' as const, name: 'A · Tightened for Rina', why: 'She prefers short — 31 words.', text: 'Rina — §4 attached: Starter, Team and Scale, each with a 14-day trial. Team covers your 40 seats. Talk at 10:30.' },
   { id: 'b' as const, name: 'B · As you wrote it, cleaned', why: 'Your full wording — 48 words.', text: 'Hi Rina, ahead of our 10:30 call I\'ve attached the pricing section. There are three tiers — Starter, Team and Scale — each with a 14-day trial. For 40 seats, Team is the natural fit; happy to walk through it together.' },
 ];
-const QA = [['What are the seat limits?', 'Team is 50 seats; Scale is unlimited. You need 40 — Team fits.'], ['Can we keep pilot pricing?', 'Pilot rate holds through Q1 on an annual plan.'], ['How fast can we start?', 'Earliest Nov 3. Legal needs ten days on the contract.'], ['Does Starter include the checklist?', 'Dana decides by 11:00 — say “yes, on Team and above” if pressed.']];
+const QA = [['What are the seat limits?', 'Team is 50 seats; Scale is unlimited. You need 40 — Team fits.'], ['Can we keep pilot pricing?', 'Pilot rate holds through Q1 on an annual plan.'], ['How fast can we start?', `Earliest ${START}. Legal needs ten days on the contract.`], ['Does Starter include the checklist?', 'Dana decides by 11:00 — say “yes, on Team and above” if pressed.']];
 // The two real alerts, as Bridge-iT Bouncer closure-gate decisions: only what
 // materially changed, why it needs you, two choices, and how it closes.
 interface Decision { title: string; changed: string; why: string; choices: { id: string; label: string; closed: string; say: string }[] }
@@ -82,11 +84,12 @@ const ALERTS: Decision[] = [
 ];
 // What the bouncer did with today's agent work before any of it reached you.
 const GATE = [['25', 'passed silently'], ['16', 'consolidated'], ['3', 'returned to their agents'], ['3', 'brought to you']];
-const DID = [['Folded 14 weekend tabs into three things', 'Same goal, one place'], ['Muted #launch-chat until 10:00', '14 messages, none mention you'], ['Snapshotted spec v4 before Dana\'s copy', 'Your way back'], ['Held the spec through the call', 'Nothing to save, nothing lost'], ['Moved 11 replies to the 14:00 digest', 'Your Monday setting']];
+const DID = [['Folded 14 weekend tabs into three things', 'Same goal, one place'], ['Muted #launch-chat until 10:00', '14 messages, none mention you'], ['Snapshotted spec v4 before Dana\'s copy', 'Your way back'], ['Held the spec through the call', 'Nothing to save, nothing lost'], ['Moved 11 replies to the 14:00 digest', 'Your usual setting']];
 
 const EASE = 'cubic-bezier(.2,.8,.2,1)';
 const kick = (color: string, size = 12): CSSProperties => ({ fontSize: size, letterSpacing: '.14em', fontWeight: 700, color });
-const roomBox: CSSProperties = { width: 1280, height: 800, overflow: 'hidden', position: 'relative', background: 'var(--color-bg)', boxShadow: 'var(--shadow-md)', fontFamily: 'var(--font-heading)' };
+const ROOM_H = 800;
+const roomBox: CSSProperties = { width: 1280, height: ROOM_H, overflow: 'hidden', position: 'relative', background: 'var(--color-bg)', boxShadow: 'var(--shadow-md)', fontFamily: 'var(--font-heading)' };
 const briefRow: CSSProperties = { display: 'grid', gridTemplateColumns: '64px 110px 1fr', gap: 20, alignItems: 'baseline', padding: '10px 14px', margin: '0 -14px', outlineOffset: -3, transition: 'outline-color .3s' };
 
 /**
@@ -206,6 +209,12 @@ export class Desk extends Component<object, State> {
   ask = (t: string) => {
     const q = t.toLowerCase();
     let reply = 'Noted — I\'ll do it and it goes on the day\'s record.', dest: number | null = null;
+    // a sign-off closes the line instead of being taken as a task; a request in the same breath ("show me the spec, thanks") still routes
+    if (!/show|open|take me|go to|bring|pull up/.test(q) && /thank|bye|catch up|see you|that'?s all|done for now|good for now|תודה|ביי|נדבר/.test(q)) {
+      const at = q.match(/\b\d{1,2}:\d{2}\b/)?.[0] ?? (/close|end of day/.test(q) ? '16:45' : null);
+      this.say(at ? `Good. I'll stay quiet until ${at} — the day will be ready to close.` : 'Good. I\'ll stay quiet — press TAB when you need me.', 'DONE', false, this.closeLine);
+      return;
+    }
     if (/dana|pricing|spec|tier|write|doc/.test(q)) { reply = 'That lives in the spec — opening §4, your copy.'; dest = 1; }
     else if (/call|rina|northwind|10:30|answer/.test(q)) { reply = 'Call room — statement pinned, answers ready.'; dest = 2; }
     else if (/day|report|tomorrow|close|did|record/.test(q)) { reply = 'Here is the day — report, tomorrow, and what I did.'; dest = 3; }
@@ -273,7 +282,11 @@ export class Desk extends Component<object, State> {
     const s = this.state, w = s.walk;
     const ct = s.line.open ? 200 : 104, rt = s.line.open ? 206 : 110;
     const hl = (i: number) => w === i ? '3px solid oklch(0.7 0.17 65)' : '3px solid transparent';
-    const main = (m: { l: number; w: number }): CSSProperties => ({ position: 'absolute', left: m.l, top: ct, width: m.w, transition: `left .3s,width .3s,top .6s ${EASE}` });
+    // Text size scales the reading columns (not the narrow side rails); offsets are divided back so only the type grows
+    const tz = TEXT_ZOOM[s.text] ?? 1;
+    // At Large a column can outgrow the room; it scrolls inside instead of running off the bottom
+    const clampH = (top: number): CSSProperties => tz > 1 ? { maxHeight: (ROOM_H - 12 - top) / tz, overflowY: 'auto', overflowX: 'hidden' } : {};
+    const main = (m: { l: number; w: number }): CSSProperties => ({ position: 'absolute', left: m.l / tz, top: ct / tz, width: m.w / tz, zoom: tz, ...clampH(ct), transition: `left .3s,width .3s,top .6s ${EASE}` });
     const rail = (m: { rail: string }, gap = 28): CSSProperties => ({ position: 'absolute', left: 1000, top: rt, width: 196, transition: `top .6s ${EASE}`, display: m.rail, flexDirection: 'column', gap, fontSize: 15 });
     const A = this.enlarge('a'), W = this.enlarge('w'), Cl = this.enlarge('c');
 
@@ -283,7 +296,7 @@ export class Desk extends Component<object, State> {
         {/* 1 DAY · the assistant */}
         {this.room(0, <>
           <div style={main(A)}>
-            <div style={{ fontSize: 13, letterSpacing: '.14em', color: 'var(--color-accent-2)', fontWeight: 700 }}>MONDAY 5 OCTOBER</div>
+            <div style={{ fontSize: 13, letterSpacing: '.14em', color: 'var(--color-accent-2)', fontWeight: 700 }}>{LONG}</div>
             <h1 style={{ margin: '8px 0 0', fontSize: 64, fontWeight: 600, lineHeight: 1.02, letterSpacing: '-.01em' }}>Good morning. Here is your day.</h1>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 34 }}>
               <div style={{ ...briefRow, outline: hl(1) }}>
@@ -399,7 +412,7 @@ export class Desk extends Component<object, State> {
               {(['before', 'live', 'after'] as const).map((ph, i) => <button key={ph} onClick={() => this.setCallPhase(ph)} style={{ all: 'unset', cursor: 'pointer', padding: '4px 12px', fontSize: 13, letterSpacing: '.12em', fontWeight: 700, borderRadius: 2, background: s.callPhase === ph ? 'var(--color-accent)' : 'var(--color-neutral-200)', color: s.callPhase === ph ? '#fff' : 'var(--color-neutral-700)' }}>{i + 1} · {['BEFORE', 'DURING', 'AFTER'][i]}</button>)}
             </div>
             {s.callPhase === 'before' && <>
-              <div style={{ ...kick('var(--color-neutral-700)', 13), marginTop: 18 }}>FROM THE LAST CALL · AUG 28</div>
+              <div style={{ ...kick('var(--color-neutral-700)', 13), marginTop: 18 }}>FROM THE LAST CALL · {LAST_CALL_DATE}</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 6 }}>{LAST_CALL.map(t => <div key={t} style={{ fontSize: 17, lineHeight: 1.35 }}>· {t}</div>)}</div>
               <div style={{ ...kick('var(--color-accent-2)', 13), marginTop: 16 }}>ASK HER · BEFORE YOU HANG UP</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 6 }}>{ASK.map((q, i) => <div key={q[0]} style={{ fontSize: 17, lineHeight: 1.35 }}><span style={{ color: 'var(--color-accent)', marginRight: 8 }}>{i + 1}</span>{q[0]}</div>)}</div>
@@ -416,7 +429,7 @@ export class Desk extends Component<object, State> {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 6 }}>{ASK.map(q => <div key={q[0]} style={{ fontSize: 17, lineHeight: 1.35, color: 'var(--color-accent-700)' }}>✓ <span style={{ color: 'var(--color-text)' }}>{q[1]}</span></div>)}</div>
               <div style={{ ...kick('var(--color-accent-2)', 13), marginTop: 16 }}>FOLLOW-UP</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 6 }}>{FOLLOW.map(f => <div key={f[0]} style={{ display: 'grid', gridTemplateColumns: '1fr 180px', gap: 20, fontSize: 17, lineHeight: 1.35 }}><div>{f[0]}</div><div style={{ color: 'var(--color-neutral-600)' }}>{f[1]}</div></div>)}</div>
-              <div style={{ fontSize: 15, color: 'var(--color-neutral-600)', fontStyle: 'italic', marginTop: 14 }}>Summary filed under Northwind › Calls › 5 Oct. Reversible for 7 days.</div>
+              <div style={{ fontSize: 15, color: 'var(--color-neutral-600)', fontStyle: 'italic', marginTop: 14 }}>Summary filed under Northwind › Calls › {DAY_MONTH}. Reversible for 7 days.</div>
             </>}
             {s.callPhase !== 'after' && <>
               <div style={{ ...kick('var(--color-accent-700)', 13), marginTop: 16 }}>IF SHE ASKS · YOU ANSWER</div>
@@ -447,17 +460,17 @@ export class Desk extends Component<object, State> {
 
         {/* 4 CLOSE · the librarian */}
         {this.room(3, <>
-          <div style={{ position: 'absolute', left: 96, top: ct, width: 1090, transition: `top .6s ${EASE}` }}>
+          <div style={{ position: 'absolute', left: 96 / tz, top: ct / tz, width: 1090 / tz, zoom: tz, ...clampH(ct), transition: `top .6s ${EASE}` }}>
             <div style={kick('var(--color-accent-2)', 13)}>END OF DAY · 16:45–17:00</div>
             <h1 style={{ margin: '6px 0 0', fontSize: 56, fontWeight: 600, lineHeight: 1.02, letterSpacing: '-.01em' }}>That's the day.</h1>
             <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr 1fr', gap: 48, marginTop: 24 }}>
               <div>
                 <div style={kick('var(--color-neutral-700)')}>REPORT</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 12 }}>
-                  {[['11:42', 'spec sent, 18 min early'], ['Team', 'tier agreed with Northwind; start Nov 3'], ['3', `approvals asked of you today: ${s.sendPick !== null ? 'the send is done' : 'the send is waiting'}, two below`]].map(r => <div key={r[0]} style={{ display: 'flex', gap: 14, alignItems: 'baseline' }}><span style={{ fontSize: 40, lineHeight: 1, color: 'var(--color-accent)', width: 120 }}>{r[0]}</span><span style={{ fontSize: 17 }}>{r[1]}</span></div>)}
+                  {[['11:42', 'spec sent, 18 min early'], ['Team', `tier agreed with Northwind; start ${START}`], ['3', `approvals asked of you today: ${s.sendPick !== null ? 'the send is done' : 'the send is waiting'}, two below`]].map(r => <div key={r[0]} style={{ display: 'flex', gap: 14, alignItems: 'baseline' }}><span style={{ fontSize: 40, lineHeight: 1, color: 'var(--color-accent)', width: 120 }}>{r[0]}</span><span style={{ fontSize: 17 }}>{r[1]}</span></div>)}
                 </div>
                 <div style={{ ...kick('var(--color-neutral-700)'), marginTop: 34 }}>TOMORROW · ALREADY FILED</div>
-                <div style={{ fontSize: 17, lineHeight: 1.5, marginTop: 8 }}>Legal review first (comment 2 on trial length), then the retro at 11:00. Room set to your Tuesday.</div>
+                <div style={{ fontSize: 17, lineHeight: 1.5, marginTop: 8 }}>Legal review first (comment 2 on trial length), then the retro at 11:00. Room set to your {TOMORROW}.</div>
               </div>
               <div>
                 <div style={kick('var(--color-accent-2)')}>REAL ALERTS · 2</div>
