@@ -357,7 +357,7 @@ export class Desk extends Component<object, State> {
                 <button className="btn btn-ghost" onClick={() => this.setState({ sendStep: 0 })} style={{ marginTop: 12 }}>Back to the spec</button>
               </>}
             </div>}
-            {s.sendStep === 0 && <div style={{ marginTop: 26, background: '#fff', padding: '48px 56px', minHeight: 420, boxSizing: 'border-box', boxShadow: 'var(--shadow-sm)' }}>
+            <div style={{ display: s.sendStep === 0 ? 'block' : 'none', marginTop: 26, background: '#fff', padding: '48px 56px', minHeight: 420, boxSizing: 'border-box', boxShadow: 'var(--shadow-sm)' }}>
               <div style={{ fontSize: 13, letterSpacing: '.14em', color: 'var(--color-neutral-600)' }}>ONBOARDING SPEC · {s.copy === 'mine' ? 'YOUR COPY' : 'DANA\'S COPY · READ ONLY'}</div>
               <h2 style={{ margin: '10px 0 18px', fontSize: 34, fontWeight: 600, lineHeight: 1.1 }}>§4 Pricing tiers</h2>
               {s.copy === 'mine' && <div contentEditable suppressContentEditableWarning style={{ fontSize: 22, lineHeight: 1.55, minHeight: 200, cursor: 'text', caretColor: 'var(--color-accent)' }}>
@@ -373,7 +373,7 @@ export class Desk extends Component<object, State> {
                   <button className="btn btn-ghost" onClick={() => this.setState({ copy: 'mine' })}>Back to mine</button>
                 </div>
               </div>}
-            </div>}
+            </div>
           </div>
           <div style={rail(W)}>
             <div>
