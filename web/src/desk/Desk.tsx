@@ -155,6 +155,7 @@ export class Desk extends Component<object, State> {
     const st = this.state.stage;
     if (st === this.lastStage) return;
     this.lastStage = st;
+    if (this.state.small) window.scrollTo(0, 0); // on phones each room starts at its top
     clearTimeout(this.nudgeT);
     if (this.state.walk) this.walkStop(); else if (this.state.line.open && !this.keepLine) this.closeLine();
     this.keepLine = false;
@@ -281,7 +282,7 @@ export class Desk extends Component<object, State> {
       <div style={{ fontSize: 30, margin: '0 0 6px', color: 'var(--color-neutral-600)', display: s.board ? 'block' : 'none' }}>{i + 1} · {NAMES[i]} — {WHO[i]}</div>
       <div style={{ ...(P ? phoneBox : { ...roomBox, width: s.rw, height: s.rh, boxShadow: s.board ? 'var(--shadow-md)' : 'none' }), filter: `brightness(${(s.bright / 100 + .1).toFixed(2)}) sepia(${(s.warm / 160).toFixed(2)})` }}>
         <Chrome compact={P} active={i} tabs={TABS} time={TIMES[i]} onGo={this.nav} />
-        {P ? <>{line}{sideline}{children}</> : <>{children}{sideline}{line}</>}
+        {line}{sideline}{children}
       </div>
     </div>;
   }
