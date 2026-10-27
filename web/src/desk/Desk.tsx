@@ -362,12 +362,12 @@ export class Desk extends Component<object, State> {
                 {([['mine', 'Yours · v4 · 10:12'], ['dana', 'Dana\'s · Fri']] as const).map(c => <button key={c[0]} onClick={() => this.setState({ copy: c[0] })} style={{ all: 'unset', cursor: 'pointer', padding: '6px 14px', fontSize: 16, borderRadius: 2, background: s.copy === c[0] ? 'var(--color-accent)' : 'var(--color-neutral-200)', color: s.copy === c[0] ? '#fff' : 'var(--color-text)', whiteSpace: 'nowrap' }}>{c[1]}</button>)}
                 <span style={{ padding: '6px 10px', fontSize: 14, color: 'var(--color-neutral-500)', whiteSpace: 'nowrap' }}>+ one more, at most</span>
               </div>
-              <div style={{ display: 'flex', gap: 12, alignItems: 'baseline' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'baseline' }}>
                 <div style={{ fontSize: 14, color: 'var(--color-neutral-600)', whiteSpace: 'nowrap' }}>{s.copy === 'mine' ? 'Saved as you type · v4' : 'Comparing · yours untouched'}</div>
                 {s.copy === 'mine' && s.sendStep === 0 && <button className="btn btn-primary" onClick={() => { this.setState({ sendStep: 1 }); this.say('Checked and cleaned — your words stay yours. Two versions below; pick one to send.', '', false, () => this.rest()); }} style={{ whiteSpace: 'nowrap' }}>Ready to send →</button>}
               </div>
             </div>
-            {s.sendStep === 0 && <div style={{ display: 'flex', gap: 4, marginTop: 14, fontSize: 15, color: 'var(--color-neutral-700)' }}>
+            {s.sendStep === 0 && <div style={{ display: 'flex', flexWrap: 'wrap', whiteSpace: 'nowrap', gap: 4, marginTop: 14, fontSize: 15, color: 'var(--color-neutral-700)' }}>
               <span style={{ padding: '3px 9px', fontWeight: 700 }}>B</span><span style={{ padding: '3px 9px', fontStyle: 'italic' }}>I</span><span style={{ padding: '3px 9px', textDecoration: 'underline' }}>U</span><span style={{ padding: '3px 9px' }}>H1</span><span style={{ padding: '3px 9px' }}>H2</span><span style={{ padding: '3px 9px' }}>¶</span><span style={{ padding: '3px 9px' }}>“ ”</span><span style={{ padding: '3px 9px' }}>§</span>
             </div>}
             {s.sendStep > 0 && <div style={{ marginTop: 12, background: '#fff', padding: P ? '16px' : '20px 32px', boxSizing: 'border-box', boxShadow: 'var(--shadow-sm)' }}>
@@ -542,9 +542,9 @@ export class Desk extends Component<object, State> {
       </div>
 
       <div id="desk-bar" style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 50, background: 'var(--color-bg)', display: 'flex', alignItems: 'center', gap: s.small ? 4 : 16, padding: s.small ? '4px 8px' : '10px 24px', flexWrap: s.small ? 'nowrap' : 'wrap', overflowX: 'auto', boxShadow: 'var(--shadow-sm)' }}>
-        {!s.small && <div style={{ fontSize: 11, letterSpacing: '.14em', color: 'var(--color-neutral-600)', fontWeight: 700, whiteSpace: 'nowrap' }}>DEMO · FOUR ROOMS</div>}
+        {!s.small && s.rw * s.z >= 1600 && <div style={{ fontSize: 11, letterSpacing: '.14em', color: 'var(--color-neutral-600)', fontWeight: 700, whiteSpace: 'nowrap' }}>DEMO · FOUR ROOMS</div>}
         <div style={{ display: 'flex', gap: 4, flexWrap: s.small ? 'nowrap' : 'wrap', flex: 1 }}>
-          {NAMES.map((n, i) => { const on = !s.board && s.stage === i; return <button key={n} onClick={this.go(i)} style={{ all: 'unset', cursor: 'pointer', padding: s.small ? '6px 8px' : '4px 10px', fontSize: s.small ? 13 : 14, borderRadius: 2, background: on ? 'var(--color-accent)' : 'transparent', color: on ? '#fff' : 'var(--color-text)', whiteSpace: 'nowrap' }}>{i + 1} · {n}{s.small ? '' : ` — ${WHO[i]}`}</button>; })}
+          {NAMES.map((n, i) => { const on = !s.board && s.stage === i; return <button key={n} onClick={this.go(i)} style={{ all: 'unset', cursor: 'pointer', padding: s.small ? '6px 8px' : '4px 10px', fontSize: s.small ? 13 : 14, borderRadius: 2, background: on ? 'var(--color-accent)' : 'transparent', color: on ? '#fff' : 'var(--color-text)', whiteSpace: 'nowrap' }}>{i + 1} · {n}{s.small || s.rw * s.z < 1600 ? '' : ` — ${WHO[i]}`}</button>; })}
         </div>
         <button className="btn btn-ghost" onClick={() => this.setState({ stepOut: true })} title="TAB steps out of the desk (T)" style={{ whiteSpace: 'nowrap', fontSize: s.small ? 13 : undefined, color: 'oklch(0.5 0.15 55)' }}>● TAB</button>
         <button className="btn btn-ghost" onClick={this.restart} style={{ whiteSpace: 'nowrap', fontSize: s.small ? 13 : undefined }}>{s.small ? 'Restart' : 'Restart demo'}</button>
