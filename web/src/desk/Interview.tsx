@@ -67,10 +67,11 @@ export function Interview({ onActive }: { onActive: (on: boolean) => void }) {
     const a = new Audio(`/voice/tab-${i + 1}.mp3`);
     audio.current = a;
     setHeard('');
-    a.onloadedmetadata = () => { setStatus('speaking'); reveal(t, a.duration); };
+    const mine = turn.current; // stopping (close, next answer) cancels this one, even mid-load
+    a.onloadedmetadata = () => { if (mine === turn.current) { setStatus('speaking'); reveal(t, a.duration); } };
     a.onended = () => setStatus('');
     let fell = false; // a missing file fails both play() and onerror; read the line once
-    const fallback = () => { if (!fell) { fell = true; speakBrowser(t); } };
+    const fallback = () => { if (!fell && mine === turn.current) { fell = true; speakBrowser(t); } };
     a.onerror = fallback; // no recorded file: the browser's voice reads the same line
     void a.play().catch(fallback);
   };
