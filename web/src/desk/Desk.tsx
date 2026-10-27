@@ -129,6 +129,7 @@ export class Desk extends Component<object, State> {
   private onKey = (e: KeyboardEvent) => {
     const el = e.target as HTMLElement | null;
     if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return; // leave browser shortcuts (Find, new tab) alone
     if (e.key === 't' || e.key === 'T') this.setState(st => ({ stepOut: !st.stepOut }));
     else if (e.key === 'f' || e.key === 'F') this.toggleFull();
     else if (e.key === 'Escape' && this.state.stepOut) this.setState({ stepOut: false });
