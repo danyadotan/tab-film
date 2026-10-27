@@ -27,6 +27,7 @@ interface State extends Prefs {
   callPhase: 'before' | 'live' | 'after';
   answered: number;
   stepOut: boolean;
+  full: boolean; // the browser is in true full screen
   walk: number;
   heard: number; // the furthest brief item walked through; at Light, rows stay held until then
   walkMode: 'Both' | 'Visual';
@@ -37,7 +38,7 @@ interface State extends Prefs {
 }
 
 const TEXT_ZOOM: Record<string, number> = { Compact: .9, Roomy: 1, Large: 1.15 };
-const INIT: State = { stage: 0, prev: null, board: false, bright: 85, warm: 25, sound: 'Soft', quiet: 'Digest', text: 'Roomy', pace: 'Steady', pinned: false, asked: false, taken: false, copy: 'mine', joined: false, ok: {}, checked: {}, z: 1, rw: 1280, rh: 800, barH: 64, small: false, sendStep: 0, sendPick: null, callPhase: 'before', answered: 0, stepOut: false, walk: 0, heard: 0, walkMode: 'Both', said: {}, nudged: false, wide: {}, line: { open: false, words: [], shown: 0, meta: '', speaking: false, controls: false, idle: false, choices: null } };
+const INIT: State = { stage: 0, prev: null, board: false, bright: 85, warm: 25, sound: 'Soft', quiet: 'Digest', text: 'Roomy', pace: 'Steady', pinned: false, asked: false, taken: false, copy: 'mine', joined: false, ok: {}, checked: {}, z: 1, rw: 1280, rh: 800, barH: 64, small: false, sendStep: 0, sendPick: null, callPhase: 'before', answered: 0, stepOut: false, full: false, walk: 0, heard: 0, walkMode: 'Both', said: {}, nudged: false, wide: {}, line: { open: false, words: [], shown: 0, meta: '', speaking: false, controls: false, idle: false, choices: null } };
 
 const ARRIVE = [
   null,
@@ -128,23 +129,34 @@ export class Desk extends Component<object, State> {
   private onKey = (e: KeyboardEvent) => {
     const el = e.target as HTMLElement | null;
     if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return; // leave browser shortcuts (Find, new tab) alone
     if (e.key === 't' || e.key === 'T') this.setState(st => ({ stepOut: !st.stepOut }));
+    else if (e.key === 'f' || e.key === 'F') this.toggleFull();
     else if (e.key === 'Escape' && this.state.stepOut) this.setState({ stepOut: false });
   };
+
+  // True full screen: the desk covers the whole monitor, without the browser's bars. Esc leaves it.
+  private toggleFull = () => {
+    if (document.fullscreenElement) void document.exitFullscreen();
+    else void document.documentElement.requestFullscreen?.().catch(() => {});
+  };
+  private onFull = () => this.setState({ full: !!document.fullscreenElement });
 
   componentDidMount() {
     this.fit();
     window.addEventListener('resize', this.fit);
+    document.addEventListener('fullscreenchange', this.onFull);
     window.addEventListener('keydown', this.onKey);
     if (window.speechSynthesis) speechSynthesis.getVoices();
     this.lastStage = 0;
     this.arrive(0);
   }
-  componentWillUnmount() { window.removeEventListener('resize', this.fit); window.removeEventListener('keydown', this.onKey); this.answerT.forEach(clearTimeout); this.stopLine(); clearTimeout(this.nudgeT); clearTimeout(this.closeT); }
+  componentWillUnmount() { window.removeEventListener('resize', this.fit); document.removeEventListener('fullscreenchange', this.onFull); window.removeEventListener('keydown', this.onKey); this.answerT.forEach(clearTimeout); this.stopLine(); clearTimeout(this.nudgeT); clearTimeout(this.closeT); }
   componentDidUpdate() {
     const st = this.state.stage;
     if (st === this.lastStage) return;
     this.lastStage = st;
+    if (this.state.small) window.scrollTo(0, 0); // on phones each room starts at its top
     clearTimeout(this.nudgeT);
     if (this.state.walk) this.walkStop(); else if (this.state.line.open && !this.keepLine) this.closeLine();
     this.keepLine = false;
@@ -259,7 +271,7 @@ export class Desk extends Component<object, State> {
     this.setState({ sendStep: 2, sendPick: v });
     this.say(`Sent — version ${v.toUpperCase()}, your words. A copy is filed under Northwind; nothing else left your desk.`, 'DONE', false, () => this.rest());
   };
-  restart = () => { this.answerT.forEach(clearTimeout); this.closeLine(); clearTimeout(this.nudgeT); this.lastStage = 0; this.setState(({ z, rw, rh, barH, small }) => ({ ...INIT, z, rw, rh, barH, small }), () => this.arrive(0)); };
+  restart = () => { this.answerT.forEach(clearTimeout); this.closeLine(); clearTimeout(this.nudgeT); this.lastStage = 0; this.setState(({ z, rw, rh, barH, small, full }) => ({ ...INIT, z, rw, rh, barH, small, full }), () => this.arrive(0)); };
 
   // ——— render ———
   room(i: number, children: ReactNode) {
@@ -271,7 +283,7 @@ export class Desk extends Component<object, State> {
       <div style={{ fontSize: 30, margin: '0 0 6px', color: 'var(--color-neutral-600)', display: s.board ? 'block' : 'none' }}>{i + 1} · {NAMES[i]} — {WHO[i]}</div>
       <div style={{ ...(P ? phoneBox : { ...roomBox, width: s.rw, height: s.rh, boxShadow: s.board ? 'var(--shadow-md)' : 'none' }), filter: `brightness(${(s.bright / 100 + .1).toFixed(2)}) sepia(${(s.warm / 160).toFixed(2)})` }}>
         <Chrome compact={P} active={i} tabs={TABS} time={TIMES[i]} onGo={this.nav} />
-        {P ? <>{line}{sideline}{children}</> : <>{children}{sideline}{line}</>}
+        {line}{sideline}{children}
       </div>
     </div>;
   }
@@ -536,6 +548,7 @@ export class Desk extends Component<object, State> {
         </div>
         <button className="btn btn-ghost" onClick={() => this.setState({ stepOut: true })} title="TAB steps out of the desk (T)" style={{ whiteSpace: 'nowrap', fontSize: s.small ? 13 : undefined, color: 'oklch(0.5 0.15 55)' }}>● TAB</button>
         <button className="btn btn-ghost" onClick={this.restart} style={{ whiteSpace: 'nowrap', fontSize: s.small ? 13 : undefined }}>{s.small ? 'Restart' : 'Restart demo'}</button>
+        {!s.small && document.fullscreenEnabled && <button className="btn btn-ghost" onClick={this.toggleFull} title="Full screen (F) · Esc to leave" style={{ whiteSpace: 'nowrap' }}>{s.full ? 'Exit full screen' : '⛶ Full screen'}</button>}
         {!s.small && <button className="btn btn-ghost" onClick={() => this.setState({ board: !s.board })} style={{ whiteSpace: 'nowrap', fontSize: s.small ? 13 : undefined }}>{s.board ? 'Back to demo' : 'All four'}</button>}
       </div>
 
