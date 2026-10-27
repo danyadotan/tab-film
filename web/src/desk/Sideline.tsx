@@ -27,6 +27,8 @@ const panel: CSSProperties = { width: 340, height: '100%', background: '#fff', b
 const pill = (bg: string, extra: CSSProperties = {}): CSSProperties => ({ all: 'unset', cursor: 'pointer', writingMode: 'vertical-rl', whiteSpace: 'nowrap', padding: '14px 7px', display: 'flex', alignItems: 'center', gap: 10, background: bg, color: '#fff', fontSize: 14, letterSpacing: '.14em', transformOrigin: 'right center', transition: 'transform .25s ease', ...extra });
 
 interface SidelineProps {
+  phone?: boolean;
+  height?: number;
   prefs: Prefs;
   onPref: <K extends keyof Prefs>(k: K, v: Prefs[K]) => void;
   backTo: string;
@@ -34,14 +36,16 @@ interface SidelineProps {
   onTab: () => void;
 }
 
-/** The sideline at the right edge: the amber TAB pill, glossary, settings and back. */
-export function Sideline({ prefs: p, onPref, backTo, onBack, onTab }: SidelineProps) {
+/** The sideline at the right edge: the amber TAB pill, glossary, settings and back. On phones it is a row under the chrome, and its panels open below it. */
+export function Sideline({ phone, height = 744, prefs: p, onPref, backTo, onBack, onTab }: SidelineProps) {
   const [open, setOpen] = useState<'g' | 's' | null>(null);
   const [q, setQ] = useState('');
   const terms = TERMS.filter(t => !q || (t[1] + t[2]).toLowerCase().includes(q.toLowerCase()));
-  return <div style={{ position: 'absolute', right: 0, top: 56, height: 744, zIndex: 20 }}>
-    <div style={{ display: 'flex', alignItems: 'flex-start', height: '100%', fontFamily: 'var(--font-heading)', color: 'var(--color-text)' }}>
-      {open === 'g' && <div style={panel}>
+  const box: CSSProperties = phone ? { ...panel, width: '100%', height: 'auto', padding: '20px 18px', marginTop: 10 } : panel;
+  const pl = (bg: string, extra: CSSProperties = {}) => phone ? pill(bg, { ...extra, writingMode: 'horizontal-tb', padding: '7px 12px', fontSize: 12 }) : pill(bg, extra);
+  return <div style={phone ? { marginTop: 10 } : { position: 'absolute', right: 0, top: 56, height, zIndex: 20 }}>
+    <div style={{ display: 'flex', flexDirection: phone ? 'column-reverse' : 'row', alignItems: phone ? 'stretch' : 'flex-start', height: phone ? 'auto' : '100%', fontFamily: 'var(--font-heading)', color: 'var(--color-text)' }}>
+      {open === 'g' && <div style={box}>
         <div style={{ fontSize: 13, letterSpacing: '.14em', color: 'var(--color-accent-700)', fontWeight: 700 }}>GLOSSARY · LEARNED TOGETHER</div>
         <h3 style={{ margin: '8px 0 6px', fontSize: 28, lineHeight: 1.1, fontWeight: 600 }}>Your words, kept</h3>
         <p style={{ margin: '0 0 14px', fontSize: 15, lineHeight: 1.45, color: 'var(--color-neutral-700)' }}>{TERMS.length} terms since {SINCE}. It grows as you work together.</p>
@@ -55,7 +59,7 @@ export function Sideline({ prefs: p, onPref, backTo, onBack, onTab }: SidelinePr
         {terms.length === 0 && <p style={{ marginTop: 18, fontSize: 15, lineHeight: 1.45, color: 'var(--color-neutral-700)' }}>Not here yet. TAB adds it the next time it comes up.</p>}
         <p style={{ marginTop: 22, fontSize: 13, lineHeight: 1.45, fontStyle: 'italic', color: 'var(--color-neutral-600)' }}>TAB adds a term when you look it up twice, meet it for the first time, or use your own shorthand. It stays on your desk; remove any term.</p>
       </div>}
-      {open === 's' && <div style={panel}>
+      {open === 's' && <div style={box}>
         <div style={{ fontSize: 13, letterSpacing: '.14em', color: 'var(--color-accent-2-700)', fontWeight: 700 }}>YOUR USUAL SETTINGS</div>
         <h3 style={{ margin: '8px 0 6px', fontSize: 28, lineHeight: 1.1, fontWeight: 600 }}>Adjust without leaving</h3>
         <p style={{ margin: '0 0 20px', fontSize: 15, lineHeight: 1.45, color: 'var(--color-neutral-700)' }}>Changes apply right away. You stay on this screen.</p>
@@ -69,11 +73,11 @@ export function Sideline({ prefs: p, onPref, backTo, onBack, onTab }: SidelinePr
             </div></div>)}
         </div>
       </div>}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 84, marginRight: 2, alignItems: 'center' }}>
-        <button className="side-pill" onClick={() => { setOpen(null); onTab(); }} title="For anything, just TAB it" style={pill('oklch(0.7 0.17 65)', { padding: '16px 8px', fontSize: 15, fontWeight: 700, letterSpacing: '.18em' })}>TAB</button>
-        <button className="side-pill" onClick={() => setOpen(open === 'g' ? null : 'g')} style={pill('var(--color-accent-600)')}>GLOSSARY</button>
-        <button className="side-pill" onClick={() => setOpen(open === 's' ? null : 's')} style={pill('var(--color-accent-2-600)')}>SETTINGS</button>
-        <button className="side-pill" onClick={() => { setOpen(null); onBack(); }} style={pill('var(--color-neutral-800)', { opacity: backTo ? 1 : 0.45 })}>{backTo ? 'BACK · ' + backTo.toUpperCase() : 'BACK'}</button>
+      <div style={phone ? { display: 'flex', flexWrap: 'wrap', gap: 6 } : { display: 'flex', flexDirection: 'column', gap: 10, marginTop: 84, marginRight: 2, alignItems: 'center' }}>
+        <button className="side-pill" onClick={() => { setOpen(null); onTab(); }} title="For anything, just TAB it" style={phone ? pl('oklch(0.7 0.17 65)', { fontWeight: 700, letterSpacing: '.18em' }) : pill('oklch(0.7 0.17 65)', { padding: '16px 8px', fontSize: 15, fontWeight: 700, letterSpacing: '.18em' })}>TAB</button>
+        <button className="side-pill" onClick={() => setOpen(open === 'g' ? null : 'g')} style={pl('var(--color-accent-600)')}>GLOSSARY</button>
+        <button className="side-pill" onClick={() => setOpen(open === 's' ? null : 's')} style={pl('var(--color-accent-2-600)')}>SETTINGS</button>
+        <button className="side-pill" onClick={() => { setOpen(null); onBack(); }} style={pl('var(--color-neutral-800)', { opacity: backTo ? 1 : 0.45 })}>{backTo ? 'BACK · ' + backTo.toUpperCase() : 'BACK'}</button>
       </div>
     </div>
   </div>;

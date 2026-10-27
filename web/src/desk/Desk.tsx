@@ -18,9 +18,10 @@ interface State extends Prefs {
   ok: Record<number, string>;
   checked: Record<number, boolean>;
   z: number;
+  rw: number; // the room's size in layout px: at least 1280×800, stretched to the window's shape
+  rh: number;
+  barH: number;
   small: boolean;
-  portrait: boolean;
-  hintClosed: boolean;
   sendStep: 0 | 1 | 2;
   sendPick: 'a' | 'b' | null;
   callPhase: 'before' | 'live' | 'after';
@@ -36,7 +37,7 @@ interface State extends Prefs {
 }
 
 const TEXT_ZOOM: Record<string, number> = { Compact: .9, Roomy: 1, Large: 1.15 };
-const INIT: State = { stage: 0, prev: null, board: false, bright: 85, warm: 25, sound: 'Soft', quiet: 'Digest', text: 'Roomy', pace: 'Steady', pinned: false, asked: false, taken: false, copy: 'mine', joined: false, ok: {}, checked: {}, z: 1, small: false, portrait: false, hintClosed: false, sendStep: 0, sendPick: null, callPhase: 'before', answered: 0, stepOut: false, walk: 0, heard: 0, walkMode: 'Both', said: {}, nudged: false, wide: {}, line: { open: false, words: [], shown: 0, meta: '', speaking: false, controls: false, idle: false, choices: null } };
+const INIT: State = { stage: 0, prev: null, board: false, bright: 85, warm: 25, sound: 'Soft', quiet: 'Digest', text: 'Roomy', pace: 'Steady', pinned: false, asked: false, taken: false, copy: 'mine', joined: false, ok: {}, checked: {}, z: 1, rw: 1280, rh: 800, barH: 64, small: false, sendStep: 0, sendPick: null, callPhase: 'before', answered: 0, stepOut: false, walk: 0, heard: 0, walkMode: 'Both', said: {}, nudged: false, wide: {}, line: { open: false, words: [], shown: 0, meta: '', speaking: false, controls: false, idle: false, choices: null } };
 
 const ARRIVE = [
   null,
@@ -89,8 +90,10 @@ const DID = [['Folded 14 weekend tabs into three things', 'Same goal, one place'
 
 const EASE = 'cubic-bezier(.2,.8,.2,1)';
 const kick = (color: string, size = 12): CSSProperties => ({ fontSize: size, letterSpacing: '.14em', fontWeight: 700, color });
-const ROOM_H = 800;
-const roomBox: CSSProperties = { width: 1280, height: ROOM_H, overflow: 'hidden', position: 'relative', background: 'var(--color-bg)', boxShadow: 'var(--shadow-md)', fontFamily: 'var(--font-heading)' };
+const READ_W = 1100; // the reading column stops widening here on very wide screens
+const roomBox: CSSProperties = { overflow: 'hidden', position: 'relative', background: 'var(--color-bg)', fontFamily: 'var(--font-heading)' };
+// Phones: the room is a single readable column instead of a scaled-down 1280×800 desktop.
+const phoneBox: CSSProperties = { width: '100%', position: 'relative', background: 'var(--color-bg)', boxShadow: 'var(--shadow-md)', fontFamily: 'var(--font-heading)', padding: '0 16px 28px', boxSizing: 'border-box' };
 const briefRow: CSSProperties = { display: 'grid', gridTemplateColumns: '64px 110px 1fr', gap: 20, alignItems: 'baseline', padding: '10px 14px', margin: '0 -14px', outlineOffset: -3, transition: 'outline-color .3s' };
 
 /**
@@ -99,14 +102,15 @@ const briefRow: CSSProperties = { display: 'grid', gridTemplateColumns: '64px 11
  */
 export class Desk extends Component<object, State> {
   state: State = { ...INIT };
-  // Full view: the 1280×800 room fills the window in both directions (minus the
-  // margin and the bottom demo bar), growing on large screens too. Measured on the
-  // layout viewport: on phones innerWidth grows once content overflows, which fed
-  // the old fit a too-large width and cropped the room.
+  // Full view: the room fills the whole window above the demo bar. The scale keeps
+  // at least 1280×800 layout px; the room then takes the window's shape, so a wide
+  // screen gets a wider room rather than grey bands. Measured on the layout
+  // viewport: on phones innerWidth grows once content overflows.
   private fit = () => {
     const W = document.documentElement.clientWidth, H = document.documentElement.clientHeight, small = W < 760 || H < 520;
-    const pad = small ? 8 : 24, bar = small ? 44 : 72;
-    this.setState({ small, portrait: small && H > W, z: Math.min(1.6, (W - 2 * pad - 8) / 1280, (H - 2 * pad - bar) / 800) });
+    const bar = document.getElementById('desk-bar')?.offsetHeight ?? 64;
+    const w = W, h = H - bar, z = Math.min(1.6, w / 1280, h / 800);
+    this.setState({ small, z, rw: w / z, rh: h / z, barH: bar });
   };
   private lastStage = 0;
   private gen = 0;
@@ -255,27 +259,28 @@ export class Desk extends Component<object, State> {
     this.setState({ sendStep: 2, sendPick: v });
     this.say(`Sent — version ${v.toUpperCase()}, your words. A copy is filed under Northwind; nothing else left your desk.`, 'DONE', false, () => this.rest());
   };
-  restart = () => { this.answerT.forEach(clearTimeout); this.closeLine(); clearTimeout(this.nudgeT); this.lastStage = 0; this.setState(({ z, small, portrait, hintClosed }) => ({ ...INIT, z, small, portrait, hintClosed }), () => this.arrive(0)); };
+  restart = () => { this.answerT.forEach(clearTimeout); this.closeLine(); clearTimeout(this.nudgeT); this.lastStage = 0; this.setState(({ z, rw, rh, barH, small }) => ({ ...INIT, z, rw, rh, barH, small }), () => this.arrive(0)); };
 
   // ——— render ———
   room(i: number, children: ReactNode) {
     const s = this.state;
-    return <div style={{ display: s.board || s.stage === i ? 'block' : 'none', zoom: s.board ? Math.min(.44, s.z * .44) : s.z }}>
+    const P = s.small;
+    const sideline = <Sideline phone={P} height={s.rh - 56} prefs={s} onPref={(k, v) => this.setState({ [k]: v } as Pick<State, typeof k>)} backTo={s.prev != null ? NAMES[s.prev] : ''} onBack={() => s.prev != null && this.setState({ stage: s.prev, prev: s.stage, board: false })} onTab={this.tabIt} />;
+    const line = s.stage === i && <Line phone={P} top={66} line={s.line} nextLabel={s.walk === 3 ? 'Done' : 'Next'} onNext={() => s.walk === 3 ? this.walkDone() : this.runBrief(s.walk + 1)} onStop={() => s.walk ? this.walkStop() : this.closeLine()} onAsk={this.ask} onTyping={on => { this.typingNow = on; if (!on) this.armClose(); }} onChoice={this.choose} />;
+    return <div style={{ display: s.board || s.stage === i ? 'block' : 'none', zoom: P ? 1 : s.board ? Math.min(.44, s.z * .44) : s.z, width: P ? '100%' : undefined }}>
       <div style={{ fontSize: 30, margin: '0 0 6px', color: 'var(--color-neutral-600)', display: s.board ? 'block' : 'none' }}>{i + 1} · {NAMES[i]} — {WHO[i]}</div>
-      <div style={{ ...roomBox, filter: `brightness(${(s.bright / 100 + .1).toFixed(2)}) sepia(${(s.warm / 160).toFixed(2)})` }}>
-        <Chrome active={i} tabs={TABS} time={TIMES[i]} onGo={this.nav} />
-        {children}
-        <Sideline prefs={s} onPref={(k, v) => this.setState({ [k]: v } as Pick<State, typeof k>)} backTo={s.prev != null ? NAMES[s.prev] : ''} onBack={() => s.prev != null && this.setState({ stage: s.prev, prev: s.stage, board: false })} onTab={this.tabIt} />
-        {s.stage === i && <Line top={66} line={s.line} nextLabel={s.walk === 3 ? 'Done' : 'Next'} onNext={() => s.walk === 3 ? this.walkDone() : this.runBrief(s.walk + 1)} onStop={() => s.walk ? this.walkStop() : this.closeLine()} onAsk={this.ask} onTyping={on => { this.typingNow = on; if (!on) this.armClose(); }} onChoice={this.choose} />}
+      <div style={{ ...(P ? phoneBox : { ...roomBox, width: s.rw, height: s.rh, boxShadow: s.board ? 'var(--shadow-md)' : 'none' }), filter: `brightness(${(s.bright / 100 + .1).toFixed(2)}) sepia(${(s.warm / 160).toFixed(2)})` }}>
+        <Chrome compact={P} active={i} tabs={TABS} time={TIMES[i]} onGo={this.nav} />
+        {P ? <>{line}{sideline}{children}</> : <>{children}{sideline}{line}</>}
       </div>
     </div>;
   }
 
   enlarge(k: Room) {
-    const on = !!this.state.wide[k];
+    const on = !!this.state.wide[k], rw = this.state.rw;
     return {
-      l: on ? 96 : 112, w: on ? 1090 : 850, rail: on ? 'none' : 'flex',
-      button: <button onClick={() => this.setState(st => ({ wide: { ...st.wide, [k]: !st.wide[k] } }))} style={{ position: 'absolute', top: 66, right: 56, zIndex: 15, whiteSpace: 'nowrap', display: this.state.line.open ? 'none' : 'inline-flex' }} className="btn btn-ghost">{on ? '↙ Side column' : '↗ Enlarge'}</button>,
+      l: on ? 96 : 112, w: on ? Math.min(rw - 190, READ_W + 240) : Math.min(rw - 430, READ_W), rail: on ? 'none' : 'flex',
+      button: <button onClick={() => this.setState(st => ({ wide: { ...st.wide, [k]: !st.wide[k] } }))} style={{ position: 'absolute', top: 66, right: 56, zIndex: 15, whiteSpace: 'nowrap', display: this.state.line.open || this.state.small ? 'none' : 'inline-flex' }} className="btn btn-ghost">{on ? '↙ Side column' : '↗ Enlarge'}</button>,
     };
   }
 
@@ -283,40 +288,42 @@ export class Desk extends Component<object, State> {
     const s = this.state, w = s.walk;
     const ct = s.line.open ? 200 : 104, rt = s.line.open ? 206 : 110;
     const light = s.pace === 'Light';
+    const br: CSSProperties = s.small ? { ...briefRow, gridTemplateColumns: '28px 62px 1fr', gap: 10, margin: 0, padding: '8px 2px' } : briefRow;
     const hl = (i: number) => w === i ? '3px solid oklch(0.7 0.17 65)' : '3px solid transparent';
     // Text size scales the reading columns (not the narrow side rails); offsets are divided back so only the type grows
     const tz = TEXT_ZOOM[s.text] ?? 1;
     // At Large a column can outgrow the room; it scrolls inside instead of running off the bottom
-    const clampH = (top: number): CSSProperties => tz > 1 ? { maxHeight: (ROOM_H - 12 - top) / tz, overflowY: 'auto', overflowX: 'hidden' } : {};
-    const main = (m: { l: number; w: number }): CSSProperties => ({ position: 'absolute', left: m.l / tz, top: ct / tz, width: m.w / tz, zoom: tz, ...clampH(ct), transition: `left .3s,width .3s,top .6s ${EASE}` });
-    const rail = (m: { rail: string }, gap = 28): CSSProperties => ({ position: 'absolute', left: 1000, top: rt, width: 196, transition: `top .6s ${EASE}`, display: m.rail, flexDirection: 'column', gap, fontSize: 15 });
+    const clampH = (top: number): CSSProperties => tz > 1 ? { maxHeight: (s.rh - 12 - top) / tz, overflowY: 'auto', overflowX: 'hidden' } : {};
+    const P = s.small;
+    const main = (m: { l: number; w: number }): CSSProperties => P ? { position: 'relative', zoom: tz, marginTop: 18 } : ({ position: 'absolute', left: m.l / tz, top: ct / tz, width: m.w / tz, zoom: tz, ...clampH(ct), transition: `left .3s,width .3s,top .6s ${EASE}` });
+    const rail = (m: { rail: string }, gap = 28): CSSProperties => P ? { display: 'flex', flexDirection: 'column', gap, fontSize: 15, marginTop: 32, paddingTop: 20, borderTop: '1px solid var(--color-divider)' } : ({ position: 'absolute', left: s.rw - 280, top: rt, width: 196, transition: `top .6s ${EASE}`, display: m.rail, flexDirection: 'column', gap, fontSize: 15 });
     const A = this.enlarge('a'), W = this.enlarge('w'), Cl = this.enlarge('c');
 
-    return <div style={{ fontFamily: 'var(--font-body)', color: 'var(--color-text)', paddingBottom: 64 }}>
-      <div style={{ padding: s.small ? 8 : 24, display: 'flex', flexWrap: 'wrap', gap: s.small ? 12 : 28, justifyContent: 'center', alignItems: 'flex-start' }}>
+    return <div style={{ fontFamily: 'var(--font-body)', color: 'var(--color-text)', paddingBottom: s.small || s.board ? 64 : s.barH }}>
+      <div style={{ padding: s.small ? 8 : s.board ? 24 : 0, display: 'flex', flexWrap: 'wrap', gap: s.small ? 12 : 28, justifyContent: 'center', alignItems: 'flex-start' }}>
 
         {/* 1 DAY · the assistant */}
         {this.room(0, <>
           <div style={main(A)}>
             <div style={{ fontSize: 13, letterSpacing: '.14em', color: 'var(--color-accent-2)', fontWeight: 700 }}>{LONG}</div>
-            <h1 style={{ margin: '8px 0 0', fontSize: 64, fontWeight: 600, lineHeight: 1.02, letterSpacing: '-.01em' }}>Good morning. Here is your day.</h1>
+            <h1 style={{ margin: '8px 0 0', fontSize: P ? 34 : 64, fontWeight: 600, lineHeight: 1.02, letterSpacing: '-.01em' }}>Good morning. Here is your day.</h1>
             <div style={{ display: 'flex', flexDirection: 'column', gap: s.pace === 'Full' ? 4 : 14, marginTop: s.pace === 'Full' ? 24 : 34 }}>
-              <div style={{ ...briefRow, outline: hl(1) }}>
-                <div style={{ fontSize: 48, lineHeight: 1, color: 'var(--color-accent)' }}>1</div><div style={{ fontSize: 16, color: 'var(--color-neutral-600)' }}>by 12:00</div>
-                <div><div style={{ fontSize: 30, lineHeight: 1.15 }}>Onboarding spec — ship it.</div><div style={{ fontSize: 17, marginTop: 4, color: 'var(--color-neutral-700)' }}>Sections one to three settled. <span style={{ color: 'var(--color-accent-2)' }}>§4 pricing tiers</span> still open.</div></div></div>
-              <div style={{ ...briefRow, outline: hl(2), display: light && s.heard < 2 ? 'none' : 'grid' }}>
-                <div style={{ fontSize: 48, lineHeight: 1, color: 'var(--color-accent)' }}>2</div><div style={{ fontSize: 16, color: 'var(--color-neutral-600)' }}>9:30</div>
-                <div><div style={{ fontSize: 30, lineHeight: 1.15 }}>Standup — three lines, drafted.</div><div style={{ fontSize: 17, marginTop: 4, color: 'var(--color-neutral-700)' }}>The one blocker to raise: the pricing decision.</div></div></div>
-              <div style={{ ...briefRow, outline: hl(3), display: light && s.heard < 3 ? 'none' : 'grid' }}>
-                <div style={{ fontSize: 48, lineHeight: 1, color: 'var(--color-accent)' }}>3</div><div style={{ fontSize: 16, color: 'var(--color-neutral-600)' }}>when free</div>
-                <div><div style={{ fontSize: 30, lineHeight: 1.15 }}>Replies — Dana first.</div><div style={{ fontSize: 17, marginTop: 4, color: 'var(--color-neutral-700)' }}>Her answer unblocks the spec. Then Omar, then Legal. Eleven others held till 14:00.</div></div></div>
-              {light && s.heard < 2 && <div style={{ fontSize: 17, color: 'var(--color-neutral-700)', padding: '6px 0 0 84px' }}>Two more held — the standup and the replies. Ask when you're ready.</div>}
+              <div style={{ ...br, outline: hl(1) }}>
+                <div style={{ fontSize: P ? 28 : 48, lineHeight: 1, color: 'var(--color-accent)' }}>1</div><div style={{ fontSize: 16, color: 'var(--color-neutral-600)' }}>by 12:00</div>
+                <div><div style={{ fontSize: P ? 20 : 30, lineHeight: 1.15 }}>Onboarding spec — ship it.</div><div style={{ fontSize: 17, marginTop: 4, color: 'var(--color-neutral-700)' }}>Sections one to three settled. <span style={{ color: 'var(--color-accent-2)' }}>§4 pricing tiers</span> still open.</div></div></div>
+              <div style={{ ...br, outline: hl(2), display: light && s.heard < 2 ? 'none' : 'grid' }}>
+                <div style={{ fontSize: P ? 28 : 48, lineHeight: 1, color: 'var(--color-accent)' }}>2</div><div style={{ fontSize: 16, color: 'var(--color-neutral-600)' }}>9:30</div>
+                <div><div style={{ fontSize: P ? 20 : 30, lineHeight: 1.15 }}>Standup — three lines, drafted.</div><div style={{ fontSize: 17, marginTop: 4, color: 'var(--color-neutral-700)' }}>The one blocker to raise: the pricing decision.</div></div></div>
+              <div style={{ ...br, outline: hl(3), display: light && s.heard < 3 ? 'none' : 'grid' }}>
+                <div style={{ fontSize: P ? 28 : 48, lineHeight: 1, color: 'var(--color-accent)' }}>3</div><div style={{ fontSize: 16, color: 'var(--color-neutral-600)' }}>when free</div>
+                <div><div style={{ fontSize: P ? 20 : 30, lineHeight: 1.15 }}>Replies — Dana first.</div><div style={{ fontSize: 17, marginTop: 4, color: 'var(--color-neutral-700)' }}>Her answer unblocks the spec. Then Omar, then Legal. Eleven others held till 14:00.</div></div></div>
+              {light && s.heard < 2 && <div style={{ fontSize: 17, color: 'var(--color-neutral-700)', padding: P ? '6px 0 0' : '6px 0 0 84px' }}>Two more held — the standup and the replies. Ask when you're ready.</div>}
               {/* Full adds the afternoon digest as one compact line, so four rows still fit with the line open */}
-              {s.pace === 'Full' && <div style={{ ...briefRow, padding: '4px 14px' }}>
-                <div style={{ fontSize: 32, lineHeight: 1, color: 'var(--color-accent)' }}>4</div><div style={{ fontSize: 16, color: 'var(--color-neutral-600)' }}>after 14:00</div>
+              {s.pace === 'Full' && <div style={{ ...br, padding: s.small ? '4px 2px' : '4px 14px' }}>
+                <div style={{ fontSize: P ? 24 : 32, lineHeight: 1, color: 'var(--color-accent)' }}>4</div><div style={{ fontSize: 16, color: 'var(--color-neutral-600)' }}>after 14:00</div>
                 <div style={{ fontSize: 22, lineHeight: 1.2 }}>Digest — eleven replies. <span style={{ fontSize: 16, color: 'var(--color-neutral-700)' }}>None mention you; one pass.</span></div></div>}
             </div>
-            {s.pinned && <div style={{ marginTop: 28, display: 'flex', gap: 18, alignItems: 'baseline' }}>
+            {s.pinned && <div style={{ marginTop: 28, display: 'flex', flexWrap: 'wrap', gap: P ? 6 : 18, alignItems: 'baseline' }}>
               <div style={{ fontSize: 13, letterSpacing: '.14em', color: 'var(--color-accent-2)', fontWeight: 700, whiteSpace: 'nowrap' }}>PINNED UNTIL 12:00</div>
               <div style={{ fontSize: 24, lineHeight: 1.2 }}>§4 Pricing tiers — <a href="#" onClick={this.go(1)}>open it</a></div>
             </div>}
@@ -338,8 +345,8 @@ export class Desk extends Component<object, State> {
         {/* 2 WRITE · the editor */}
         {this.room(1, <>
           <div style={main(W)}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 20 }}>
-              <div style={{ display: 'flex', gap: 4 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'baseline', gap: P ? 10 : 20 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                 {([['mine', 'Yours · v4 · 10:12'], ['dana', 'Dana\'s · Fri']] as const).map(c => <button key={c[0]} onClick={() => this.setState({ copy: c[0] })} style={{ all: 'unset', cursor: 'pointer', padding: '6px 14px', fontSize: 16, borderRadius: 2, background: s.copy === c[0] ? 'var(--color-accent)' : 'var(--color-neutral-200)', color: s.copy === c[0] ? '#fff' : 'var(--color-text)', whiteSpace: 'nowrap' }}>{c[1]}</button>)}
                 <span style={{ padding: '6px 10px', fontSize: 14, color: 'var(--color-neutral-500)', whiteSpace: 'nowrap' }}>+ one more, at most</span>
               </div>
@@ -351,7 +358,7 @@ export class Desk extends Component<object, State> {
             {s.sendStep === 0 && <div style={{ display: 'flex', gap: 4, marginTop: 14, fontSize: 15, color: 'var(--color-neutral-700)' }}>
               <span style={{ padding: '3px 9px', fontWeight: 700 }}>B</span><span style={{ padding: '3px 9px', fontStyle: 'italic' }}>I</span><span style={{ padding: '3px 9px', textDecoration: 'underline' }}>U</span><span style={{ padding: '3px 9px' }}>H1</span><span style={{ padding: '3px 9px' }}>H2</span><span style={{ padding: '3px 9px' }}>¶</span><span style={{ padding: '3px 9px' }}>“ ”</span><span style={{ padding: '3px 9px' }}>§</span>
             </div>}
-            {s.sendStep > 0 && <div style={{ marginTop: 12, background: '#fff', padding: '20px 32px', boxSizing: 'border-box', boxShadow: 'var(--shadow-sm)' }}>
+            {s.sendStep > 0 && <div style={{ marginTop: 12, background: '#fff', padding: P ? '16px' : '20px 32px', boxSizing: 'border-box', boxShadow: 'var(--shadow-sm)' }}>
               <div style={kick('var(--color-neutral-600)', 13)}>TO RINA KAPLAN · NORTHWIND · §4 ATTACHED</div>
               {s.sendStep === 1 && <>
                 <div style={{ ...kick('var(--color-accent-700)', 12), marginTop: 14 }}>TAB CHECKED · YOUR WORDS UNCHANGED</div>
@@ -360,7 +367,7 @@ export class Desk extends Component<object, State> {
                 </div>
                 <div style={{ fontSize: 13, fontStyle: 'italic', color: 'var(--color-neutral-600)', marginTop: 8 }}>Shredded: the v3 paragraph on annual discounts (superseded) and two repeated sentences.</div>
                 <div style={{ ...kick('var(--color-accent-2)', 12), marginTop: 18 }}>SEND ONE · APPROVAL 1 OF 3 TODAY</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 10 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: P ? '1fr' : '1fr 1fr', gap: 16, marginTop: 10 }}>
                   {VERSIONS.map(v => <div key={v.id} style={{ border: '1px solid var(--color-divider)', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                     <div style={{ fontSize: 16, fontWeight: 600 }}>{v.name}</div>
                     <div style={{ fontSize: 15, lineHeight: 1.45, flex: 1 }}>{v.text}</div>
@@ -377,15 +384,15 @@ export class Desk extends Component<object, State> {
                 <button className="btn btn-ghost" onClick={() => this.setState({ sendStep: 0 })} style={{ marginTop: 12 }}>Back to the spec</button>
               </>}
             </div>}
-            <div style={{ display: s.sendStep === 0 ? 'block' : 'none', marginTop: 26, background: '#fff', padding: '48px 56px', minHeight: 420, boxSizing: 'border-box', boxShadow: 'var(--shadow-sm)' }}>
+            <div style={{ display: s.sendStep === 0 ? 'block' : 'none', marginTop: P ? 16 : 26, background: '#fff', padding: P ? '22px 18px' : '48px 56px', minHeight: P ? 0 : 420, boxSizing: 'border-box', boxShadow: 'var(--shadow-sm)' }}>
               <div style={{ fontSize: 13, letterSpacing: '.14em', color: 'var(--color-neutral-600)' }}>ONBOARDING SPEC · {s.copy === 'mine' ? 'YOUR COPY' : 'DANA\'S COPY · READ ONLY'}</div>
-              <h2 style={{ margin: '10px 0 18px', fontSize: 34, fontWeight: 600, lineHeight: 1.1 }}>§4 Pricing tiers</h2>
-              {s.copy === 'mine' && <div contentEditable suppressContentEditableWarning style={{ fontSize: 22, lineHeight: 1.55, minHeight: 200, cursor: 'text', caretColor: 'var(--color-accent)' }}>
+              <h2 style={{ margin: '10px 0 18px', fontSize: P ? 26 : 34, fontWeight: 600, lineHeight: 1.1 }}>§4 Pricing tiers</h2>
+              {s.copy === 'mine' && <div contentEditable suppressContentEditableWarning style={{ fontSize: P ? 18 : 22, lineHeight: 1.55, minHeight: P ? 120 : 200, cursor: 'text', caretColor: 'var(--color-accent)' }}>
                 <p style={{ margin: '0 0 14px' }}>Onboarding is offered in three tiers: Starter, Team, Scale. Trial length is 14 days across all of them.</p>
                 <p style={{ margin: '0 0 14px' }}>Open: does Starter include the guided checklist? Decision owner: Dana.</p>
                 <p style={{ margin: 0, color: 'var(--color-neutral-500)' }}>Keep writing here — your words, nothing generated.</p>
               </div>}
-              {s.copy === 'dana' && <div style={{ fontSize: 22, lineHeight: 1.55, minHeight: 200 }}>
+              {s.copy === 'dana' && <div style={{ fontSize: P ? 18 : 22, lineHeight: 1.55, minHeight: 200 }}>
                 <p style={{ margin: '0 0 14px' }}>Onboarding is offered in <span style={{ background: 'var(--color-accent-100)' }}>three tiers: Starter, Team, Scale</span>. Trial length is <span style={{ background: 'var(--color-accent-100)' }}>14 days</span> across all of them.</p>
                 <p style={{ margin: '0 0 14px', fontStyle: 'italic', color: 'var(--color-neutral-700)', fontFamily: 'var(--font-body)' }}>Dana, Friday: “Northwind asked for exactly this in the pilot. Legal may push for 30 days.”</p>
                 <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
@@ -414,8 +421,8 @@ export class Desk extends Component<object, State> {
         {this.room(2, <>
           <div style={main(Cl)}>
             <div style={{ fontSize: 13, letterSpacing: '.14em', color: 'var(--color-accent-2)', fontWeight: 700 }}>PINNED FOR THE WHOLE CALL</div>
-            <div style={{ fontSize: 34, fontWeight: 600, lineHeight: 1.15, marginTop: 8 }}>We leave with a tier and a start date for the 40-seat rollout.</div>
-            <div style={{ display: 'flex', gap: 4, marginTop: 14 }}>
+            <div style={{ fontSize: P ? 24 : 34, fontWeight: 600, lineHeight: 1.15, marginTop: 8 }}>We leave with a tier and a start date for the 40-seat rollout.</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 14 }}>
               {(['before', 'live', 'after'] as const).map((ph, i) => <button key={ph} onClick={() => this.setCallPhase(ph)} style={{ all: 'unset', cursor: 'pointer', padding: '4px 12px', fontSize: 13, letterSpacing: '.12em', fontWeight: 700, borderRadius: 2, background: s.callPhase === ph ? 'var(--color-accent)' : 'var(--color-neutral-200)', color: s.callPhase === ph ? '#fff' : 'var(--color-neutral-700)' }}>{i + 1} · {['BEFORE', 'DURING', 'AFTER'][i]}</button>)}
             </div>
             {s.callPhase === 'before' && <>
@@ -425,23 +432,23 @@ export class Desk extends Component<object, State> {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 6 }}>{ASK.map((q, i) => <div key={q[0]} style={{ fontSize: 17, lineHeight: 1.35 }}><span style={{ color: 'var(--color-accent)', marginRight: 8 }}>{i + 1}</span>{q[0]}</div>)}</div>
             </>}
             {s.callPhase === 'live' && <>
-              <div style={{ marginTop: 14, height: 130, background: 'var(--color-neutral-800)', display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 2, padding: 2, boxSizing: 'border-box' }}>
+              <div style={{ marginTop: 14, height: P ? 150 : 130, background: 'var(--color-neutral-800)', display: 'grid', gridTemplateColumns: P ? 'repeat(2,1fr)' : 'repeat(4,1fr)', gap: 2, padding: 2, boxSizing: 'border-box' }}>
                 {PEOPLE.map(t => <div key={t} style={{ background: 'var(--color-neutral-900)', color: '#fff', display: 'flex', alignItems: 'flex-end', padding: '10px 14px', fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden' }}>{t}</div>)}
               </div>
               <div style={{ ...kick('var(--color-accent-2)', 13), marginTop: 14 }}>YOUR QUESTIONS · HER ANSWERS AS THEY COME</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 6 }}>{ASK.map((q, i) => <div key={q[0]} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, alignItems: 'baseline', fontSize: 16, lineHeight: 1.3 }}><div><span style={{ color: 'var(--color-accent)', marginRight: 8 }}>{i + 1}</span>{q[0]}</div><div style={{ color: i < s.answered ? 'var(--color-accent-700)' : 'var(--color-neutral-400)', fontStyle: i < s.answered ? 'normal' : 'italic' }}>{i < s.answered ? `✓ ${q[1]}` : 'listening…'}</div></div>)}</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 6 }}>{ASK.map((q, i) => <div key={q[0]} style={{ display: 'grid', gridTemplateColumns: P ? '1fr' : '1fr 1fr', gap: P ? 2 : 20, alignItems: 'baseline', fontSize: 16, lineHeight: 1.3 }}><div><span style={{ color: 'var(--color-accent)', marginRight: 8 }}>{i + 1}</span>{q[0]}</div><div style={{ color: i < s.answered ? 'var(--color-accent-700)' : 'var(--color-neutral-400)', fontStyle: i < s.answered ? 'normal' : 'italic' }}>{i < s.answered ? `✓ ${q[1]}` : 'listening…'}</div></div>)}</div>
             </>}
             {s.callPhase === 'after' && <>
               <div style={{ ...kick('var(--color-neutral-700)', 13), marginTop: 18 }}>WHAT YOU HEARD · CALL ENDED 10:52</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 6 }}>{ASK.map(q => <div key={q[0]} style={{ fontSize: 17, lineHeight: 1.35, color: 'var(--color-accent-700)' }}>✓ <span style={{ color: 'var(--color-text)' }}>{q[1]}</span></div>)}</div>
               <div style={{ ...kick('var(--color-accent-2)', 13), marginTop: 16 }}>FOLLOW-UP</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 6 }}>{FOLLOW.map(f => <div key={f[0]} style={{ display: 'grid', gridTemplateColumns: '1fr 180px', gap: 20, fontSize: 17, lineHeight: 1.35 }}><div>{f[0]}</div><div style={{ color: 'var(--color-neutral-600)' }}>{f[1]}</div></div>)}</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 6 }}>{FOLLOW.map(f => <div key={f[0]} style={{ display: 'grid', gridTemplateColumns: P ? '1fr auto' : '1fr 180px', gap: 20, fontSize: 17, lineHeight: 1.35 }}><div>{f[0]}</div><div style={{ color: 'var(--color-neutral-600)' }}>{f[1]}</div></div>)}</div>
               <div style={{ fontSize: 15, color: 'var(--color-neutral-600)', fontStyle: 'italic', marginTop: 14 }}>Summary filed under Northwind › Calls › {DAY_MONTH}. Reversible for 7 days.</div>
             </>}
             {s.callPhase !== 'after' && <>
               <div style={{ ...kick('var(--color-accent-700)', 13), marginTop: 16 }}>IF SHE ASKS · YOU ANSWER</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: s.callPhase === 'live' ? 4 : 6, marginTop: 6 }}>
-                {QA.map(q => <div key={q[0]} style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr', gap: 20, alignItems: 'baseline', fontSize: s.callPhase === 'live' ? 15 : 16, lineHeight: 1.3 }}><div style={{ fontStyle: 'italic', fontFamily: 'var(--font-body)' }}>“{q[0]}”</div><div>{q[1]}</div></div>)}
+                {QA.map(q => <div key={q[0]} style={{ display: 'grid', gridTemplateColumns: P ? '1fr' : '1fr 1.3fr', gap: P ? 2 : 20, alignItems: 'baseline', fontSize: s.callPhase === 'live' ? 15 : 16, lineHeight: 1.3 }}><div style={{ fontStyle: 'italic', fontFamily: 'var(--font-body)' }}>“{q[0]}”</div><div>{q[1]}</div></div>)}
               </div>
             </>}
           </div>
@@ -455,7 +462,7 @@ export class Desk extends Component<object, State> {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginTop: 8, alignItems: 'flex-start' }}><span className="tag tag-accent">Agenda</span><span className="tag tag-accent">Pricing v4 — shareable</span><span className="tag tag-neutral">Contract — internal</span></div>
             </div>
             <div>
-              <div style={{ width: 196, aspectRatio: '16/9', background: 'var(--color-neutral-800)', color: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '10px 12px', boxSizing: 'border-box' }}>
+              <div style={{ width: P ? '100%' : 196, maxWidth: 320, aspectRatio: '16/9', background: 'var(--color-neutral-800)', color: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '10px 12px', boxSizing: 'border-box' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, letterSpacing: '.12em' }}><span>NORTHWIND</span><span style={{ width: 8, height: 8, borderRadius: '50%', background: 'oklch(0.7 0.17 65)' }}></span></div>
                 <div style={{ fontSize: 13, lineHeight: 1.3, opacity: .85 }}>{s.callPhase === 'live' ? 'Live · TAB on notes, off camera' : s.callPhase === 'after' ? 'Call ended · 10:52' : 'Waiting room · camera off until you join'}</div>
               </div>
@@ -467,14 +474,14 @@ export class Desk extends Component<object, State> {
 
         {/* 4 CLOSE · the librarian */}
         {this.room(3, <>
-          <div style={{ position: 'absolute', left: 96 / tz, top: ct / tz, width: 1090 / tz, zoom: tz, ...clampH(ct), transition: `top .6s ${EASE}` }}>
+          <div style={P ? main(Cl) : { position: 'absolute', left: 96 / tz, top: ct / tz, width: Math.min(s.rw - 190, READ_W + 240) / tz, zoom: tz, ...clampH(ct), transition: `top .6s ${EASE}` }}>
             <div style={kick('var(--color-accent-2)', 13)}>END OF DAY · 16:45–17:00</div>
-            <h1 style={{ margin: '6px 0 0', fontSize: 56, fontWeight: 600, lineHeight: 1.02, letterSpacing: '-.01em' }}>That's the day.</h1>
-            <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr 1fr', gap: 48, marginTop: 24 }}>
+            <h1 style={{ margin: '6px 0 0', fontSize: P ? 34 : 56, fontWeight: 600, lineHeight: 1.02, letterSpacing: '-.01em' }}>That's the day.</h1>
+            <div style={{ display: 'grid', gridTemplateColumns: P ? '1fr' : '1.1fr 1fr 1fr', gap: P ? 32 : 48, marginTop: 24 }}>
               <div>
                 <div style={kick('var(--color-neutral-700)')}>REPORT</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 12 }}>
-                  {[['11:42', 'spec sent, 18 min early'], ['Team', `tier agreed with Northwind; start ${START}`], ['3', `approvals asked of you today: ${s.sendPick !== null ? 'the send is done' : 'the send is waiting'}, two below`]].map(r => <div key={r[0]} style={{ display: 'flex', gap: 14, alignItems: 'baseline' }}><span style={{ fontSize: 40, lineHeight: 1, color: 'var(--color-accent)', width: 120 }}>{r[0]}</span><span style={{ fontSize: 17 }}>{r[1]}</span></div>)}
+                  {[['11:42', 'spec sent, 18 min early'], ['Team', `tier agreed with Northwind; start ${START}`], ['3', `approvals asked of you today: ${s.sendPick !== null ? 'the send is done' : 'the send is waiting'}, two below`]].map(r => <div key={r[0]} style={{ display: 'flex', gap: 14, alignItems: 'baseline' }}><span style={{ fontSize: P ? 28 : 40, lineHeight: 1, color: 'var(--color-accent)', width: P ? 76 : 120, flex: 'none' }}>{r[0]}</span><span style={{ fontSize: 17 }}>{r[1]}</span></div>)}
                 </div>
                 <div style={{ ...kick('var(--color-neutral-700)'), marginTop: 34 }}>TOMORROW · ALREADY FILED</div>
                 <div style={{ fontSize: 17, lineHeight: 1.5, marginTop: 8 }}>Legal review first (comment 2 on trial length), then the retro at 11:00. Room set to your {TOMORROW}.</div>
@@ -510,11 +517,11 @@ export class Desk extends Component<object, State> {
                 <div style={{ fontSize: 13, color: 'var(--color-neutral-600)', marginTop: 10 }}>Every line reversible for 7 days. Check means you looked.</div>
               </div>
             </div>
-            <div style={{ marginTop: 18, display: 'flex', gap: 18, alignItems: 'baseline' }}>
+            <div style={{ marginTop: 18, display: 'flex', flexWrap: 'wrap', gap: P ? 6 : 18, alignItems: 'baseline' }}>
               <div style={kick('var(--color-neutral-700)')}>BRIDGE-IT BOUNCER · TODAY</div>
               <div style={{ fontSize: 16 }}>{GATE.map((g, i) => <span key={g[1]} title={i === 2 ? 'e.g. a drafted reply to Legal claiming Northwind agreed to 30 days — no source, so it went back to its agent, not to you.' : undefined} style={{ cursor: i === 2 ? 'help' : undefined }}>{i > 0 && <span style={{ color: 'var(--color-neutral-400)' }}> · </span>}<span style={{ color: 'var(--color-accent)', fontSize: 20 }}>{g[0]}</span> {g[1]}</span>)}</div>
             </div>
-            <div style={{ marginTop: 16, display: 'flex', gap: 18, alignItems: 'center' }}>
+            <div style={{ marginTop: 16, display: 'flex', flexWrap: 'wrap', gap: P ? 10 : 18, alignItems: 'center' }}>
               <button className="btn btn-primary" onClick={this.go(0)} style={{ fontSize: 18, padding: '12px 24px', whiteSpace: 'nowrap' }}>Goodbye — close the edition</button>
               <span style={{ fontSize: 16, fontStyle: 'italic', color: 'var(--color-neutral-600)', fontFamily: 'var(--font-body)' }}>Brightness, warmth and sound return to how you had them.</span>
             </div>
@@ -522,23 +529,23 @@ export class Desk extends Component<object, State> {
         </>)}
       </div>
 
-      <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 50, background: 'var(--color-bg)', display: 'flex', alignItems: 'center', gap: s.small ? 4 : 16, padding: s.small ? '4px 8px' : '10px 24px', flexWrap: s.small ? 'nowrap' : 'wrap', overflowX: 'auto', boxShadow: 'var(--shadow-sm)' }}>
+      <div id="desk-bar" style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 50, background: 'var(--color-bg)', display: 'flex', alignItems: 'center', gap: s.small ? 4 : 16, padding: s.small ? '4px 8px' : '10px 24px', flexWrap: s.small ? 'nowrap' : 'wrap', overflowX: 'auto', boxShadow: 'var(--shadow-sm)' }}>
         {!s.small && <div style={{ fontSize: 11, letterSpacing: '.14em', color: 'var(--color-neutral-600)', fontWeight: 700, whiteSpace: 'nowrap' }}>DEMO · FOUR ROOMS</div>}
         <div style={{ display: 'flex', gap: 4, flexWrap: s.small ? 'nowrap' : 'wrap', flex: 1 }}>
           {NAMES.map((n, i) => { const on = !s.board && s.stage === i; return <button key={n} onClick={this.go(i)} style={{ all: 'unset', cursor: 'pointer', padding: s.small ? '6px 8px' : '4px 10px', fontSize: s.small ? 13 : 14, borderRadius: 2, background: on ? 'var(--color-accent)' : 'transparent', color: on ? '#fff' : 'var(--color-text)', whiteSpace: 'nowrap' }}>{i + 1} · {n}{s.small ? '' : ` — ${WHO[i]}`}</button>; })}
         </div>
         <button className="btn btn-ghost" onClick={() => this.setState({ stepOut: true })} title="TAB steps out of the desk (T)" style={{ whiteSpace: 'nowrap', fontSize: s.small ? 13 : undefined, color: 'oklch(0.5 0.15 55)' }}>● TAB</button>
         <button className="btn btn-ghost" onClick={this.restart} style={{ whiteSpace: 'nowrap', fontSize: s.small ? 13 : undefined }}>{s.small ? 'Restart' : 'Restart demo'}</button>
-        <button className="btn btn-ghost" onClick={() => this.setState({ board: !s.board })} style={{ whiteSpace: 'nowrap', fontSize: s.small ? 13 : undefined }}>{s.board ? 'Back to demo' : s.small ? 'All 4' : 'All four'}</button>
+        {!s.small && <button className="btn btn-ghost" onClick={() => this.setState({ board: !s.board })} style={{ whiteSpace: 'nowrap', fontSize: s.small ? 13 : undefined }}>{s.board ? 'Back to demo' : 'All four'}</button>}
       </div>
 
       {/* TAB steps out of the desk: the amber tab leaves the edge and stands on its own. */}
       {s.stepOut && <div className="tab-out-backdrop" onClick={() => this.setState({ stepOut: false })} style={{ position: 'fixed', inset: 0, zIndex: 70, background: 'color-mix(in srgb, var(--color-bg) 88%, transparent)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, fontFamily: 'var(--font-heading)' }}>
         <div className="tab-out-card" onClick={e => e.stopPropagation()} style={{ maxWidth: 760, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 18 }}>
-          <div style={{ background: 'oklch(0.7 0.17 65)', color: '#fff', fontWeight: 700, letterSpacing: '.24em', fontSize: 56, padding: '10px 28px 10px 34px' }}>TAB</div>
+          <div style={{ background: 'oklch(0.7 0.17 65)', color: '#fff', fontWeight: 700, letterSpacing: '.24em', fontSize: s.small ? 36 : 56, padding: '10px 28px 10px 34px' }}>TAB</div>
           <div style={kick('var(--color-accent-2)', 14)}>A CO-WORKER, NOT A FEATURE</div>
-          <div style={{ fontSize: 44, fontWeight: 600, lineHeight: 1.08 }}>TAB isn't the desk. It's who works beside you at it.</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 21, lineHeight: 1.35 }}>
+          <div style={{ fontSize: s.small ? 28 : 44, fontWeight: 600, lineHeight: 1.08 }}>TAB isn't the desk. It's who works beside you at it.</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: s.small ? 17 : 21, lineHeight: 1.35 }}>
             <div><b style={{ color: 'oklch(0.5 0.15 55)' }}>One voice</b> — a single line, once per room.</div>
             <div><b style={{ color: 'oklch(0.5 0.15 55)' }}>One place</b> — the amber tab at the edge of any screen.</div>
             <div><b style={{ color: 'oklch(0.5 0.15 55)' }}>One color</b> — amber, TAB's alone.</div>
@@ -549,13 +556,6 @@ export class Desk extends Component<object, State> {
         </div>
       </div>}
 
-      {/* Phones held upright: the desk is a 1280×800 desktop, so suggest turning sideways. */}
-      {s.portrait && !s.hintClosed && <div style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'color-mix(in srgb, var(--color-bg) 96%, transparent)', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 28px', gap: 14, fontFamily: 'var(--font-heading)' }}>
-        <div style={kick('var(--color-accent-2)')}>TAB · A SHARED DESK</div>
-        <div style={{ fontSize: 32, fontWeight: 600, lineHeight: 1.1 }}>Turn your phone sideways.</div>
-        <div style={{ fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: 18, lineHeight: 1.4, color: 'var(--color-neutral-700)' }}>TAB Desk is a full workday on one screen. It reads best in landscape, or on a computer at tab-at-work.com.</div>
-        <button className="btn btn-primary" onClick={() => this.setState({ hintClosed: true })} style={{ alignSelf: 'flex-start', marginTop: 8 }}>Continue anyway</button>
-      </div>}
     </div>;
   }
 }
