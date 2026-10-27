@@ -2,6 +2,7 @@ import { Component, type CSSProperties, type MouseEvent, type ReactNode } from '
 import { Chrome } from './Chrome';
 import { Line, type Choice, type LineState } from './Line';
 import { DAY_MONTH, LAST_CALL_DATE, LONG, SHORT, START, TOMORROW } from './dates';
+import { Interview } from './Interview';
 import { Sideline, type Prefs } from './Sideline';
 
 type Room = 'a' | 'w' | 'c';
@@ -27,6 +28,7 @@ interface State extends Prefs {
   callPhase: 'before' | 'live' | 'after';
   answered: number;
   stepOut: boolean;
+  ivActive: boolean; // the webinar interview is showing on TAB's card
   full: boolean; // the browser is in true full screen
   walk: number;
   heard: number; // the furthest brief item walked through; at Light, rows stay held until then
@@ -38,7 +40,7 @@ interface State extends Prefs {
 }
 
 const TEXT_ZOOM: Record<string, number> = { Compact: .9, Roomy: 1, Large: 1.15 };
-const INIT: State = { stage: 0, prev: null, board: false, bright: 85, warm: 25, sound: 'Soft', quiet: 'Digest', text: 'Roomy', pace: 'Steady', pinned: false, asked: false, taken: false, copy: 'mine', joined: false, ok: {}, checked: {}, z: 1, rw: 1280, rh: 800, barH: 64, small: false, sendStep: 0, sendPick: null, callPhase: 'before', answered: 0, stepOut: false, full: false, walk: 0, heard: 0, walkMode: 'Both', said: {}, nudged: false, wide: {}, line: { open: false, words: [], shown: 0, meta: '', speaking: false, controls: false, idle: false, choices: null } };
+const INIT: State = { stage: 0, prev: null, board: false, bright: 85, warm: 25, sound: 'Soft', quiet: 'Digest', text: 'Roomy', pace: 'Steady', pinned: false, asked: false, taken: false, copy: 'mine', joined: false, ok: {}, checked: {}, z: 1, rw: 1280, rh: 800, barH: 64, small: false, sendStep: 0, sendPick: null, callPhase: 'before', answered: 0, stepOut: false, ivActive: false, full: false, walk: 0, heard: 0, walkMode: 'Both', said: {}, nudged: false, wide: {}, line: { open: false, words: [], shown: 0, meta: '', speaking: false, controls: false, idle: false, choices: null } };
 
 const ARRIVE = [
   null,
@@ -130,9 +132,9 @@ export class Desk extends Component<object, State> {
     const el = e.target as HTMLElement | null;
     if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)) return;
     if (e.ctrlKey || e.metaKey || e.altKey) return; // leave browser shortcuts (Find, new tab) alone
-    if (e.key === 't' || e.key === 'T') this.setState(st => ({ stepOut: !st.stepOut }));
+    if (e.key === 't' || e.key === 'T') this.setState(st => ({ stepOut: !st.stepOut, ivActive: false }));
     else if (e.key === 'f' || e.key === 'F') this.toggleFull();
-    else if (e.key === 'Escape' && this.state.stepOut) this.setState({ stepOut: false });
+    else if (e.key === 'Escape' && this.state.stepOut) this.setState({ stepOut: false, ivActive: false });
   };
 
   // True full screen: the desk covers the whole monitor, without the browser's bars. Esc leaves it.
@@ -553,18 +555,19 @@ export class Desk extends Component<object, State> {
       </div>
 
       {/* TAB steps out of the desk: the amber tab leaves the edge and stands on its own. */}
-      {s.stepOut && <div className="tab-out-backdrop" onClick={() => this.setState({ stepOut: false })} style={{ position: 'fixed', inset: 0, zIndex: 70, background: 'color-mix(in srgb, var(--color-bg) 88%, transparent)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, fontFamily: 'var(--font-heading)' }}>
+      {s.stepOut && <div className="tab-out-backdrop" onClick={() => this.setState({ stepOut: false, ivActive: false })} style={{ position: 'fixed', inset: 0, zIndex: 70, background: 'color-mix(in srgb, var(--color-bg) 88%, transparent)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, fontFamily: 'var(--font-heading)' }}>
         <div className="tab-out-card" onClick={e => e.stopPropagation()} style={{ maxWidth: 760, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 18 }}>
           <div style={{ background: 'oklch(0.7 0.17 65)', color: '#fff', fontWeight: 700, letterSpacing: '.24em', fontSize: s.small ? 36 : 56, padding: '10px 28px 10px 34px' }}>TAB</div>
           <div style={kick('var(--color-accent-2)', 14)}>A CO-WORKER, NOT A FEATURE</div>
           <div style={{ fontSize: s.small ? 28 : 44, fontWeight: 600, lineHeight: 1.08 }}>TAB isn't the desk. It's who works beside you at it.</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: s.small ? 17 : 21, lineHeight: 1.35 }}>
+          <Interview onActive={on => this.setState({ ivActive: on })} />
+          {!s.ivActive && <><div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: s.small ? 17 : 21, lineHeight: 1.35 }}>
             <div><b style={{ color: 'oklch(0.5 0.15 55)' }}>One voice</b> — a single line, once per room.</div>
             <div><b style={{ color: 'oklch(0.5 0.15 55)' }}>One place</b> — the amber tab at the edge of any screen.</div>
             <div><b style={{ color: 'oklch(0.5 0.15 55)' }}>One color</b> — amber, TAB's alone.</div>
           </div>
-          <div style={{ fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: 19, lineHeight: 1.4, color: 'var(--color-neutral-700)' }}>TAB@Work is one desk it works at. It measures friction in the flow of work — never feelings.</div>
-          <button className="btn btn-primary" onClick={() => this.setState({ stepOut: false })}>Back to the desk</button>
+          <div style={{ fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: 19, lineHeight: 1.4, color: 'var(--color-neutral-700)' }}>TAB@Work is one desk it works at. It measures friction in the flow of work — never feelings.</div></>}
+          <button className="btn btn-primary" onClick={() => this.setState({ stepOut: false, ivActive: false })}>Back to the desk</button>
           <div style={{ fontSize: 13, color: 'var(--color-neutral-600)' }}>Press T or Esc to return.</div>
         </div>
       </div>}
