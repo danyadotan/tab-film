@@ -28,6 +28,7 @@ const pill = (bg: string, extra: CSSProperties = {}): CSSProperties => ({ all: '
 
 interface SidelineProps {
   phone?: boolean;
+  height?: number;
   prefs: Prefs;
   onPref: <K extends keyof Prefs>(k: K, v: Prefs[K]) => void;
   backTo: string;
@@ -36,13 +37,13 @@ interface SidelineProps {
 }
 
 /** The sideline at the right edge: the amber TAB pill, glossary, settings and back. On phones it is a row under the chrome, and its panels open below it. */
-export function Sideline({ phone, prefs: p, onPref, backTo, onBack, onTab }: SidelineProps) {
+export function Sideline({ phone, height = 744, prefs: p, onPref, backTo, onBack, onTab }: SidelineProps) {
   const [open, setOpen] = useState<'g' | 's' | null>(null);
   const [q, setQ] = useState('');
   const terms = TERMS.filter(t => !q || (t[1] + t[2]).toLowerCase().includes(q.toLowerCase()));
   const box: CSSProperties = phone ? { ...panel, width: '100%', height: 'auto', padding: '20px 18px', marginTop: 10 } : panel;
   const pl = (bg: string, extra: CSSProperties = {}) => phone ? pill(bg, { ...extra, writingMode: 'horizontal-tb', padding: '7px 12px', fontSize: 12 }) : pill(bg, extra);
-  return <div style={phone ? { marginTop: 10 } : { position: 'absolute', right: 0, top: 56, height: 744, zIndex: 20 }}>
+  return <div style={phone ? { marginTop: 10 } : { position: 'absolute', right: 0, top: 56, height, zIndex: 20 }}>
     <div style={{ display: 'flex', flexDirection: phone ? 'column-reverse' : 'row', alignItems: phone ? 'stretch' : 'flex-start', height: phone ? 'auto' : '100%', fontFamily: 'var(--font-heading)', color: 'var(--color-text)' }}>
       {open === 'g' && <div style={box}>
         <div style={{ fontSize: 13, letterSpacing: '.14em', color: 'var(--color-accent-700)', fontWeight: 700 }}>GLOSSARY · LEARNED TOGETHER</div>

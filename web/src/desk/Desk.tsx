@@ -18,6 +18,9 @@ interface State extends Prefs {
   ok: Record<number, string>;
   checked: Record<number, boolean>;
   z: number;
+  rw: number; // the room's size in layout px: at least 1280×800, stretched to the window's shape
+  rh: number;
+  barH: number;
   small: boolean;
   sendStep: 0 | 1 | 2;
   sendPick: 'a' | 'b' | null;
@@ -34,7 +37,7 @@ interface State extends Prefs {
 }
 
 const TEXT_ZOOM: Record<string, number> = { Compact: .9, Roomy: 1, Large: 1.15 };
-const INIT: State = { stage: 0, prev: null, board: false, bright: 85, warm: 25, sound: 'Soft', quiet: 'Digest', text: 'Roomy', pace: 'Steady', pinned: false, asked: false, taken: false, copy: 'mine', joined: false, ok: {}, checked: {}, z: 1, small: false, sendStep: 0, sendPick: null, callPhase: 'before', answered: 0, stepOut: false, walk: 0, heard: 0, walkMode: 'Both', said: {}, nudged: false, wide: {}, line: { open: false, words: [], shown: 0, meta: '', speaking: false, controls: false, idle: false, choices: null } };
+const INIT: State = { stage: 0, prev: null, board: false, bright: 85, warm: 25, sound: 'Soft', quiet: 'Digest', text: 'Roomy', pace: 'Steady', pinned: false, asked: false, taken: false, copy: 'mine', joined: false, ok: {}, checked: {}, z: 1, rw: 1280, rh: 800, barH: 64, small: false, sendStep: 0, sendPick: null, callPhase: 'before', answered: 0, stepOut: false, walk: 0, heard: 0, walkMode: 'Both', said: {}, nudged: false, wide: {}, line: { open: false, words: [], shown: 0, meta: '', speaking: false, controls: false, idle: false, choices: null } };
 
 const ARRIVE = [
   null,
@@ -87,8 +90,8 @@ const DID = [['Folded 14 weekend tabs into three things', 'Same goal, one place'
 
 const EASE = 'cubic-bezier(.2,.8,.2,1)';
 const kick = (color: string, size = 12): CSSProperties => ({ fontSize: size, letterSpacing: '.14em', fontWeight: 700, color });
-const ROOM_H = 800;
-const roomBox: CSSProperties = { width: 1280, height: ROOM_H, overflow: 'hidden', position: 'relative', background: 'var(--color-bg)', boxShadow: 'var(--shadow-md)', fontFamily: 'var(--font-heading)' };
+const READ_W = 1100; // the reading column stops widening here on very wide screens
+const roomBox: CSSProperties = { overflow: 'hidden', position: 'relative', background: 'var(--color-bg)', fontFamily: 'var(--font-heading)' };
 // Phones: the room is a single readable column instead of a scaled-down 1280×800 desktop.
 const phoneBox: CSSProperties = { width: '100%', position: 'relative', background: 'var(--color-bg)', boxShadow: 'var(--shadow-md)', fontFamily: 'var(--font-heading)', padding: '0 16px 28px', boxSizing: 'border-box' };
 const briefRow: CSSProperties = { display: 'grid', gridTemplateColumns: '64px 110px 1fr', gap: 20, alignItems: 'baseline', padding: '10px 14px', margin: '0 -14px', outlineOffset: -3, transition: 'outline-color .3s' };
@@ -99,14 +102,15 @@ const briefRow: CSSProperties = { display: 'grid', gridTemplateColumns: '64px 11
  */
 export class Desk extends Component<object, State> {
   state: State = { ...INIT };
-  // Full view: the 1280×800 room fills the window in both directions (minus the
-  // margin and the bottom demo bar), growing on large screens too. Measured on the
-  // layout viewport: on phones innerWidth grows once content overflows, which fed
-  // the old fit a too-large width and cropped the room.
+  // Full view: the room fills the whole window above the demo bar. The scale keeps
+  // at least 1280×800 layout px; the room then takes the window's shape, so a wide
+  // screen gets a wider room rather than grey bands. Measured on the layout
+  // viewport: on phones innerWidth grows once content overflows.
   private fit = () => {
     const W = document.documentElement.clientWidth, H = document.documentElement.clientHeight, small = W < 760 || H < 520;
-    const pad = small ? 8 : 24, bar = small ? 44 : 72;
-    this.setState({ small, z: Math.min(1.6, (W - 2 * pad - 8) / 1280, (H - 2 * pad - bar) / 800) });
+    const bar = document.getElementById('desk-bar')?.offsetHeight ?? 64;
+    const w = W, h = H - bar, z = Math.min(1.6, w / 1280, h / 800);
+    this.setState({ small, z, rw: w / z, rh: h / z, barH: bar });
   };
   private lastStage = 0;
   private gen = 0;
@@ -255,17 +259,17 @@ export class Desk extends Component<object, State> {
     this.setState({ sendStep: 2, sendPick: v });
     this.say(`Sent — version ${v.toUpperCase()}, your words. A copy is filed under Northwind; nothing else left your desk.`, 'DONE', false, () => this.rest());
   };
-  restart = () => { this.answerT.forEach(clearTimeout); this.closeLine(); clearTimeout(this.nudgeT); this.lastStage = 0; this.setState(({ z, small }) => ({ ...INIT, z, small }), () => this.arrive(0)); };
+  restart = () => { this.answerT.forEach(clearTimeout); this.closeLine(); clearTimeout(this.nudgeT); this.lastStage = 0; this.setState(({ z, rw, rh, barH, small }) => ({ ...INIT, z, rw, rh, barH, small }), () => this.arrive(0)); };
 
   // ——— render ———
   room(i: number, children: ReactNode) {
     const s = this.state;
     const P = s.small;
-    const sideline = <Sideline phone={P} prefs={s} onPref={(k, v) => this.setState({ [k]: v } as Pick<State, typeof k>)} backTo={s.prev != null ? NAMES[s.prev] : ''} onBack={() => s.prev != null && this.setState({ stage: s.prev, prev: s.stage, board: false })} onTab={this.tabIt} />;
+    const sideline = <Sideline phone={P} height={s.rh - 56} prefs={s} onPref={(k, v) => this.setState({ [k]: v } as Pick<State, typeof k>)} backTo={s.prev != null ? NAMES[s.prev] : ''} onBack={() => s.prev != null && this.setState({ stage: s.prev, prev: s.stage, board: false })} onTab={this.tabIt} />;
     const line = s.stage === i && <Line phone={P} top={66} line={s.line} nextLabel={s.walk === 3 ? 'Done' : 'Next'} onNext={() => s.walk === 3 ? this.walkDone() : this.runBrief(s.walk + 1)} onStop={() => s.walk ? this.walkStop() : this.closeLine()} onAsk={this.ask} onTyping={on => { this.typingNow = on; if (!on) this.armClose(); }} onChoice={this.choose} />;
     return <div style={{ display: s.board || s.stage === i ? 'block' : 'none', zoom: P ? 1 : s.board ? Math.min(.44, s.z * .44) : s.z, width: P ? '100%' : undefined }}>
       <div style={{ fontSize: 30, margin: '0 0 6px', color: 'var(--color-neutral-600)', display: s.board ? 'block' : 'none' }}>{i + 1} · {NAMES[i]} — {WHO[i]}</div>
-      <div style={{ ...(P ? phoneBox : roomBox), filter: `brightness(${(s.bright / 100 + .1).toFixed(2)}) sepia(${(s.warm / 160).toFixed(2)})` }}>
+      <div style={{ ...(P ? phoneBox : { ...roomBox, width: s.rw, height: s.rh, boxShadow: s.board ? 'var(--shadow-md)' : 'none' }), filter: `brightness(${(s.bright / 100 + .1).toFixed(2)}) sepia(${(s.warm / 160).toFixed(2)})` }}>
         <Chrome compact={P} active={i} tabs={TABS} time={TIMES[i]} onGo={this.nav} />
         {P ? <>{line}{sideline}{children}</> : <>{children}{sideline}{line}</>}
       </div>
@@ -273,9 +277,9 @@ export class Desk extends Component<object, State> {
   }
 
   enlarge(k: Room) {
-    const on = !!this.state.wide[k];
+    const on = !!this.state.wide[k], rw = this.state.rw;
     return {
-      l: on ? 96 : 112, w: on ? 1090 : 850, rail: on ? 'none' : 'flex',
+      l: on ? 96 : 112, w: on ? Math.min(rw - 190, READ_W + 240) : Math.min(rw - 430, READ_W), rail: on ? 'none' : 'flex',
       button: <button onClick={() => this.setState(st => ({ wide: { ...st.wide, [k]: !st.wide[k] } }))} style={{ position: 'absolute', top: 66, right: 56, zIndex: 15, whiteSpace: 'nowrap', display: this.state.line.open || this.state.small ? 'none' : 'inline-flex' }} className="btn btn-ghost">{on ? '↙ Side column' : '↗ Enlarge'}</button>,
     };
   }
@@ -289,14 +293,14 @@ export class Desk extends Component<object, State> {
     // Text size scales the reading columns (not the narrow side rails); offsets are divided back so only the type grows
     const tz = TEXT_ZOOM[s.text] ?? 1;
     // At Large a column can outgrow the room; it scrolls inside instead of running off the bottom
-    const clampH = (top: number): CSSProperties => tz > 1 ? { maxHeight: (ROOM_H - 12 - top) / tz, overflowY: 'auto', overflowX: 'hidden' } : {};
+    const clampH = (top: number): CSSProperties => tz > 1 ? { maxHeight: (s.rh - 12 - top) / tz, overflowY: 'auto', overflowX: 'hidden' } : {};
     const P = s.small;
     const main = (m: { l: number; w: number }): CSSProperties => P ? { position: 'relative', zoom: tz, marginTop: 18 } : ({ position: 'absolute', left: m.l / tz, top: ct / tz, width: m.w / tz, zoom: tz, ...clampH(ct), transition: `left .3s,width .3s,top .6s ${EASE}` });
-    const rail = (m: { rail: string }, gap = 28): CSSProperties => P ? { display: 'flex', flexDirection: 'column', gap, fontSize: 15, marginTop: 32, paddingTop: 20, borderTop: '1px solid var(--color-divider)' } : ({ position: 'absolute', left: 1000, top: rt, width: 196, transition: `top .6s ${EASE}`, display: m.rail, flexDirection: 'column', gap, fontSize: 15 });
+    const rail = (m: { rail: string }, gap = 28): CSSProperties => P ? { display: 'flex', flexDirection: 'column', gap, fontSize: 15, marginTop: 32, paddingTop: 20, borderTop: '1px solid var(--color-divider)' } : ({ position: 'absolute', left: s.rw - 280, top: rt, width: 196, transition: `top .6s ${EASE}`, display: m.rail, flexDirection: 'column', gap, fontSize: 15 });
     const A = this.enlarge('a'), W = this.enlarge('w'), Cl = this.enlarge('c');
 
-    return <div style={{ fontFamily: 'var(--font-body)', color: 'var(--color-text)', paddingBottom: 64 }}>
-      <div style={{ padding: s.small ? 8 : 24, display: 'flex', flexWrap: 'wrap', gap: s.small ? 12 : 28, justifyContent: 'center', alignItems: 'flex-start' }}>
+    return <div style={{ fontFamily: 'var(--font-body)', color: 'var(--color-text)', paddingBottom: s.small || s.board ? 64 : s.barH }}>
+      <div style={{ padding: s.small ? 8 : s.board ? 24 : 0, display: 'flex', flexWrap: 'wrap', gap: s.small ? 12 : 28, justifyContent: 'center', alignItems: 'flex-start' }}>
 
         {/* 1 DAY · the assistant */}
         {this.room(0, <>
@@ -470,7 +474,7 @@ export class Desk extends Component<object, State> {
 
         {/* 4 CLOSE · the librarian */}
         {this.room(3, <>
-          <div style={P ? main(Cl) : { position: 'absolute', left: 96 / tz, top: ct / tz, width: 1090 / tz, zoom: tz, ...clampH(ct), transition: `top .6s ${EASE}` }}>
+          <div style={P ? main(Cl) : { position: 'absolute', left: 96 / tz, top: ct / tz, width: Math.min(s.rw - 190, READ_W + 240) / tz, zoom: tz, ...clampH(ct), transition: `top .6s ${EASE}` }}>
             <div style={kick('var(--color-accent-2)', 13)}>END OF DAY · 16:45–17:00</div>
             <h1 style={{ margin: '6px 0 0', fontSize: P ? 34 : 56, fontWeight: 600, lineHeight: 1.02, letterSpacing: '-.01em' }}>That's the day.</h1>
             <div style={{ display: 'grid', gridTemplateColumns: P ? '1fr' : '1.1fr 1fr 1fr', gap: P ? 32 : 48, marginTop: 24 }}>
@@ -525,7 +529,7 @@ export class Desk extends Component<object, State> {
         </>)}
       </div>
 
-      <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 50, background: 'var(--color-bg)', display: 'flex', alignItems: 'center', gap: s.small ? 4 : 16, padding: s.small ? '4px 8px' : '10px 24px', flexWrap: s.small ? 'nowrap' : 'wrap', overflowX: 'auto', boxShadow: 'var(--shadow-sm)' }}>
+      <div id="desk-bar" style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 50, background: 'var(--color-bg)', display: 'flex', alignItems: 'center', gap: s.small ? 4 : 16, padding: s.small ? '4px 8px' : '10px 24px', flexWrap: s.small ? 'nowrap' : 'wrap', overflowX: 'auto', boxShadow: 'var(--shadow-sm)' }}>
         {!s.small && <div style={{ fontSize: 11, letterSpacing: '.14em', color: 'var(--color-neutral-600)', fontWeight: 700, whiteSpace: 'nowrap' }}>DEMO · FOUR ROOMS</div>}
         <div style={{ display: 'flex', gap: 4, flexWrap: s.small ? 'nowrap' : 'wrap', flex: 1 }}>
           {NAMES.map((n, i) => { const on = !s.board && s.stage === i; return <button key={n} onClick={this.go(i)} style={{ all: 'unset', cursor: 'pointer', padding: s.small ? '6px 8px' : '4px 10px', fontSize: s.small ? 13 : 14, borderRadius: 2, background: on ? 'var(--color-accent)' : 'transparent', color: on ? '#fff' : 'var(--color-text)', whiteSpace: 'nowrap' }}>{i + 1} · {n}{s.small ? '' : ` — ${WHO[i]}`}</button>; })}
