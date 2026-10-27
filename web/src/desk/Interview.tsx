@@ -15,7 +15,7 @@ export const SCRIPT = [
 const AMBER = 'oklch(0.7 0.17 65)';
 let played = 0; // survives closing and reopening the card during the webinar
 
-type Recognition = { lang: string; interimResults: boolean; continuous: boolean; start: () => void; stop: () => void; onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null; onend: (() => void) | null; onerror: (() => void) | null };
+type Recognition = { lang: string; interimResults: boolean; continuous: boolean; start: () => void; abort: () => void; onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null; onend: (() => void) | null; onerror: (() => void) | null };
 
 function hebrewVoice() {
   const vs = window.speechSynthesis?.getVoices() ?? [];
@@ -31,8 +31,11 @@ export function Interview({ onActive }: { onActive: (on: boolean) => void }) {
   const timer = useRef<number | undefined>(undefined);
   const rec = useRef<Recognition | null>(null);
   const token = useRef(new URLSearchParams(location.search).get('live') ?? '');
+  const turn = useRef(0); // bumped by every stop, so a late live answer can't talk over what came after it
 
   const stop = () => {
+    turn.current += 1;
+    rec.current?.abort(); rec.current = null;
     window.clearInterval(timer.current);
     audio.current?.pause();
     window.speechSynthesis?.cancel();
@@ -66,19 +69,23 @@ export function Interview({ onActive }: { onActive: (on: boolean) => void }) {
     setHeard('');
     a.onloadedmetadata = () => { setStatus('speaking'); reveal(t, a.duration); };
     a.onended = () => setStatus('');
-    a.onerror = () => speakBrowser(t); // no recorded file: the browser's voice reads the same line
-    void a.play().catch(() => speakBrowser(t));
+    let fell = false; // a missing file fails both play() and onerror; read the line once
+    const fallback = () => { if (!fell) { fell = true; speakBrowser(t); } };
+    a.onerror = fallback; // no recorded file: the browser's voice reads the same line
+    void a.play().catch(fallback);
   };
 
   const askLive = async (q: string) => {
     setHeard(q); setStatus('thinking'); setText(''); onActive(true);
+    const mine = turn.current;
     try {
       const r = await fetch('/api/tab', { method: 'POST', headers: { 'content-type': 'application/json', 'x-tab-live': token.current }, body: JSON.stringify({ q }) });
       const { answer } = r.ok ? ((await r.json()) as { answer: string }) : { answer: '' };
+      if (mine !== turn.current) return;
       if (answer) speakBrowser(answer);
       else setStatus('');
     } catch {
-      setStatus('');
+      if (mine === turn.current) setStatus('');
     }
   };
 
@@ -89,9 +96,9 @@ export function Interview({ onActive }: { onActive: (on: boolean) => void }) {
     stop();
     const r = new R();
     r.lang = 'he-IL'; r.interimResults = false; r.continuous = false;
-    r.onresult = e => { const q = e.results[0]?.[0]?.transcript?.trim(); if (q) void askLive(q); };
-    r.onend = () => setStatus(st => (st === 'listening' ? '' : st));
-    r.onerror = () => setStatus('');
+    r.onresult = e => { if (rec.current !== r) return; const q = e.results[0]?.[0]?.transcript?.trim(); if (q) void askLive(q); };
+    r.onend = () => { if (rec.current === r) setStatus(st => (st === 'listening' ? '' : st)); };
+    r.onerror = () => { if (rec.current === r) setStatus(''); };
     rec.current = r;
     setStatus('listening'); setHeard(''); onActive(true);
     r.start();
@@ -105,7 +112,7 @@ export function Interview({ onActive }: { onActive: (on: boolean) => void }) {
       else if (e.key === 'l' || e.key === 'L') listen();
     };
     window.addEventListener('keydown', key);
-    return () => { window.removeEventListener('keydown', key); stop(); rec.current?.stop(); };
+    return () => { window.removeEventListener('keydown', key); stop(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
