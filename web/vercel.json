@@ -49,6 +49,9 @@
     {
       "src": "^/film$",
       "dest": "/index.html"
+    },
+    {
+      "handle": "filesystem"
     }
   ]
 }
