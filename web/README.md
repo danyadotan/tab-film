@@ -53,3 +53,81 @@ The ledger and ROI figures are still illustrative placeholders. Replace them in 
 - **Any other domain** (e.g. tab.dynamicbridge.io) opens the film at `/`. The desk is at `/desk.html`.
 
 The Desk fills the window in both directions: the 1280×800 room scales between fit-to-screen and 160%.
+
+## Webinar live Q&A (11 November 2026, 20:00 Israel)
+
+The five `/voice/tab-1.mp3` … `tab-5.mp3` recordings work independently of the
+live API, its credentials and browser speech recognition. Open Desk, press **T**,
+then **→ / PageDown** for the next recording, **← / PageUp** to replay.
+
+For live questions, press **L**. Enter the presenter access token into the masked
+field (before sharing the screen). It stays only in component memory and is
+cleared by **סיום Q&A** or closing the card. Do not put it in a URL or a Vite
+variable. Legacy `?live=...` parameters are discarded when the card opens; old
+links should no longer be used. This is a presenter credential, not an audience
+link; share the plain Desk URL with attendees.
+
+Use **הקראת שאלה** to recognise Hebrew (`he-IL`) or type the question and press
+**שליחת שאלה**. Speech recognition may use the browser vendor's remote service;
+ask only public webinar questions. The question is sent to Anthropic. Browser
+speech reads the live reply only when a Hebrew voice is available; otherwise the
+complete answer remains visible for the presenter to read. Recorded audio uses
+the existing files, not the model or browser voice.
+
+### Deployment and security
+
+- Vercel project Root Directory must be `web`, framework Vite. `/api/tab.ts`
+  exports a standalone default `fetch` handler. The page-specific routes finish
+  with `handle: filesystem` to resolve the function, static assets and audio.
+  `vite preview` serves static output only; it cannot validate deployed API routing.
+- Server-only `ANTHROPIC_API_KEY` and `TAB_LIVE_TOKEN` are both required. Never
+  add a `VITE_` prefix. Configure them directly in the intended Vercel environment.
+- Missing/wrong token or unset server token: 401, no provider request. Valid token
+  but missing model key: 503. Only POST JSON is accepted; questions are 1–600
+  trimmed characters and bodies at most 4096 bytes. Cross-origin browser requests
+  are refused. Responses are `no-store`; provider error details are never returned.
+- The shared token authorises model usage. Anyone who obtains it can use the API;
+  it is not per-user authentication or a distributed spending limit. Keep it private,
+  use provider spending controls and rotate it directly in Vercel if disclosed.
+- Provider timeout: 18 seconds, no SDK retries, bounded output. UI deadline:
+  22 seconds. Recognition deadline: 12 seconds. Errors give a visible recovery
+  message. **עצירה**, another recording or closing the card cancels the client
+  request and prevents stale answers speaking over the next turn. An already
+  started provider request may still complete on the server.
+
+### Checks performed on 2 November 2026
+
+- Public `POST https://tab-at-work.com/api/tab` without a token returned **404**.
+- Vercel reports the custom domain on production commit `4028ace`; the latest
+  main commit `9bd5b08` deployment failed `npm run build` with missing `StrictMode`.
+  This branch fixes that import as well as the live-path issues.
+- Both required variable names exist as sensitive **production** variables;
+  values were not decrypted or copied. Preview availability is not confirmed.
+- `npm test` builds and typechecks both UI and API, then runs server transport
+  tests using the real SDK with a mocked upstream and React lifecycle tests with
+  mocked recognition, speech, audio and fetch. It scans built JS for server
+  credential references and checks the five MP3 files remain present.
+- These are not real-browser/microphone or live-provider tests. Chromium could
+  not be installed in the execution environment. No production config, secret,
+  deployment or domain was changed; no paid model request was made.
+
+### Remaining acceptance before the broadcast
+
+After reviewing/merging and deploying through the normal release process:
+
+1. In the intended deployment, unauthenticated POST `/api/tab` must return 401
+   (not HTML, 404 or 500); GET must return 405. Confirm recordings and `/film`,
+   `/desk`, `/demo` page routes still work.
+2. On the actual broadcast computer in Chrome over HTTPS, allow microphone,
+   open **T → L**, enter the token privately and ask one Hebrew question. Confirm
+   the transcript, actual provider/model availability, full Hebrew answer and
+   Hebrew speaker output. The existing model identifier and beta options are
+   preserved; their live availability has not been verified.
+3. Deny microphone permission and submit the same question by typing. Disable
+   the connection: verify the visible error/deadline, then **→** still plays the
+   next recording. Check sound reaches the webinar audience, not just headphones.
+4. If any live check fails, use the five recordings and let Danya answer audience
+   questions herself. The scripted interview needs neither live credentials nor
+   recognition. For fully offline rehearsal, serve the built `dist/` locally.
+
+Tests require Node 24 (matching this Vercel project): `npm ci && npm test`.
