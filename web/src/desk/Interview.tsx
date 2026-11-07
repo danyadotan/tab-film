@@ -25,12 +25,16 @@ function hebrewVoice() {
 export function Interview({ onActive }: { onActive: (on: boolean) => void }) {
   const [text, setText] = useState('');
   const [shown, setShown] = useState(0);
-  const [status, setStatus] = useState<'' | 'speaking' | 'listening' | 'thinking'>('');
+  const [status, setStatus] = useState<'' | 'speaking' | 'listening' | 'thinking' | 'loadingVoice'>('');
   const [heard, setHeard] = useState('');
   const [notice, setNotice] = useState('');
   const [liveOpen, setLiveOpen] = useState(false);
   const [question, setQuestion] = useState('');
   const [access, setAccess] = useState('');
+  const [canReplay, setCanReplay] = useState(false);
+  const voicePending = useRef<AbortController | null>(null);
+  const voiceDeadline = useRef<number | undefined>(undefined);
+  const voiceURL = useRef<string | null>(null);
   const pending = useRef<AbortController | null>(null);
   const deadline = useRef<number | undefined>(undefined);
   const listenDeadline = useRef<number | undefined>(undefined);
@@ -45,6 +49,10 @@ export function Interview({ onActive }: { onActive: (on: boolean) => void }) {
     const previous = rec.current; rec.current = null;
     previous?.abort();
     pending.current?.abort(); pending.current = null;
+    voicePending.current?.abort(); voicePending.current = null;
+    window.clearTimeout(voiceDeadline.current);
+    if (voiceURL.current) { URL.revokeObjectURL(voiceURL.current); voiceURL.current = null; }
+    setCanReplay(false);
     window.clearTimeout(deadline.current);
     window.clearTimeout(listenDeadline.current);
     setStatus('');
@@ -77,6 +85,49 @@ export function Interview({ onActive }: { onActive: (on: boolean) => void }) {
     setStatus('speaking');
     try { window.speechSynthesis.speak(u); }
     catch { setStatus(''); setNotice('ההשמעה אינה זמינה. התשובה מוצגת לקריאה.'); }
+  };
+
+  const playVoice = (mine: number) => {
+    if (mine !== turn.current || !audio.current || !voiceURL.current) return;
+    const a = audio.current;
+    a.currentTime = 0;
+    setNotice(''); setStatus('speaking');
+    a.onended = () => { if (mine === turn.current) setStatus(''); };
+    a.onerror = () => { if (mine === turn.current) { setStatus(''); setNotice('לא ניתן להשמיע את הקול. התשובה נשארת לקריאה.'); } };
+    void a.play().catch(() => {
+      if (mine === turn.current) { setStatus(''); setNotice('לחצי על ״השמעת התשובה״ כדי לאפשר השמעה בדפדפן.'); }
+    });
+  };
+
+  const speakLive = async (answer: string) => {
+    const mine = turn.current;
+    setText(answer); setShown(answer.split(' ').length); setStatus('loadingVoice');
+    const controller = new AbortController(); voicePending.current = controller;
+    voiceDeadline.current = window.setTimeout(() => controller.abort(), 18_000);
+    try {
+      const response = await fetch('/api/tab-voice', {
+        method: 'POST', signal: controller.signal,
+        headers: { 'content-type': 'application/json', 'x-tab-live': token.current },
+        body: JSON.stringify({ text: answer }),
+      });
+      if (!response.ok || !response.headers.get('content-type')?.startsWith('audio/')) throw new Error('Voice unavailable');
+      const blob = await response.blob();
+      if (mine !== turn.current) return;
+      if (!blob.size || blob.size > 2_000_000) throw new Error('Invalid audio');
+      voiceURL.current = URL.createObjectURL(blob);
+      audio.current = new Audio(voiceURL.current);
+      setCanReplay(true);
+      playVoice(mine);
+    } catch {
+      if (mine === turn.current) {
+        // Browser Hebrew speech remains a fallback when available; text always
+        // remains complete. A failed voice request never repeats the model call.
+        speakBrowser(answer);
+        setNotice('קול TAB אינו זמין כרגע. התשובה מוצגת לקריאה; אם קיים קול עברי בדפדפן הוא יקריא אותה.');
+      }
+    } finally {
+      if (mine === turn.current) { window.clearTimeout(voiceDeadline.current); voicePending.current = null; }
+    }
   };
 
   const play = (i: number) => {
@@ -113,7 +164,7 @@ export function Interview({ onActive }: { onActive: (on: boolean) => void }) {
       const body: unknown = await r.json();
       const answer = (body as { answer?: unknown } | null)?.answer;
       if (typeof answer !== 'string' || !answer.trim()) throw new Error('לא התקבלה תשובה.');
-      if (mine === turn.current) speakBrowser(answer);
+      if (mine === turn.current) void speakLive(answer);
     } catch (error) {
       if (mine === turn.current) {
         setStatus('');
@@ -182,12 +233,14 @@ export function Interview({ onActive }: { onActive: (on: boolean) => void }) {
       <button type="button" onClick={() => { stop(); setNotice(''); }}>עצירה</button>
       <button type="button" onClick={() => { stop(); token.current = ''; setAccess(''); setLiveOpen(false); setNotice(''); setText(''); setHeard(''); onActive(false); }}>סיום Q&A</button>
     </form>}
+    {canReplay && <button type="button" onClick={() => playVoice(turn.current)}>השמעת התשובה</button>}
     {notice && <div role="status" style={{ fontSize: 16 }}>{notice}</div>}
     {heard && <div style={{ fontSize: 15, color: 'var(--color-neutral-600)', fontStyle: 'italic' }}>״{heard}״</div>}
     <div style={{ display: 'flex', gap: 12, alignItems: 'baseline' }}>
       <span style={{ width: 12, height: 12, flex: 'none', borderRadius: '50%', background: AMBER, boxShadow: `0 0 0 ${status === 'speaking' ? 6 : 0}px oklch(0.9 0.1 80)`, transition: 'box-shadow .25s' }}></span>
       <div style={{ fontSize: 24, lineHeight: 1.4 }}>
         {status === 'listening' && <span style={{ color: 'var(--color-neutral-500)' }}>מקשיב…</span>}
+        {status === 'loadingVoice' && <span style={{ fontSize: 16, color: 'var(--color-neutral-500)' }}>מכין קול… </span>}
         {status === 'thinking' && !text && <span style={{ color: 'var(--color-neutral-500)' }}>…</span>}
         <span>{words.slice(0, shown).join(' ')}</span>
       </div>

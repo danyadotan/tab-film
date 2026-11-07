@@ -41,7 +41,7 @@ async function setup(t, { voice = true, recognition = 'success', url = 'https://
   globalThis.window = w;
   globalThis.location = new URL(url);
   globalThis.history = { replaceState: (_state, _title, url) => { globalThis.location = new URL(url); } };
-  globalThis.fetch = async (url, options) => { calls.push({ url, options }); return Response.json({ answer: 'מתחילים בצעד קטן.' }); };
+  globalThis.fetch = async (url, options) => { calls.push({ url, options }); return url === '/api/tab-voice' ? new Response(null, { status: 503 }) : Response.json({ answer: 'מתחילים בצעד קטן.' }); };
   let renderer;
   await act(async () => { renderer = TestRenderer.create(React.createElement(Interview, { onActive: value => active.push(value) })); });
   t.after(async () => { await act(async () => renderer.unmount()); });
@@ -80,7 +80,7 @@ for (const mode of ['absent', 'throws', 'denied', 'no-speech']) test(`recognitio
   if (mode === 'no-speech') await act(async () => t.mock.timers.tick(12_001));
   assert.match(c.text(), /להקליד/);
   await c.input('שאלה מהקהל', 'איך מתחילים?'); await c.submit();
-  assert.match(c.text(), /מתחילים בצעד קטן/); assert.match(c.text(), /אין קול עברי/); assert.equal(c.spoken.length, 0);
+  assert.match(c.text(), /מתחילים בצעד קטן/); assert.match(c.text(), /קול TAB אינו זמין/); assert.equal(c.spoken.length, 0);
 });
 
 test('model HTTP failures, malformed response and network failure have visible recovery', async t => {
@@ -114,4 +114,34 @@ test('speech synthesis failure and recorded-file failure keep the complete text 
   const index = Number(c.recordings.at(-1).url.match(/tab-(\d+)/)[1]) - 1;
   assert.equal(c.spoken.at(-1).text, SCRIPT[index]); assert.ok(c.text().includes(SCRIPT[index]));
   await c.button('סיום Q&A'); await c.key('l'); assert.equal(c.renderer.root.findByProps({ 'aria-label': 'אסימון גישה למגישה' }).props.value, '');
+});
+
+
+test('ElevenLabs audio plays with no browser Hebrew voice; replay uses cached audio', async t => {
+  const c = await setup(t, { voice: false });
+  const requests = [];
+  globalThis.fetch = async (url, options) => {
+    requests.push({ url, options });
+    return url === '/api/tab' ? Response.json({ answer: 'שלום דניה.' }) : new Response(new Uint8Array([73,68,51,1]), { headers: { 'content-type': 'audio/mpeg' } });
+  };
+  await c.key('l'); await c.input('אסימון גישה למגישה', 'test-only-token'); await c.input('שאלה מהקהל', 'שלום'); await c.submit();
+  assert.match(c.text(), /שלום דניה/);
+  assert.equal(requests[1].url, '/api/tab-voice');
+  assert.equal(requests[1].options.headers['x-tab-live'], 'test-only-token');
+  assert.deepEqual(JSON.parse(requests[1].options.body), { text: 'שלום דניה.' });
+  assert.ok(c.recordings.at(-1).url.startsWith('blob:'));
+  assert.equal(c.spoken.length, 0);
+  await c.button('השמעת התשובה'); assert.equal(requests.length, 2);
+  await c.button('עצירה'); assert.equal(c.renderer.root.findAllByType('button').some(b => b.children.includes('השמעת התשובה')), false);
+});
+
+test('late voice generation is discarded after stop without interrupting recorded playback', async t => {
+  const c = await setup(t, { voice: false }); let deliver;
+  globalThis.fetch = async url => url === '/api/tab' ? Response.json({ answer: 'תשובה חיה' }) : new Promise(resolve => { deliver = resolve; });
+  await c.key('l'); await c.input('אסימון גישה למגישה', 'test-only-token'); await c.input('שאלה מהקהל', 'שלום'); await c.submit();
+  assert.match(c.text(), /מכין קול/);
+  await c.key('ArrowRight'); const recorded = c.recordings.at(-1);
+  await act(async () => deliver(new Response(new Uint8Array([73,68,51]), { headers: { 'content-type': 'audio/mpeg' } })));
+  assert.equal(c.recordings.at(-1), recorded);
+  assert.equal(c.recordings.some(a => a.url.startsWith('blob:')), false);
 });

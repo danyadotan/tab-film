@@ -131,3 +131,43 @@ After reviewing/merging and deploying through the normal release process:
    recognition. For fully offline rehearsal, serve the built `dist/` locally.
 
 Tests require Node 24 (matching this Vercel project): `npm ci && npm test`.
+
+## ElevenLabs voice for live answers
+
+Live answers now appear in full immediately, then POST their text to
+`/api/tab-voice` for Hebrew MP3 generation (`eleven_v3`, language `he`). The same
+presenter token protects both APIs. The voice endpoint accepts at most 2000
+characters/12000 bytes, fixes the voice/model server-side, limits audio to 2 MB,
+uses a 15-second deadline and never retries paid generation automatically.
+
+Configure these **server-only** variables in the intended Preview branch first:
+
+| Variable | Value |
+| --- | --- |
+| `ELEVENLABS_API_KEY` | A restricted ElevenLabs API key with Text to Speech access; save as Secret |
+| `ELEVENLABS_VOICE_ID` | ID of the selected voice accessible to that account; preferably the voice used for the existing recordings |
+
+Create/manage the key at https://elevenlabs.io/app/api/api-keys and choose a voice
+at https://elevenlabs.io/app/voice-library. Preview scope for the webinar test is
+`fix/webinar-live-qa`; the existing branch-specific `TAB_LIVE_TOKEN` is reused.
+Redeploy that branch after saving variables. Do not put provider credentials in
+the presenter token field or a `VITE_` variable. No key/voice was configured by
+this code change. Provider cost/access depends on the ElevenLabs account.
+
+Only the answer text is sent to ElevenLabs. This is cloud processing and provider
+retention follows your account settings; do not describe it as local processing
+or guaranteed zero retention. The endpoint sends no prompt, question history or
+presenter token to the provider and returns only MP3 audio, not provider headers.
+The browser keeps the clip in memory for replay; it is revoked when the turn is
+stopped/replaced or the card closes. Audio is not persisted to files/storage.
+
+If playback is blocked by browser autoplay rules, use **השמעת התשובה** to play
+the cached clip without another provider request. If generation fails or times
+out, the complete answer remains, with browser Hebrew speech used if available.
+The live text request and five recorded interview files remain independent.
+
+Acceptance: test one actual Hebrew answer with the chosen voice, check first
+audio latency and pronunciation, replay, Stop during generation/playback, next
+recording and provider failure. `npm test` covers these transport/component
+boundaries with mocked services; actual ElevenLabs audio quality and account
+permissions have not yet been tested because the credentials are not configured.

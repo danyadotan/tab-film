@@ -112,7 +112,7 @@ test('routing preserves page mappings and resolves deployed filesystem functions
 test('production JS excludes model SDK and server credential references', () => {
   const folder = new URL('../dist/assets/', import.meta.url);
   for (const name of readdirSync(folder).filter(n => n.endsWith('.js'))) {
-    assert.doesNotMatch(readFileSync(new URL(name, folder), 'utf8'), /ANTHROPIC_API_KEY|TAB_LIVE_TOKEN|api\.anthropic\.com|test-only-key/);
+    assert.doesNotMatch(readFileSync(new URL(name, folder), 'utf8'), /ELEVENLABS_API_KEY|ELEVENLABS_VOICE_ID|ANTHROPIC_API_KEY|TAB_LIVE_TOKEN|api\.anthropic\.com|test-only-key/);
   }
   for (let i = 1; i <= 5; i++) assert.ok(readFileSync(new URL(`../public/voice/tab-${i}.mp3`, import.meta.url)).length > 1000);
 });
