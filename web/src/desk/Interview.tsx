@@ -12,6 +12,13 @@ export const SCRIPT = [
   'כשכל דבר מבקש אישור, אישור הופך לרפלקס, ואנשים מאשרים בלי לקרוא. החדש הוא שהמכסה חלה על הסוכנים, לא עלייך. הם צריכים לעשות עבודה טובה יותר כדי להגיע אלייך.',
 ];
 
+export const PRESENTER_QUESTIONS = [
+  'דניה, למה בנית אותי כך שאשלים אותך?',
+  'מה הסביבה צריכה להחזיק עבור אדם בזמן עבודה?',
+  'מי מחליט מה מותר לסוכן לעשות?',
+  'איך תדעי שהמערכת עזרה, ואיך תשמרי על בדיקה גם כשהיא נעשית מוכרת?',
+];
+
 const AMBER = 'oklch(0.7 0.17 65)';
 let played = 0; // survives closing and reopening the card during the webinar
 
@@ -175,6 +182,15 @@ export function Interview({ onActive }: { onActive: (on: boolean) => void }) {
     }
   };
 
+  const askPresenter = (i: number) => {
+    stop(); setNotice(''); setLiveOpen(true); onActive(true);
+    const q = PRESENTER_QUESTIONS[i];
+    if (!q) return;
+    if (!token.current) { setNotice('יש להזין אסימון גישה למגישה. השאלה זמינה להקראה מהמסמך.'); return; }
+    setHeard('TAB שואל את דניה');
+    void speakLive(q);
+  };
+
   const listen = () => {
     stop(); setLiveOpen(true); setNotice(''); onActive(true);
     if (!token.current) { setNotice('יש להזין אסימון גישה למגישה. הראיון המוקלט זמין כרגיל.'); return; }
@@ -222,7 +238,7 @@ export function Interview({ onActive }: { onActive: (on: boolean) => void }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!text && !status && !notice && !liveOpen) return null;
+  if (!text && !status && !notice && !liveOpen) return <button type="button" onClick={() => { setLiveOpen(true); onActive(true); }}>שאלות חיות והחלפת תפקידים</button>;
   const words = text.split(' ');
   return <div dir="rtl" style={{ alignSelf: 'stretch', background: '#fff', outline: `1.5px solid ${AMBER}`, borderRadius: 24, padding: '16px 22px', display: 'flex', flexDirection: 'column', gap: 8 }}>
     {liveOpen && <form onSubmit={e => { e.preventDefault(); void askLive(question); }} style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -233,6 +249,10 @@ export function Interview({ onActive }: { onActive: (on: boolean) => void }) {
       <button type="button" onClick={() => { stop(); setNotice(''); }}>עצירה</button>
       <button type="button" onClick={() => { stop(); token.current = ''; setAccess(''); setLiveOpen(false); setNotice(''); setText(''); setHeard(''); onActive(false); }}>סיום Q&A</button>
     </form>}
+    {liveOpen && <div aria-label="שאלות TAB לדניה" style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+      <div style={{ flexBasis: '100%', fontSize: 16 }}>החלפת תפקידים: בחרי שאלה אחת. TAB מקריא נוסח מוכן; את עונה בקול. אין האזנה או קריאת צ׳אט אוטומטית.</div>
+      {PRESENTER_QUESTIONS.map((q, i) => <button type="button" key={q} aria-label={`שאלת TAB ${i + 1}`} onClick={() => askPresenter(i)} disabled={!!status}>שאלת TAB {i + 1}</button>)}
+    </div>}
     {canReplay && <button type="button" onClick={() => playVoice(turn.current)}>השמעת התשובה</button>}
     {notice && <div role="status" style={{ fontSize: 16 }}>{notice}</div>}
     {heard && <div style={{ fontSize: 15, color: 'var(--color-neutral-600)', fontStyle: 'italic' }}>״{heard}״</div>}

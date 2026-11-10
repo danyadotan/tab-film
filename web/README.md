@@ -171,3 +171,25 @@ audio latency and pronunciation, replay, Stop during generation/playback, next
 recording and provider failure. `npm test` covers these transport/component
 boundaries with mocked services; actual ElevenLabs audio quality and account
 permissions have not yet been tested because the credentials are not configured.
+
+## Presenter questions for 11 November
+
+With TAB's card open, use **שאלות חיות והחלפת תפקידים** to open presenter
+controls without starting the microphone. Enter the access token privately.
+The four **שאלת TAB 1–4** buttons speak prepared questions through the existing
+protected voice endpoint; they do not call Claude or listen to the presenter.
+Wait for playback to finish, answer aloud, then choose the next question.
+**השמעת התשובה** replays the current cached clip without a provider request.
+Stop, card closure and recorded playback cancel pending generation as before.
+
+This does not connect Zoom chat or automate the event clock. The existing five
+recordings remain independent and unchanged. They describe a product scenario,
+not verified production privacy guarantees. Introduce them as prepared demo
+answers. Live model guidance now distinguishes implemented cloud Q&A from
+local-first design goals and removes unsupported retention and research claims.
+
+Release gate: ELEVENLABS_VOICE_ID currently exists only for the previous Preview
+branch. Use the selected voice ID for this Preview branch before its build.
+Production configuration/release requires explicit approval. Verify actual voice,
+model latency and Zoom Share sound on the presenter computer; mocked transport
+checks and a GET 405 do not establish that acceptance.
