@@ -47,7 +47,7 @@ async function setup(t, { voice = true, recognition = 'success', url = 'https://
   t.after(async () => { await act(async () => renderer.unmount()); });
   const key = async key => act(async () => { const e = new Event('keydown'); Object.assign(e, { key }); w.dispatchEvent(e); });
   const input = async (label, value) => act(async () => renderer.root.findByProps({ 'aria-label': label }).props.onChange({ target: { value } }));
-  const button = async label => act(async () => renderer.root.findAllByType('button').find(b => b.children.includes(label)).props.onClick());
+  const button = async label => act(async () => renderer.root.findAllByType('button').find(b => b.children.includes(label) || b.props['aria-label'] === label).props.onClick());
   const submit = async () => act(async () => renderer.root.findByType('form').props.onSubmit({ preventDefault() {} }));
   const text = () => JSON.stringify(renderer.toJSON());
   return { w, renderer, key, input, button, submit, text, spoken, recordings, calls, active };
@@ -144,4 +144,31 @@ test('late voice generation is discarded after stop without interrupting recorde
   await act(async () => deliver(new Response(new Uint8Array([73,68,51]), { headers: { 'content-type': 'audio/mpeg' } })));
   assert.equal(c.recordings.at(-1), recorded);
   assert.equal(c.recordings.some(a => a.url.startsWith('blob:')), false);
+});
+
+test('presenter opens controls without microphone; each prepared question uses voice only and cached replay', async t => {
+  const c = await setup(t, {voice:false});
+  await c.button('שאלות חיות והחלפת תפקידים');
+  assert.equal(c.w.recognition, undefined);
+  await c.button('שאלת TAB 1');
+  assert.equal(c.calls.length, 0);
+  await c.input('אסימון גישה למגישה', 'test-only-token');
+  const requests=[];
+  globalThis.fetch=async (url,options)=>{requests.push({url,options});return new Response(new Uint8Array([1,2,3]),{headers:{'content-type':'audio/mpeg'}});};
+  for(let i=1;i<=4;i++) {
+    await c.button(`שאלת TAB ${i}`);
+    assert.equal(requests.at(-1).url, '/api/tab-voice');
+    assert.equal(requests.at(-1).options.headers['x-tab-live'], 'test-only-token');
+    const sent=JSON.parse(requests.at(-1).options.body).text;
+    assert.match(c.text(), new RegExp(sent.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+    const before=requests.length;
+    await c.button('השמעת התשובה');
+    assert.equal(requests.length,before);
+    await act(async()=>c.recordings.at(-1).onended?.());
+  }
+  assert.equal(requests.length,4);
+  await c.button('סיום Q&A');
+  await c.button('שאלות חיות והחלפת תפקידים');
+  await c.button('שאלת TAB 1');
+  assert.equal(requests.length,4);
 });
