@@ -51,6 +51,17 @@
       "dest": "/index.html"
     },
     {
+      "src": "^/desk-he$",
+      "status": 308,
+      "headers": {
+        "Location": "/desk-he/"
+      }
+    },
+    {
+      "src": "^/desk-he/$",
+      "dest": "/desk-he/index.html"
+    },
+    {
       "handle": "filesystem"
     }
   ]

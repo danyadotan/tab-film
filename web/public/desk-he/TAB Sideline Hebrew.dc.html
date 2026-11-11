@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TAB Sideline עברית</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/broadsheet-74f2bd77-1572-48bb-a3ab-6cfa90e647f0/styles.css">
+<script src="_ds/broadsheet-74f2bd77-1572-48bb-a3ab-6cfa90e647f0/_ds_bundle.js"></script>
+</helmet>
+<div dir="rtl" style="display:flex;align-items:flex-start;height:100%;font-family:var(--font-heading);color:var(--color-text);direction:rtl">
+  <sc-if value="{{ showG }}" hint-placeholder-val="{{ false }}">
+    <div style="width:340px;height:100%;background:#fff;box-shadow:var(--shadow-lg);padding:40px 28px 28px;box-sizing:border-box;overflow:auto">
+      <div style="font-size:14px;letter-spacing:.04em;color:var(--color-accent-700);font-weight:700">מילון · המונחים של היום</div>
+      <h3 style="margin:8px 0 14px;font-size:28px;line-height:1.15;font-weight:600">מילים על המסך שלך</h3>
+      <input id="tab-he-term" class="input" aria-label="חיפוש מונח" placeholder="חיפוש מונח" value="{{ q }}" onInput="{{ setQ }}" style="width:100%;box-sizing:border-box;font-size:17px">
+      <div style="display:flex;flex-direction:column;gap:14px;margin-top:18px">
+        <sc-for list="{{ terms }}" as="t" hint-placeholder-count="6">
+          <div><div style="font-size:19px;font-weight:600">{{ t.k }}</div><div style="font-size:16px;line-height:1.5;color:var(--color-neutral-700);margin-top:2px">{{ t.v }}</div></div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ showS }}" hint-placeholder-val="{{ false }}">
+    <div style="width:340px;height:100%;background:#fff;box-shadow:var(--shadow-lg);padding:40px 28px 28px;box-sizing:border-box;overflow:auto">
+      <div style="font-size:14px;letter-spacing:.04em;color:var(--color-accent-2-700);font-weight:700">ההגדרות הרגילות שלך</div>
+      <h3 style="margin:8px 0 6px;font-size:28px;line-height:1.15;font-weight:600">לכוון בלי לעזוב</h3>
+      <p style="margin:0 0 20px;font-size:16px;line-height:1.5;color:var(--color-neutral-700)">השינויים חלים מיד. נשארים במסך הזה.</p>
+      <div style="display:flex;flex-direction:column;gap:16px;font-size:17px">
+        <div><label for="tab-he-bright" style="display:block;margin-bottom:4px">בהירות</label><input id="tab-he-bright" type="range" min="40" max="100" value="{{ bright }}" onInput="{{ setBright }}" style="width:100%;accent-color:var(--color-accent)"></div>
+        <div><label for="tab-he-warm" style="display:block;margin-bottom:4px">חמימות</label><input id="tab-he-warm" type="range" min="0" max="80" value="{{ warm }}" onInput="{{ setWarm }}" style="width:100%;accent-color:var(--color-accent)"></div>
+        <sc-for list="{{ groups }}" as="g" hint-placeholder-count="4">
+          <div><div style="margin-bottom:6px">{{ g.label }}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <sc-for list="{{ g.opts }}" as="o" hint-placeholder-count="3">
+                <button onClick="{{ o.click }}" style="all:unset;cursor:pointer;padding:5px 12px;font-size:16px;border-radius:2px;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button>
+              </sc-for>
+            </div></div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+  <div style="display:flex;flex-direction:column;gap:10px;margin-top:84px;margin-left:2px;align-items:center">
+    <button onClick="{{ tab }}" title="לכל דבר, פשוט TAB" style="all:unset;cursor:pointer;writing-mode:vertical-rl;white-space:nowrap;padding:16px 8px;border-radius:999px !important;display:flex;align-items:center;gap:10px;background:oklch(0.55 0.17 55);color:#fff;font-size:15px;font-weight:700;letter-spacing:.18em;transform-origin:left center;transition:transform .25s ease" style-hover="transform:scale(1.15)">TAB</button>
+    <button onClick="{{ toggleG }}" style="all:unset;cursor:pointer;writing-mode:vertical-rl;white-space:nowrap;padding:14px 7px;border-radius:999px !important;display:flex;align-items:center;gap:10px;background:var(--color-accent-700);color:#fff;font-size:16px;transform-origin:left center;transition:transform .25s ease" style-hover="transform:scale(1.15)">מילון</button>
+    <button onClick="{{ toggleS }}" style="all:unset;cursor:pointer;writing-mode:vertical-rl;white-space:nowrap;padding:14px 7px;border-radius:999px !important;display:flex;align-items:center;gap:10px;background:var(--color-accent-2-700);color:#fff;font-size:16px;transform-origin:left center;transition:transform .25s ease" style-hover="transform:scale(1.15)">הגדרות</button>
+    <button onClick="{{ back }}" style="all:unset;cursor:pointer;writing-mode:vertical-rl;white-space:nowrap;padding:14px 7px;border-radius:999px !important;display:flex;align-items:center;gap:10px;background:var(--color-neutral-800);color:#fff;font-size:16px;transform-origin:left center;transition:transform .25s ease;opacity:{{ backOp }}" style-hover="transform:scale(1.15)">{{ backLab }}</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:400,&quot;height&quot;:744},&quot;prefs&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;onPref&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(k:string,v:any)=&gt;void&quot;},&quot;backTo&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;היום&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;onBack&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;},&quot;onTab&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;}}">
+class Component extends DCLogic {
+  state = { panel: null, q: '' };
+  renderVals() {
+    const p = this.props.prefs || {}, on = (k, v) => this.props.onPref && this.props.onPref(k, v), panel = this.state.panel;
+    const grp = (label, key, opts) => ({ label, opts: opts.map(o => ({ label: o[1], click: () => on(key, o[0]), bg: p[key] === o[0] ? 'var(--color-accent-700)' : 'var(--color-neutral-200)', fg: p[key] === o[0] ? '#fff' : 'var(--color-text)' })) });
+    const T = [
+      ['תקציר', 'תיקייה ש-TAB בונה סביב מטרה אחת להיום: המסמך, האנשים והנתונים שהיא דורשת.'],
+      ['רצף', 'כל מה ששייך למשימה אחת נפתח יחד כמשטח אחד, ואז מוחזר למקומו.'],
+      ['בצד', 'כרטיסיות שתויקו, לא נסגרו. אפשר לשחזר בכל רגע.'],
+      ['כרטיס מיומנות', 'כלי קטן (השוואה, יומן, טיימר) שמופיע רק כשהמשימה צריכה אותו.'],
+      ['סיכום מרוכז', 'התראות שמוחזקות בצד ומגיעות יחד בשעה קבועה.'],
+      ['מסמך ראשי / מיזוג אפשרי', 'הגרסה שעובדים בה, והמועמדת היחידה ש-TAB מציע למזג לתוכה.'],
+      ['סיכון נמוך / גבוה', 'הפיך ופרטי: TAB עושה. שולח, משתף או משנה יום של מישהו אחר: TAB שואל.'],
+      ['מסלול', 'רמת תמחור: Starter, Team, Scale.'],
+      ['קבוצת הפעלה', 'משתמשים לפי שבוע ההרשמה, במעקב עד הפעולה המרכזית הראשונה.']
+    ];
+    const q = this.state.q.toLowerCase(), bt = this.props.backTo;
+    return {
+      showG: panel === 'g', showS: panel === 's',
+      toggleG: () => this.setState({ panel: panel === 'g' ? null : 'g' }),
+      toggleS: () => this.setState({ panel: panel === 's' ? null : 's' }),
+      back: () => { this.setState({ panel: null }); this.props.onBack && this.props.onBack(); },
+      tab: () => { this.setState({ panel: null }); this.props.onTab && this.props.onTab(); },
+      backLab: bt ? 'חזרה · ' + String(bt) : 'חזרה', backOp: bt ? 1 : .45,
+      bright: p.bright ?? 85, warm: p.warm ?? 25,
+      setBright: e => on('bright', +e.target.value), setWarm: e => on('warm', +e.target.value),
+      groups: [
+        grp('צליל', 'sound', [['Off', 'כבוי'], ['Soft', 'רך'], ['Ambient', 'סביבתי']]),
+        grp('התראות', 'quiet', [['Quiet', 'שקט'], ['Digest', 'סיכום מרוכז'], ['All', 'הכול']]),
+        grp('טקסט', 'text', [['Compact', 'צפוף'], ['Roomy', 'מרווח'], ['Large', 'גדול']]),
+        grp('תנועה', 'motion', [['Reduced', 'מופחתת'], ['Full', 'מלאה']])
+      ],
+      q: this.state.q, setQ: e => this.setState({ q: e.target.value }),
+      terms: T.filter(t => !q || (t[0] + t[1]).toLowerCase().includes(q)).map(t => ({ k: t[0], v: t[1] }))
+    };
+  }
+}
+</script>
+</body>
+</html>
