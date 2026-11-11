@@ -32,7 +32,7 @@
       <div style="display:grid;grid-template-columns:64px 110px 1fr;gap:20px;align-items:baseline;padding:10px 14px;margin:0 -14px;outline:{{ e1 }};outline-offset:-3px;transition:outline-color .3s">
         <div style="font-size:48px;line-height:1;color:var(--color-accent)">1</div><div style="font-size:17px;color:var(--color-neutral-700)">עד 12:00</div>
         <div>
-          <button onClick="{{ t1 }}" aria-expanded="{{ o1 }}" style="all:unset;cursor:pointer;display:block;font-size:30px;line-height:1.2">מפרט הקליטה: לשלוח. <span aria-hidden="true" style="font-size:18px;color:var(--color-neutral-600)">{{ c1 }}</span></button>
+          <button onClick="{{ t1 }}" aria-expanded="{{ o1 }}" style="all:unset;cursor:pointer;display:block;font-size:30px;line-height:1.2">מסמך האפיון: לשלוח. <span aria-hidden="true" style="font-size:18px;color:var(--color-neutral-600)">{{ c1 }}</span></button>
           <div style="font-size:18px;margin-top:4px;color:var(--color-neutral-700);display:{{ sub1 }}">סעיפים אחד עד שלושה סגורים. <span style="color:var(--color-accent-2)">סעיף 4, מסלולי התמחור</span>, עדיין פתוח.</div>
           <sc-if value="{{ o1 }}" hint-placeholder-val="{{ false }}">
             <div style="margin-top:10px;padding:12px 16px;background:#fff;box-shadow:var(--shadow-sm);font-size:17px;line-height:1.5;display:flex;flex-direction:column;gap:4px">
@@ -46,11 +46,11 @@
       <div style="display:grid;grid-template-columns:64px 110px 1fr;gap:20px;align-items:baseline;padding:10px 14px;margin:0 -14px;outline:{{ e2 }};outline-offset:-3px;transition:outline-color .3s">
         <div style="font-size:48px;line-height:1;color:var(--color-accent)">2</div><div style="font-size:17px;color:var(--color-neutral-700)">9:30</div>
         <div>
-          <button onClick="{{ t2 }}" aria-expanded="{{ o2 }}" style="all:unset;cursor:pointer;display:block;font-size:30px;line-height:1.2">סטנדאפ: שלוש שורות, מנוסחות. <span aria-hidden="true" style="font-size:18px;color:var(--color-neutral-600)">{{ c2 }}</span></button>
+          <button onClick="{{ t2 }}" aria-expanded="{{ o2 }}" style="all:unset;cursor:pointer;display:block;font-size:30px;line-height:1.2">ישיבת הבוקר: שלוש שורות, מוכנות. <span aria-hidden="true" style="font-size:18px;color:var(--color-neutral-600)">{{ c2 }}</span></button>
           <div style="font-size:18px;margin-top:4px;color:var(--color-neutral-700);display:{{ sub2 }}">החסם היחיד להעלות: החלטת התמחור.</div>
           <sc-if value="{{ o2 }}" hint-placeholder-val="{{ false }}">
             <div style="margin-top:10px;padding:12px 16px;background:#fff;box-shadow:var(--shadow-sm);font-size:17px;line-height:1.5;display:flex;flex-direction:column;gap:4px">
-              <div>המפרט יוצא עד 12:00.</div>
+              <div>המסמך יוצא עד 12:00.</div>
               <div>חסם אחד: החלטת התמחור בסעיף 4.</div>
               <div>שיחה עם Northwind ב-10:30.</div>
             </div>
@@ -59,8 +59,8 @@
       <div style="display:grid;grid-template-columns:64px 110px 1fr;gap:20px;align-items:baseline;padding:10px 14px;margin:0 -14px;outline:{{ e3 }};outline-offset:-3px;transition:outline-color .3s">
         <div style="font-size:48px;line-height:1;color:var(--color-accent)">3</div><div style="font-size:17px;color:var(--color-neutral-700)">כשמתפנים</div>
         <div>
-          <button onClick="{{ t3 }}" aria-expanded="{{ o3 }}" style="all:unset;cursor:pointer;display:block;font-size:30px;line-height:1.2">תשובות: דנה ראשונה. <span aria-hidden="true" style="font-size:18px;color:var(--color-neutral-600)">{{ c3 }}</span></button>
-          <div style="font-size:18px;margin-top:4px;color:var(--color-neutral-700);display:{{ sub3 }}">התשובה שלה משחררת את המפרט. אחריה עומר, ואז המחלקה המשפטית. {{ qNote }}</div>
+          <button onClick="{{ t3 }}" aria-expanded="{{ o3 }}" style="all:unset;cursor:pointer;display:block;font-size:30px;line-height:1.2">הודעות: קודם לענות לדנה. <span aria-hidden="true" style="font-size:18px;color:var(--color-neutral-600)">{{ c3 }}</span></button>
+          <div style="font-size:18px;margin-top:4px;color:var(--color-neutral-700);display:{{ sub3 }}">התשובה שלה משחררת את המסמך. אחריה עומר, ואז המחלקה המשפטית. {{ qNote }}</div>
           <sc-if value="{{ o3 }}" hint-placeholder-val="{{ false }}">
             <div style="margin-top:10px;padding:12px 16px;background:#fff;box-shadow:var(--shadow-sm);font-size:17px;line-height:1.5;display:flex;flex-direction:column;gap:4px">
               <div>דנה: האם Starter כולל את רשימת ההכוונה?</div>
@@ -81,7 +81,7 @@
   <div style="position:absolute;left:{{ railL }};top:{{ rtM }};width:196px;zoom:{{ bzRail }};transition:top .6s cubic-bezier(.2,.8,.2,1);display:{{ M.a.rail }};flex-direction:column;gap:28px;font-size:16px">
     <div>
       <div style="font-size:14px;letter-spacing:.04em;font-weight:700;color:var(--color-accent-2)">TAB מציע</div>
-      <p style="margin:6px 0 10px;font-size:17px;line-height:1.5">המפרט נפתח שלוש פעמים בלי עריכה. להצמיד את סעיף 4 למרכז עד הצהריים?</p>
+      <p style="margin:6px 0 10px;font-size:17px;line-height:1.5">המסמך נפתח שלוש פעמים בלי עריכה. להצמיד את סעיף 4 למרכז עד הצהריים?</p>
       <button class="btn btn-primary" onClick="{{ pin }}" style="white-space:nowrap">{{ pinLabel }}</button>
     </div>
     <div>
@@ -113,7 +113,7 @@
       <span style="padding:3px 9px;font-weight:700">B</span><span style="padding:3px 9px;font-style:italic">I</span><span style="padding:3px 9px;text-decoration:underline">U</span><span style="padding:3px 9px">H1</span><span style="padding:3px 9px">H2</span><span style="padding:3px 9px">¶</span><span style="padding:3px 9px">“ ”</span><span style="padding:3px 9px">§</span>
     </div>
     <div style="margin-top:{{ docTop }};background:#fff;padding:{{ docPad }};min-height:{{ docMin }};box-sizing:border-box;box-shadow:var(--shadow-sm)">
-      <div style="font-size:15px;letter-spacing:.04em;color:var(--color-neutral-700)">מפרט הקליטה · {{ copyName }}</div>
+      <div style="font-size:15px;letter-spacing:.04em;color:var(--color-neutral-700)">מסמך האפיון · {{ copyName }}</div>
       <h2 style="margin:10px 0 18px;font-size:34px;font-weight:600;line-height:1.15">סעיף 4: מסלולי התמחור</h2>
       <sc-if value="{{ copyMine }}" hint-placeholder-val="{{ true }}">
         <div contentEditable="true" suppressContentEditableWarning="{{ true }}" style="font-size:22px;line-height:1.6;min-height:200px;cursor:text;caret-color:var(--color-accent)">
@@ -154,16 +154,16 @@
   <dc-import name="TAB Chrome Hebrew" style="display:block;zoom:{{ cz }}" active="2" tabs="{{ tabs }}" time="יום ב׳ 5 באוק׳ · 10:30" on-go="{{ goPage }}" hint-size="100%,56px"></dc-import>
   <div style="position:absolute;right:{{ M.c.l }};top:{{ ctM }};width:{{ M.c.w }};zoom:{{ bz }};transition:right .3s,width .3s,top .6s cubic-bezier(.2,.8,.2,1)">
     <div style="font-size:15px;letter-spacing:.04em;color:var(--color-accent-2);font-weight:700">מוצמד לכל אורך השיחה</div>
-    <div style="font-size:40px;font-weight:600;line-height:1.2;margin-top:8px">יוצאים עם מסלול ותאריך התחלה לפריסה של 40 משתמשים.</div>
+    <div style="font-size:{{ stFs }};font-weight:600;line-height:1.2;margin-top:8px">יוצאים עם מסלול ותאריך התחלה לפריסה של 40 משתמשים.</div>
     <sc-if value="{{ joined }}" hint-placeholder-val="{{ false }}">
-      <div style="margin-top:18px;height:180px;background:var(--color-neutral-800);display:grid;grid-template-columns:repeat(4,1fr);gap:2px;padding:2px;box-sizing:border-box">
+      <div style="margin-top:{{ gridTop }};height:{{ gridH }};background:var(--color-neutral-800);display:grid;grid-template-columns:repeat(4,1fr);gap:2px;padding:2px;box-sizing:border-box">
         <sc-for list="{{ people }}" as="t" hint-placeholder-count="4"><div style="background:var(--color-neutral-900);color:#fff;display:flex;align-items:flex-end;padding:10px 14px;font-size:15px;white-space:nowrap;overflow:hidden">{{ t }}</div></sc-for>
       </div>
     </sc-if>
     <div style="margin-top:{{ qaTop }};font-size:15px;letter-spacing:.04em;color:var(--color-accent-700);font-weight:700">אם היא שואלת · התשובה שלך</div>
     <div style="display:flex;flex-direction:column;gap:{{ qaGap }};margin-top:10px">
       <sc-for list="{{ qa }}" as="q" hint-placeholder-count="4">
-        <div style="display:grid;grid-template-columns:1fr 1.3fr;gap:24px;align-items:baseline"><div style="font-size:19px;line-height:1.35;font-family:var(--font-body);color:var(--color-neutral-700)">“{{ q.q }}”</div><div style="font-size:19px;line-height:1.35">{{ q.a }}</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1.3fr;gap:24px;align-items:baseline"><div style="font-size:{{ qaFs }};line-height:1.35;font-family:var(--font-body);color:var(--color-neutral-700)">“{{ q.q }}”</div><div style="font-size:{{ qaFs }};line-height:1.35">{{ q.a }}</div></div>
       </sc-for>
     </div>
   </div>
@@ -206,7 +206,7 @@
       <div>
         <div style="font-size:14px;letter-spacing:.04em;font-weight:700;color:var(--color-neutral-700)">דוח</div>
         <div style="display:flex;flex-direction:column;gap:14px;margin-top:12px">
-          <div style="display:flex;gap:14px;align-items:baseline"><span style="font-size:40px;line-height:1;color:var(--color-accent);width:120px;flex:none">11:42</span><span style="font-size:18px">המפרט נשלח, 18 דקות לפני הזמן</span></div>
+          <div style="display:flex;gap:14px;align-items:baseline"><span style="font-size:40px;line-height:1;color:var(--color-accent);width:120px;flex:none">11:42</span><span style="font-size:18px">המסמך נשלח, 18 דקות לפני הזמן</span></div>
           <div style="display:flex;gap:14px;align-items:baseline"><span style="font-size:40px;line-height:1;color:var(--color-accent);width:120px;flex:none">Team</span><span style="font-size:18px">המסלול סוכם עם Northwind; התחלה ב-3 בנובמבר</span></div>
           <div style="display:flex;gap:14px;align-items:baseline"><span style="font-size:40px;line-height:1;color:var(--color-accent);width:120px;flex:none">2</span><span style="font-size:18px">החלטות נשארו אצלך, ושתיהן התקבלו</span></div>
         </div>
@@ -343,7 +343,7 @@ class Component extends DCLogic {
     if (st === 0) { this.lt = setTimeout(() => this.say('בוקר טוב. שלושה דברים היום. לעבור עליהם יחד?', '', false, () => this.rest(), [{ id: 'both', label: 'בקול ועל המסך' }, { id: 'visual', label: 'על המסך בלבד' }, { id: 'no', label: 'הסתדרתי' }]), 900); return; }
     this.lt = setTimeout(() => this.say(this.ARRIVE[st], '', false, () => this.rest()), 700);
   }
-  nudge() { if (this.state.stage !== 1 || this.state.nudged) return; this.setState({ nudged: true }); this.say('Northwind בעוד חמש דקות. המפרט נשאר בדיוק כאן, אין מה לשמור. עוברים כשנוח.', '10:25', this.voiceOK, () => this.rest(), [{ id: 'call', label: 'לעבור לשיחה' }, { id: 'later', label: 'עוד שתי דקות' }], false, 'nudge'); }
+  nudge() { if (this.state.stage !== 1 || this.state.nudged) return; this.setState({ nudged: true }); this.say('Northwind בעוד חמש דקות. המסמך נשאר בדיוק כאן, אין מה לשמור. עוברים כשנוח.', '10:25', this.voiceOK, () => this.rest(), [{ id: 'call', label: 'לעבור לשיחה' }, { id: 'later', label: 'עוד שתי דקות' }], false, 'nudge'); }
   choose(id) {
     if (id === 'both' || id === 'visual') { this.voiceOK = id === 'both'; this.setState({ walkMode: id === 'both' ? 'Both' : 'Visual' }); this.runBrief(1); }
     else if (id === 'pin') { this.setState({ pinned: true }); this.say('מוצמד. סעיף 4 במרכז עד הצהריים, וכל השאר ממתין.', 'בוצע', false, () => this.rest()); }
@@ -390,7 +390,7 @@ class Component extends DCLogic {
     try { const p = a.play(); if (p && p.catch) p.catch(fail); } catch (e) { fail(); }
   }
   runBrief(i) {
-    const W = ['אחת. מפרט הקליטה, עד הצהריים. סעיפים אחד עד שלושה סגורים, ורק מסלולי התמחור פתוחים.', 'שתיים. סטנדאפ בתשע וחצי. שלוש השורות מנוסחות, והחסם היחיד להעלות הוא התמחור.', 'שלוש. תשובות. דנה ראשונה, כי התשובה שלה משחררת את המפרט. אחריה עומר, ואז המשפטית.'];
+    const W = ['אחת. מסמך האפיון, עד הצהריים. סעיפים אחד עד שלושה סגורים, ורק מסלולי התמחור פתוחים.', 'שתיים. ישיבת הבוקר, בתשע וחצי. שלוש השורות מוכנות, והחסם היחיד להעלות הוא התמחור.', 'שלוש. הודעות. קודם עונים לדנה, כי התשובה שלה משחררת את המסמך. אחריה עומר, ואז המשפטית.'];
     const voice = this.state.walkMode !== 'Visual';
     this.setState({ walk: i, openRow: 0 });
     this.say(W[i - 1], i + ' מתוך 3', voice, () => i < 3 ? this.runBrief(i + 1) : this.walkDone(), null, true, 'brief' + i);
@@ -400,7 +400,7 @@ class Component extends DCLogic {
   tabIt() { this.say('כן? אפשר לכתוב לי כאן. דברים קטנים אני עושה, דברים גדולים אני מחזיר אליך.', '', false, () => this.rest()); }
   ask(t) {
     const q = t.toLowerCase(); let reply = 'רשמתי. אעשה, וזה נכנס לרשומת היום.', dest = null;
-    if (/dana|pricing|spec|tier|write|doc|דנה|תמחור|מפרט|מסלול|כתיבה|מסמך/.test(q)) { reply = 'זה נמצא במפרט. פותח את סעיף 4, העותק שלך.'; dest = 1; }
+    if (/dana|pricing|spec|tier|write|doc|דנה|תמחור|מפרט|אפיון|מסלול|כתיבה|מסמך/.test(q)) { reply = 'זה נמצא במסמך. פותח את סעיף 4, העותק שלך.'; dest = 1; }
     else if (/call|rina|northwind|10:30|answer|שיחה|רינה|תשובות לשיחה/.test(q)) { reply = 'חדר השיחה. ההצהרה מוצמדת, התשובות מוכנות.'; dest = 2; }
     else if (/report|tomorrow|close|record|דוח|מחר|סגירה|רשומה|עשית/.test(q)) { reply = 'זה היום: הדוח, מחר, ומה שעשיתי.'; dest = 3; }
     else if (/morning|brief|three|list|בוקר|שלושה|רשימה|היום/.test(q)) { reply = 'חוזרים לשלושת הדברים שלך.'; dest = 0; }
@@ -419,7 +419,7 @@ class Component extends DCLogic {
     const tz = ({ Compact: .92, Roomy: 1, Large: 1.1 })[s.text] || 1, zR = B ? 1.25 : 1, zM = zR * tz, zC = (B ? 1.05 : 1) * tz, topA = B ? (s.line.open ? 228 : 96) : (s.line.open ? 200 : 104);
     const M = {}; ['a', 'w', 'c'].forEach(k => { const on = !!s.wide[k]; M[k] = { l: Math.round((on && !B ? 96 : 112) / zM) + 'px', w: Math.round((B ? (on ? 1075 : 812) : (on ? 1090 : 850)) / zM) + 'px', rail: on ? 'none' : 'flex', lab: on ? 'עמודת צד' : 'הגדלה', t: () => this.setState(st => ({ wide: { ...st.wide, [k]: !st.wide[k] } })) }; });
     const row = {}; [1, 2, 3].forEach(i => { const on = s.openRow === i; row['o' + i] = on; row['c' + i] = on ? '▾' : '◂'; row['t' + i] = () => this.setState({ openRow: on ? 0 : i }); });
-    const DID = [['14 כרטיסיות מסוף השבוע קופלו לשלושה דברים', 'אותה מטרה, מקום אחד'], ['הערוץ ‎#launch-chat הושתק עד 10:00', '14 הודעות, אף אחת לא מזכירה אותך'], ['נשמר צילום מצב של מפרט v4 לפני העותק של דנה', 'הדרך חזרה שלך'], ['המפרט הוחזק לאורך השיחה', 'אין מה לשמור, שום דבר לא אבד'], ['11 תשובות הועברו לסיכום המרוכז של 14:00', 'ההגדרה שלך ליום שני']];
+    const DID = [['14 כרטיסיות מסוף השבוע קופלו לשלושה דברים', 'אותה מטרה, מקום אחד'], ['הערוץ ‎#launch-chat הושתק עד 10:00', '14 הודעות, אף אחת לא מזכירה אותך'], ['נשמר צילום מצב של מסמך v4 לפני העותק של דנה', 'הדרך חזרה שלך'], ['המסמך הוחזק לאורך השיחה', 'אין מה לשמור, שום דבר לא אבד'], ['11 הודעות הועברו לסיכום המרוכז של 14:00', 'ההגדרה שלך ליום שני']];
     return {
       ivOn: iv.open, ivHasText: iv.i >= 0, ivEmpty: iv.i < 0,
       ivSaid: iv.words.slice(0, iv.shown).join(' ') + (iv.shown && iv.shown < iv.words.length ? ' ' : ''), ivRest: iv.words.slice(iv.shown).join(' '),
@@ -436,7 +436,7 @@ class Component extends DCLogic {
       sub1: s.openRow ? 'none' : 'block', sub2: s.openRow ? 'none' : 'block', sub3: s.openRow ? 'none' : 'block',
       ivFs: wc <= 45 ? '36px' : (wc <= 80 ? '29px' : '23px'),
       ...d, ...g, ...row, M, ct: s.line.open ? '200px' : '104px', rt: s.line.open ? '206px' : '110px', enl: s.line.open ? 'none' : 'inline-flex', z: s.board ? Math.min(.44, s.z * .44) : s.z, lab: s.board ? 'block' : 'none', line: s.line,
-      tabs: [['היום', '3 דברים'], ['כתיבה', 'מפרט v4, שני עותקים'], ['שיחה', '10:30 Northwind'], ['סגירה', '17:48']],
+      tabs: [['היום', '3 דברים'], ['כתיבה', 'מסמך v4, שני עותקים'], ['שיחה', '10:30 Northwind'], ['סגירה', '17:48']],
       steps: names.map((n, i) => ({ n: i + 1, label: n + ': ' + who[i], go: go(i), bg: !s.board && s.stage === i ? 'var(--color-accent-700)' : 'transparent', fg: !s.board && s.stage === i ? '#fff' : 'var(--color-text)' })),
       boardLabel: s.board ? 'חזרה להדגמה' : 'כל הארבעה', toggleBoard: () => this.setState({ board: !s.board }),
       restart: () => { this.closeLine(); this.ivStop(); clearTimeout(this.nt); this.lastStage = 0; this.setState({ ...this.INIT, z: s.z, big: s.big }, () => this.arrive(0)); },
@@ -451,11 +451,11 @@ class Component extends DCLogic {
       copyMine: s.copy === 'mine', copyDana: s.copy === 'dana', copyName: s.copy === 'mine' ? 'העותק שלך' : 'העותק של דנה · לקריאה בלבד', saveNote: s.copy === 'mine' ? 'נשמר תוך כדי כתיבה · v4' : 'בהשוואה · העותק שלך ללא שינוי',
       takeLab: s.taken ? 'נלקח לעותק שלך ✓' : 'לקחת את הניסוח שלה', takeDana: () => { this.setState({ taken: true, copy: 'mine' }); this.say('נלקח. שני הניסוחים שלה בעותק שלך, ו-v4 הקודם במרחק בקשה.', 'בוצע', false, () => this.rest()); }, backMine: () => this.setState({ copy: 'mine' }),
       askLab: s.asked ? 'נשאל ✓' : 'לשאול את דנה בשמי', askDana: () => { this.setState({ asked: true }); this.say('נשלח לדנה: “האם Starter כולל את רשימת ההכוונה? צריך תשובה עד 11:00.” התשובה שלה תגיע לכאן.', 'בוצע', false, () => this.rest()); },
-      people: ['אני', 'רינה קפלן · Northwind', 'תום רואיז · Northwind', 'דנה'], joined: s.joined, qaTop: s.joined ? '16px' : '36px', qaGap: s.joined ? '8px' : '12px',
+      people: ['אני', 'רינה קפלן · Northwind', 'תום רואיז · Northwind', 'דנה'], joined: s.joined, qaTop: s.joined ? (B ? '10px' : '16px') : (B ? '24px' : '36px'), qaGap: s.joined ? (B ? '5px' : '8px') : '12px', stFs: s.joined && B ? '28px' : '40px', gridH: B ? '88px' : '180px', gridTop: B ? '10px' : '18px', qaFs: s.joined && B ? '17px' : '19px',
       qa: [['מה מגבלות המשתמשים?', 'Team עד 50 משתמשים, Scale ללא הגבלה. צריך 40, אז Team מתאים.'], ['אפשר לשמור על מחיר הפיילוט?', 'מחיר הפיילוט נשמר עד סוף Q1, בתוכנית שנתית.'], ['כמה מהר אפשר להתחיל?', 'הכי מוקדם ב-3 בנובמבר. המשפטית צריכה עשרה ימים לחוזה.'], ['האם Starter כולל את הרשימה?', 'דנה מחליטה עד 11:00. אם לוחצים: “כן, מ-Team ומעלה”.']].map(x => ({ q: x[0], a: x[1] })),
       vidNote: s.joined ? 'בשידור · TAB רושם, מחוץ למצלמה' : 'חדר המתנה · המצלמה כבויה עד ההצטרפות', joinLab: s.joined ? 'יציאה' : 'הצטרפות · מתרחב למרכז', joinCls: s.joined ? 'btn-secondary' : 'btn-primary',
       join: () => { const j = !s.joined; this.setState({ joined: j }); if (j) this.say('בפנים. אם הקול נופל, אפשר לכתוב לי “חיוג”. התשובות נשארות מתחת לווידאו.', 'בשידור', false, () => this.rest()); },
-      alerts: [['הערה משפטית 2 עדיין סותרת את ניסיון ה-14 יום', 'לא נפתר במפרט שנשלח. המשפטית בודקת מחר', 'להוסיף למחר'], ['ה-1:1 של עומר עבר ל-14:00, ממתין לאישור שלו', 'משנה יומן של מישהו אחר. האישור שלך ניתן, שלו עדיין לא', 'לתזכר את עומר']].map((a, i) => ({ t: a[0], why: a[1], cls: s.ok[i] ? 'btn-secondary' : 'btn-primary', lab: s.ok[i] ? 'בוצע ✓' : a[2], yes: () => this.setState({ ok: { ...s.ok, [i]: true } }) })),
+      alerts: [['הערה משפטית 2 עדיין סותרת את ניסיון ה-14 יום', 'לא נפתר במסמך שנשלח. המשפטית בודקת מחר', 'להוסיף למחר'], ['ה-1:1 של עומר עבר ל-14:00, ממתין לאישור שלו', 'משנה יומן של מישהו אחר. האישור שלך ניתן, שלו עדיין לא', 'לתזכר את עומר']].map((a, i) => ({ t: a[0], why: a[1], cls: s.ok[i] ? 'btn-secondary' : 'btn-primary', lab: s.ok[i] ? 'בוצע ✓' : a[2], yes: () => this.setState({ ok: { ...s.ok, [i]: true } }) })),
       did: DID.map((r, i) => { const ck = s.checked[i]; return { t: r[0], why: r[1], c: ck ? 'var(--color-accent-700)' : 'var(--color-text)', check: () => this.setState({ checked: { ...s.checked, [i]: !ck } }) }; })
     };
   }

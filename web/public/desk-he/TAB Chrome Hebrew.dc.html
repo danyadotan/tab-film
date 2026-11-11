@@ -24,7 +24,7 @@
 class Component extends DCLogic {
   renderVals() {
     const a = Number(this.props.active ?? 0);
-    const P = this.props.tabs || [['היום', '3 דברים'], ['כתיבה', 'מפרט v4, שני עותקים'], ['שיחה', '10:30 Northwind'], ['סגירה', '17:48']];
+    const P = this.props.tabs || [['היום', '3 דברים'], ['כתיבה', 'מסמך v4, שני עותקים'], ['שיחה', '10:30 Northwind'], ['סגירה', '17:48']];
     return { time: this.props.time || 'יום ב׳ 5 באוק׳ · 8:40', tabs: P.map((p, i) => ({ label: p[0], n: p[1], w: i === a ? 700 : 400, c: i === a ? 'var(--color-accent-700)' : 'var(--color-text)', go: () => this.props.onGo && this.props.onGo(i) })) };
   }
 }
