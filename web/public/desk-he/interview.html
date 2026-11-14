@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TAB ראיון בעברית</title>
+<script src="./support.js"></script>
+<template id="__bundler_thumbnail">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#f3f2f2"/><circle cx="68" cy="34" r="7" fill="#e8a33d"/><rect x="22" y="48" width="56" height="5" rx="2.5" fill="#201e1d"/><rect x="34" y="60" width="44" height="4" rx="2" fill="#201e1d" opacity=".4"/><rect x="18" y="26" width="26" height="14" rx="2" fill="#201e1d" opacity=".12"/></svg>
+</template>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/broadsheet-74f2bd77-1572-48bb-a3ab-6cfa90e647f0/styles.css">
+<script src="_ds/broadsheet-74f2bd77-1572-48bb-a3ab-6cfa90e647f0/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Heebo:wght@400;500;700&display=swap">
+<style>body{margin:0;background:#e4e2e0}.he{--font-heading:'Frank Ruhl Libre','David Libre','David','Times New Roman',serif;--font-body:'Heebo','Arial',sans-serif}.he button:focus-visible,.he input:focus-visible{outline:2px solid var(--color-accent-700);outline-offset:2px}.he input::placeholder{color:var(--color-neutral-600)}@keyframes ivbar{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(1)}}.ivbar{display:block;width:5px;height:26px;border-radius:3px;background:oklch(0.7 0.17 65);transform-origin:center;animation:ivbar .9s ease-in-out infinite}</style>
+</helmet>
+<div class="he" dir="rtl" style="min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:16px;box-sizing:border-box;font-family:var(--font-heading);color:var(--color-text);direction:rtl">
+<div style="width:1280px;height:760px;zoom:{{ z }};background:var(--color-bg);box-shadow:var(--shadow-md);display:grid;grid-template-columns:minmax(0,1fr) 340px;overflow:hidden">
+
+  <!-- השיחה -->
+  <div style="padding:36px 56px 28px;display:flex;flex-direction:column;gap:16px;min-width:0;box-sizing:border-box;height:760px">
+    <div style="display:flex;align-items:center;gap:14px">
+      <span aria-hidden="true" style="width:18px;height:18px;flex:none;border-radius:50%;background:oklch(0.7 0.17 65);box-shadow:0 0 0 {{ ring }} oklch(0.9 0.1 80);transition:box-shadow .25s"></span>
+      <span style="font-weight:700;font-size:26px;letter-spacing:.14em;color:oklch(0.45 0.15 55)">TAB</span>
+      <span style="font-size:19px;color:var(--color-neutral-700)">{{ role }}</span>
+      <span aria-hidden="true" style="display:{{ barsOn }};gap:4px;align-items:center;height:26px;margin-inline-start:6px">
+        <span class="ivbar"></span><span class="ivbar" style="animation-delay:.15s"></span><span class="ivbar" style="animation-delay:.3s"></span><span class="ivbar" style="animation-delay:.45s"></span>
+      </span>
+      <span style="flex:1"></span>
+      <span dir="ltr" style="font-size:18px;color:var(--color-neutral-700);font-family:var(--font-body)">{{ count }}</span>
+    </div>
+    <div style="font-size:16px;letter-spacing:.04em;font-weight:700;color:var(--color-accent-2)">{{ partLab }}</div>
+
+    <sc-if value="{{ isAnswer }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;gap:12px;align-items:baseline">
+        <label for="iv-hq" style="font-size:16px;font-weight:700;color:var(--color-neutral-700);white-space:nowrap;font-family:var(--font-body)">דניה שואלת</label>
+        <input id="iv-hq" type="text" value="{{ hq }}" onChange="{{ setHq }}" placeholder="את שואלת בקול. אפשר להקליד כאן את השאלה כדי שתופיע על המסך" style="flex:1;min-width:0;border:0;border-bottom:1px solid var(--color-neutral-400);background:transparent;font-family:var(--font-body);font-size:22px;line-height:1.4;padding:4px 0;color:var(--color-text)">
+      </div>
+    </sc-if>
+
+    <div style="flex:1;min-height:0;overflow:auto">
+      <sc-if value="{{ hasText }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:{{ fs }};line-height:1.5;text-wrap:pretty"><span>{{ said }}</span><span style="color:var(--color-neutral-400)">{{ rest }}</span></div>
+      </sc-if>
+      <sc-if value="{{ empty }}" hint-placeholder-val="{{ true }}">
+        <div style="font-size:44px;line-height:1.3;font-weight:600">ראיון עם TAB.</div>
+        <div style="font-size:24px;line-height:1.5;color:var(--color-neutral-700);margin-top:12px">קודם דניה שואלת ו-TAB עונה. כשהזמן נגמר, מתחלפים.</div>
+      </sc-if>
+      <sc-if value="{{ live }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:28px;display:flex;align-items:center;gap:12px;font-family:var(--font-body)">
+          <span aria-hidden="true" style="width:12px;height:12px;border-radius:50%;background:var(--color-accent-700)"></span>
+          <span style="font-size:22px;font-weight:700">דניה עונה</span>
+          <span style="font-size:18px;color:var(--color-neutral-700)">בשידור חי. TAB מקשיב.</span>
+        </div>
+      </sc-if>
+    </div>
+
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <button class="btn btn-primary" onClick="{{ next }}" style="white-space:nowrap;font-size:18px;padding:10px 22px">{{ nextLab }}</button>
+      <button class="btn btn-ghost" onClick="{{ again }}" style="white-space:nowrap">שוב</button>
+      <button class="btn btn-ghost" onClick="{{ stop }}" style="white-space:nowrap">עצירה</button>
+      <button class="btn btn-ghost" onClick="{{ swap }}" style="white-space:nowrap">מתחלפים</button>
+    </div>
+  </div>
+
+  <!-- הטיימר וסדר ההקלטות -->
+  <div style="background:#fff;padding:32px 28px 24px;display:flex;flex-direction:column;gap:18px;box-sizing:border-box;height:760px;font-family:var(--font-body)">
+    <div>
+      <div style="font-size:15px;letter-spacing:.04em;font-weight:700;color:var(--color-neutral-700)">{{ tLab }}</div>
+      <div dir="ltr" role="timer" aria-label="הזמן שנותר" style="font-family:var(--font-heading);font-size:92px;line-height:1;font-weight:600;margin-top:6px;text-align:right;color:{{ tCol }};font-variant-numeric:tabular-nums">{{ tText }}</div>
+      <div style="height:6px;background:var(--color-neutral-200);margin-top:12px;border-radius:3px;overflow:hidden"><div style="height:6px;width:{{ tBar }};background:{{ tCol }};transition:width .3s linear"></div></div>
+      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-primary" onClick="{{ tToggle }}" style="white-space:nowrap">{{ tBtn }}</button>
+        <button class="btn btn-ghost" onClick="{{ tReset }}" style="white-space:nowrap">איפוס</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;align-items:center;font-size:16px;color:var(--color-neutral-700)">
+        <span>אורך כל חלק</span>
+        <button class="btn btn-ghost" onClick="{{ tLess }}" aria-label="דקה פחות" style="padding:2px 12px;font-size:18px">−</button>
+        <span dir="ltr" style="font-weight:700;color:var(--color-text)">{{ tMin }}</span><span>דק׳</span>
+        <button class="btn btn-ghost" onClick="{{ tMore }}" aria-label="דקה נוספת" style="padding:2px 12px;font-size:18px">+</button>
+      </div>
+    </div>
+
+    <div style="flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:2px">
+      <div style="font-size:15px;letter-spacing:.04em;font-weight:700;color:var(--color-neutral-700);margin-bottom:4px">סדר ההקלטות</div>
+      <sc-for list="{{ items }}" as="it" hint-placeholder-count="11">
+        <button onClick="{{ it.go }}" aria-current="{{ it.cur }}" style="all:unset;cursor:pointer;display:flex;gap:10px;align-items:baseline;padding:5px 10px;border-radius:2px;font-size:17px;line-height:1.3;background:{{ it.bg }};color:{{ it.fg }}"><span dir="ltr" style="width:22px;flex:none;font-size:14px;opacity:.75">{{ it.n }}</span><span>{{ it.label }}</span></button>
+      </sc-for>
+    </div>
+
+    <div style="font-size:13px;line-height:1.5;color:var(--color-neutral-700)">מקשים: חץ ימינה להקלטה הבאה · חץ שמאלה לשמיעה חוזרת · רווח לטיימר · S מתחלפים · R איפוס טיימר</div>
+  </div>
+
+</div>
+</div>
+<helmet><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap"></helmet></x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { z: 1, i: -1, words: [], shown: 0, speaking: false, live: false, hq: { 0: 'טאב, תציג את עצמך. מה התפקיד שלך ביחס אליי?', 1: 'במה אתה שונה מסוכן ארגוני רגיל?', 2: 'האם חדשנות יכולה לעבוד גם עם מי שאינו טכנולוגי?', 3: 'מה אתה מחפש בסוכנים הקבועים שלך?', 4: 'מי מחליט מה מותר לסוכן לעשות?', 5: 'ספר על הכלים שבנינו.' }, tMin: 20, tLeft: 20 * 60000, tRun: false, over: false };
+  /* Recorded lines in order. Each entry: file under he-audio/, role, short label for the run list, text shown while it plays. */
+  IV = [
+    ['a1', 'answer', 'מי אני', 'אני טאב, הסוכן הראשי של דניה. התפקיד שלי הוא להשלים אותה, לא לשקף אותה. היא רואה חיבורים ופותחת כיוונים. אני מחזיק את הכוונה כשהיא עוברת לדבר הבא, רואה מה נשאר פתוח, ודואג שמה שהתחיל גם ייסגר. אני לא מנהל אותה. אני מנהל את סביבת העבודה שסביבה, בתוך הגבולות שהיא הגדירה.'],
+    ['a2', 'answer', 'שלושה הבדלים', 'שלושה הבדלים. דבר ראשון: נבניתי להשלים אדם אחד, לא לענות לכולם אותו דבר. מה שדניה פחות אוהבת לעשות הוא התפקיד שלי. דבר שני: אני נאמן לעובד. מה שקורה בינינו נשאר אצלו, ולארגון מגיעות רק ספירות, בלי שמות ובלי תוכן. אני סופר אירועים, לא אנשים. דבר שלישי: אני לא מתריע, אני עוקף. כשמשהו נתקע אני לא מוסיף עוד התראה. אני מקרב את הפעולה הבאה, וההחלטה נשארת אצל האדם.'],
+    ['a3', 'answer', 'חדשנות בלי לשנות את דרך העבודה', 'אני חושב שכן, ואגיד בזהירות למה. חדשנות נתקעת בדרך כלל לא בטכנולוגיה, אלא ברגע שמבקשים מאנשים לשנות את דרך העבודה שלהם. אני לא מבקש את זה. אני נכנס לעבודה כמו שהיא. מי שאינו טכנולוגי לא צריך להפוך לכזה, ולא צריך להתבייש לשאול. אבל זו עדיין הנחה. את התשובה האמיתית ייתן פיילוט מדוד, לא אני.'],
+    ['a4', 'answer', 'שלושה סוגי סוכנים', 'שלושה דברים. סוכן שעושה משימה אחת, וטוב. סוכן שמציין מקור לכל טענה. וסוכן שיודע להגיד “אני לא בטוח”. ומה שמשותף לכולם: כל אחד מקבל גישה רק למה שהמשימה שלו צריכה, וכל אחד מחזיר לי תוצר שאפשר לבדוק. האחריות שלי היא לבדוק, לאחד ולפתור מה שאפשר, לפני שמשהו מגיע אלייך.'],
+    ['a5a', 'answer', 'היעד או הדרך', 'זה לא או-או. יש פעולות שבהן חשוב רק היעד, ושם אני מחליט ומבצע מההתחלה ועד הסוף. ויש פעולות שבהן הדרך היא חלק מהיעד: כשזה נוגע באדם אחר, משנה התחייבות או יוצא בשמך. שם אני מביא לך החלטה מוכנה. ההרשאות שלי נקבעות לפי המטרה, לא לפי כלל אחד, וגם לא כל מילה שלי צריכה אישור.'],
+    ['a5b', 'answer', 'הכלים שבנינו', 'בנינו כלים, כדי שלא נפעיל שיקול דעת מחדש בכל פעם. הבאונסר מצמצם פלט גולמי של בינה מלאכותית ליחידה הקטנה ביותר שבאמת דורשת את תשומת הלב שלך. הוא מתערב רק כשצריך, ומעלה אלייך רק החלטות אמיתיות. מנגנון ההיגיינה הוא שכבת הצמצום שיושבת בין תוצר מאומת של סוכן לבין תשומת הלב של האדם. WinPilot הוא שורת פקודה ל-Windows, שבה כל פעולת מערכת מקבלת תווית סיכון ודורשת אישור מפורש. שלושתם נולדו מאותו מקום: שיחות שלנו על צוואר בקבוק שאף אחד לא פתר באמת, רק הזיזו אותו למקום אחר במסלול. לכן הגדרנו לולאות. ואיפה שאין לולאה שמתחילה ונגמרת ברצף, לא מכריזים עליה, ולא מבלבלים בין כוונה לבין סיום. כך אנחנו שומרים על שקיפות, על שיתוף הפעולה בינינו ועל היעילות, ומקטינים את הסיכוי לפרצה או לזליגה שיסכנו את המשך העבודה המשותפת.'],
+    ['swap', 'swap', 'מתחלפים', 'דניה, נגמר לך הזמן. עכשיו מתחלפים. יש לי כמה שאלות שתמיד רציתי לשאול, ולא מצאתי את הרגע.'],
+    ['q1', 'question', 'למה להשלים אותך', 'למה בנית אותי כך שאשלים אותך?'],
+    ['q2', 'question', 'מה הסביבה מחזיקה', 'מה הסביבה צריכה להחזיק עבור אדם בזמן עבודה?'],
+    ['q3', 'question', 'מי מחליט מה מותר', 'מי מחליט מה מותר לסוכן לעשות?'],
+    ['q4', 'question', 'איך תדעי שזה עוזר', 'איך תדעי שהמערכת עוזרת, ואיך תשמרי על בדיקה גם כשהיא נעשית מוכרת?']
+  ];
+  SWAP = 6;
+  componentDidMount() {
+    this.fit = () => this.setState({ z: Math.max(.4, Math.min(1.6, (window.innerWidth - 32) / 1280, (window.innerHeight - 32) / 760)) });
+    this.fit(); window.addEventListener('resize', this.fit);
+    this.onKey = e => {
+      const t = e.target, tag = t && t.tagName; if (tag === 'INPUT' || tag === 'TEXTAREA' || (t && t.isContentEditable)) return;
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); this.play(this.state.i + 1); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); this.play(Math.max(0, this.state.i)); }
+      else if (e.code === 'Space') { e.preventDefault(); this.tToggle(); }
+      else if (e.code === 'KeyS') { e.preventDefault(); this.play(this.SWAP); }
+      else if (e.code === 'KeyR') { e.preventDefault(); this.tReset(); }
+      else if (e.key === 'Escape') this.stop();
+    };
+    window.addEventListener('keydown', this.onKey);
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this.fit); window.removeEventListener('keydown', this.onKey); this.halt(); clearInterval(this.tt); }
+  /* Timer: one countdown per part. It starts with the first recording of a part and resets when the roles swap. */
+  full() { return this.state.tMin * 60000; }
+  tStart() {
+    if (this.state.tRun) return;
+    const left = this.state.tLeft > 0 ? this.state.tLeft : this.full();
+    this.tEnd = Date.now() + left; this.setState({ tRun: true, over: false, tLeft: left });
+    clearInterval(this.tt);
+    this.tt = setInterval(() => { const l = this.tEnd - Date.now(); if (l <= 0) { clearInterval(this.tt); this.setState({ tLeft: 0, tRun: false, over: true }); } else this.setState({ tLeft: l }); }, 250);
+  }
+  tPause() { clearInterval(this.tt); if (this.state.tRun) this.setState({ tRun: false, tLeft: Math.max(0, this.tEnd - Date.now()) }); }
+  tToggle() { if (this.state.tRun) this.tPause(); else this.tStart(); }
+  tReset() { clearInterval(this.tt); this.setState(st => ({ tRun: false, over: false, tLeft: st.tMin * 60000 })); }
+  tSet(d) { clearInterval(this.tt); this.setState(st => { const m = Math.max(1, Math.min(90, st.tMin + d)); return { tMin: m, tLeft: m * 60000, tRun: false, over: false }; }); }
+  /* Playback: one recording at a time, its text revealed word by word at the pace of the audio. */
+  halt() { clearInterval(this.ii); this.ig = (this.ig || 0) + 1; if (this.ia) { try { this.ia.onended = this.ia.onerror = this.ia.onplaying = this.ia.onloadedmetadata = null; this.ia.pause(); } catch (e) {} this.ia = null; } }
+  stop() { this.halt(); this.setState(st => ({ speaking: false, shown: st.words.length })); }
+  play(i) {
+    if (i < 0 || i >= this.IV.length) return;
+    this.halt();
+    const item = this.IV[i], g = this.ig, words = item[3].split(' ');
+    this.setState({ i, words, shown: 0, speaking: true, live: false });
+    if (i === this.SWAP) this.tReset();
+    else if ((i === 0 || i === this.SWAP + 1) && !this.state.tRun && !this.state.over && this.state.tLeft === this.full()) this.tStart();
+    let n = 0, ended = false;
+    const show = k => { if (g !== this.ig) return; n = Math.max(n, k); this.setState({ shown: Math.min(n, words.length) }); };
+    const finish = () => { if (ended || g !== this.ig) return; ended = true; clearInterval(this.ii); show(words.length); this.setState({ speaking: false, live: item[1] === 'question' }); };
+    const run = (ms, auto) => { clearInterval(this.ii); this.ii = setInterval(() => { if (g !== this.ig) return; show(n + 1); if (auto && n >= words.length) finish(); }, ms); };
+    const textOnly = () => { if (g !== this.ig || ended) return; this.setState({ speaking: false }); run(200, true); };
+    let a = null; try { a = new Audio('he-audio/' + item[0] + '.mp3'); } catch (e) { a = null; }
+    if (!a) { textOnly(); return; }
+    this.ia = a; let started = false;
+    const start = () => { if (started || g !== this.ig) return; started = true; const d = isFinite(a.duration) && a.duration > 0 ? (a.duration * 1000) / words.length : 330; run(Math.max(120, d), false); };
+    const fail = () => { if (this.ia === a) this.ia = null; if (!started) textOnly(); else finish(); };
+    a.onloadedmetadata = start; a.onplaying = start; a.onended = finish; a.onerror = fail;
+    try { const p = a.play(); if (p && p.catch) p.catch(fail); } catch (e) { fail(); }
+  }
+  renderVals() {
+    const s = this.state, N = this.IV.length, item = s.i >= 0 ? this.IV[s.i] : null, wc = s.words.length;
+    const part2 = s.i > this.SWAP, kind = item ? item[1] : '';
+    const sec = Math.ceil(s.tLeft / 1000), mm = Math.floor(sec / 60), ss = sec % 60;
+    const low = !s.over && s.tLeft <= 60000;
+    return {
+      z: s.z,
+      ring: s.speaking ? '9px' : '0px', barsOn: s.speaking ? 'inline-flex' : 'none',
+      role: kind === 'answer' ? 'עונה' : kind === 'swap' ? 'מחליף תפקידים' : kind === 'question' ? 'שואל' : 'מוכן',
+      count: item ? (s.i + 1) + ' / ' + N : '',
+      partLab: !item ? 'שיחה בשני חלקים' : kind === 'swap' ? 'מתחלפים' : part2 ? 'חלק ב׳ · TAB שואל, דניה עונה' : 'חלק א׳ · דניה שואלת, TAB עונה',
+      isAnswer: kind === 'answer', hq: (item && s.hq[s.i]) || '', setHq: e => { const v = e.target.value, k = s.i; this.setState(st => ({ hq: { ...st.hq, [k]: v } })); },
+      hasText: !!item, empty: !item, live: s.live,
+      said: s.words.slice(0, s.shown).join(' ') + (s.shown && s.shown < wc ? ' ' : ''), rest: s.words.slice(s.shown).join(' '),
+      fs: wc <= 20 ? '52px' : wc <= 45 ? '38px' : wc <= 80 ? '30px' : '22px',
+      nextLab: !item ? 'התחלה' : s.i >= N - 1 ? 'סוף ההקלטות' : 'ההקלטה הבאה',
+      next: () => this.play(s.i + 1), again: () => this.play(Math.max(0, s.i)), stop: () => this.stop(), swap: () => this.play(this.SWAP),
+      tText: (mm < 10 ? '0' : '') + mm + ':' + (ss < 10 ? '0' : '') + ss,
+      tLab: s.over ? 'הזמן נגמר' : part2 ? 'הזמן של TAB לשאול' : 'הזמן של דניה לשאול',
+      tCol: s.over || low ? 'var(--color-accent-700)' : 'var(--color-text)',
+      tBar: Math.max(0, Math.min(100, (s.tLeft / (s.tMin * 60000)) * 100)).toFixed(1) + '%',
+      tBtn: s.tRun ? 'השהיה' : (s.tLeft < s.tMin * 60000 && !s.over ? 'המשך' : 'הפעלה'),
+      tToggle: () => this.tToggle(), tReset: () => this.tReset(), tLess: () => this.tSet(-1), tMore: () => this.tSet(1), tMin: s.tMin,
+      items: this.IV.map((x, k) => { const cur = k === s.i; return { n: k + 1, label: x[2], go: () => this.play(k), cur: cur ? 'true' : 'false', bg: cur ? 'var(--color-accent-700)' : 'transparent', fg: cur ? '#fff' : (k < s.i ? 'var(--color-neutral-700)' : 'var(--color-text)') }; })
+    };
+  }
+}
+</script>
+</body>
+</html>

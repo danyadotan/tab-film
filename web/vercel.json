@@ -62,6 +62,24 @@
       "dest": "/desk-he/index.html"
     },
     {
+      "src": "^/hub$",
+      "status": 308,
+      "headers": {
+        "Location": "/hub/"
+      }
+    },
+    {
+      "src": "^/hub/$",
+      "dest": "/hub/index.html"
+    },
+    {
+      "src": "^/interview-he/?$",
+      "status": 308,
+      "headers": {
+        "Location": "/desk-he/interview.html"
+      }
+    },
+    {
       "handle": "filesystem"
     }
   ]

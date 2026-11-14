@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TAB • מרכז תצוגה | דמו, וידאו וראיון</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%238E2430'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' fill='%23FAF8F5' font-family='sans-serif' font-weight='900' font-size='22' letter-spacing='1'%3ETAB%3C/text%3E%3C/svg%3E" />
+  <style>
+    :root {
+      --bg-cream: #F6F4EF;
+      --card-white: #FFFFFF;
+      --tab-burgundy: #8E2430;
+      --tab-burgundy-light: #FDF2F3;
+      --demo-teal: #1D6F63;
+      --demo-teal-light: #EEF8F6;
+      --text-main: #1F2421;
+      --text-muted: #5C6460;
+      --border-subtle: #E4E0D8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+    body {
+      background-color: var(--bg-cream);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* סרגל עליון */
+    .topbar {
+      background: var(--card-white);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      z-index: 10;
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .logo {
+      background: var(--tab-burgundy);
+      color: #FAF8F5;
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: 2px;
+      padding: 6px 12px;
+      border-radius: 8px;
+    }
+
+    .controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .btn {
+      padding: 7px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-cream);
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn:hover { background: #EAE6DC; }
+    .btn.active { background: var(--text-main); color: #fff; border-color: var(--text-main); }
+    .btn:focus-visible, .url-input:focus-visible { outline: 2px solid var(--tab-burgundy); outline-offset: 2px; }
+    .btn-qr { background: var(--tab-burgundy-light); color: var(--tab-burgundy); border-color: #E6C2C6; }
+
+    /* אזור המסך המפוצל */
+    .workspace {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 12px;
+      height: calc(100vh - 58px);
+    }
+
+    .workspace .pane { display: none; }
+    .workspace.split .pane-demo, .workspace.split .pane-video,
+    .workspace.demo-interview .pane-demo, .workspace.demo-interview .pane-interview,
+    .workspace.only-demo .pane-demo, .workspace.only-video .pane-video,
+    .workspace.only-interview .pane-interview { display: flex; }
+    .workspace.only-demo, .workspace.only-video, .workspace.only-interview { grid-template-columns: 1fr; }
+
+    .pane {
+      background: var(--card-white);
+      border-radius: 12px;
+      border: 2px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .pane-demo { border-top: 5px solid var(--demo-teal); }
+    .pane-video { border-top: 5px solid var(--tab-burgundy); }
+    .pane-interview { border-top: 5px solid #B4690E; }
+    .pane-interview .pane-header { background: #FBF3E6; color: #7A4706; }
+
+    .pane-header {
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .pane-demo .pane-header { background: var(--demo-teal-light); color: var(--demo-teal); }
+    .pane-video .pane-header { background: var(--tab-burgundy-light); color: var(--tab-burgundy); }
+
+    .url-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .url-input {
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid #D5CFC4;
+      font-size: 12px;
+      width: 220px;
+      direction: ltr;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      flex: 1;
+      background: #fff;
+    }
+
+    /* חלונית QR וקישורים אישיים */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      background: var(--card-white);
+      border-radius: 16px;
+      padding: 28px;
+      max-width: 560px;
+      width: 92%;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .qr-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .qr-card {
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      background: var(--bg-cream);
+    }
+
+    .qr-card img {
+      width: 150px;
+      height: 150px;
+      border-radius: 8px;
+      background: #fff;
+      padding: 8px;
+      margin: 10px auto;
+      display: block;
+    }
+
+    .qr-card a {
+      display: inline-block;
+      margin-top: 8px;
+      color: var(--tab-burgundy);
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">TAB</div>
+      <strong>שולחן עבודה • מרכז תצוגה</strong>
+    </div>
+
+    <div class="controls">
+      <button class="btn active" data-mode="split" onclick="setLayout('split')">דמו + וידאו</button>
+      <button class="btn" data-mode="demo-interview" onclick="setLayout('demo-interview')">דמו + ראיון</button>
+      <button class="btn" data-mode="only-demo" onclick="setLayout('only-demo')">רק דמו חי</button>
+      <button class="btn" data-mode="only-video" onclick="setLayout('only-video')">רק וידאו</button>
+      <button class="btn" data-mode="only-interview" onclick="setLayout('only-interview')">רק ראיון + טיימר</button>
+      <button class="btn btn-qr" onclick="toggleModal(true)">QR וקישורים (Danya Dotan)</button>
+    </div>
+  </header>
+
+  <main class="workspace split" id="workspace">
+    <!-- צד ימין: דמו חי -->
+    <section class="pane pane-demo">
+      <div class="pane-header">
+        <span>● דמו חי אינטראקטיבי (desk-he)</span>
+        <a href="https://tab-at-work.com/desk-he/" target="_blank" style="color:inherit; text-decoration:none;">פתיחה בחלון נפרד ↗</a>
+      </div>
+      <iframe src="https://tab-at-work.com/desk-he/" title="TAB Live Demo" allow="autoplay"></iframe>
+    </section>
+
+    <!-- צד שמאל: וידאו -->
+    <section class="pane pane-video">
+      <div class="pane-header">
+        <span>▶ הקרנת וידאו (TAB Film)</span>
+        <div class="url-bar">
+          <input type="text" id="video-url" class="url-input" value="https://tab-at-work.com/film" placeholder="הדביקי קישור וידאו..." />
+          <button class="btn" style="padding:3px 8px; font-size:12px;" onclick="updateVideoFrame()">טען</button>
+        </div>
+      </div>
+      <iframe id="video-frame" src="https://tab-at-work.com/film" title="TAB Video" allow="autoplay"></iframe>
+    </section>
+
+    <!-- ראיון עם TAB: ההקלטות, השיחה והטיימר -->
+    <section class="pane pane-interview">
+      <div class="pane-header">
+        <span>● ראיון עם TAB + טיימר</span>
+        <a href="https://tab-at-work.com/desk-he/interview.html" target="_blank" style="color:inherit; text-decoration:none;">פתיחה בחלון נפרד ↗</a>
+      </div>
+      <iframe src="https://tab-at-work.com/desk-he/interview.html" title="ראיון עם TAB" allow="autoplay"></iframe>
+    </section>
+  </main>
+
+  <!-- חלונית QR -->
+  <div class="modal-backdrop" id="qr-modal" onclick="if(event.target===this) toggleModal(false)">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>פרטי קשר וקודי QR • Danya Dotan</h2>
+        <button class="btn" onclick="toggleModal(false)">סגור ✕</button>
+      </div>
+      <div class="qr-grid">
+        <div class="qr-card">
+          <strong>LinkedIn</strong>
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&amp;data=https%3A%2F%2Flinkedin.com%2Fin%2Fdanya-dotan%2F" alt="קוד QR לפרופיל הלינקדאין" />
+          <div style="font-size:12px; color:#5C6460;">/in/danya-dotan</div>
+          <a href="https://linkedin.com/in/danya-dotan/" target="_blank" rel="noopener">פתיחת פרופיל ↗</a>
+        </div>
+        <div class="qr-card">
+          <strong>GitHub</strong>
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&amp;data=https%3A%2F%2Fgithub.com%2Fdanyadotan" alt="קוד QR לעמוד הגיטהאב" />
+          <div style="font-size:12px; color:#5C6460;">@danyadotan</div>
+          <a href="https://github.com/danyadotan" target="_blank" rel="noopener">פתיחת ריפוזיטורי ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function setLayout(mode) {
+      const ws = document.getElementById('workspace');
+      ws.className = 'workspace ' + mode;
+      document.querySelectorAll('.controls .btn[data-mode]').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+    }
+
+    function updateVideoFrame() {
+      let url = document.getElementById('video-url').value.trim();
+      if (url && !url.startsWith('http')) url = 'https://' + url;
+      document.getElementById('video-frame').src = url;
+    }
+
+    function toggleModal(show) {
+      document.getElementById('qr-modal').classList.toggle('open', show);
+    }
+  </script>
+</body>
+</html>
