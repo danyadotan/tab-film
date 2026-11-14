@@ -209,16 +209,16 @@
     </div>
 
     <div class="controls">
-      <button class="btn active" data-mode="split" onclick="setLayout('split')">דמו + וידאו</button>
+      <button class="btn" data-mode="split" onclick="setLayout('split')">דמו + וידאו</button>
       <button class="btn" data-mode="demo-interview" onclick="setLayout('demo-interview')">דמו + ראיון</button>
-      <button class="btn" data-mode="only-demo" onclick="setLayout('only-demo')">רק דמו חי</button>
+      <button class="btn active" data-mode="only-demo" onclick="setLayout('only-demo')">רק דמו חי</button>
       <button class="btn" data-mode="only-video" onclick="setLayout('only-video')">רק וידאו</button>
       <button class="btn" data-mode="only-interview" onclick="setLayout('only-interview')">רק ראיון + טיימר</button>
       <button class="btn btn-qr" onclick="toggleModal(true)">QR וקישורים (Danya Dotan)</button>
     </div>
   </header>
 
-  <main class="workspace split" id="workspace">
+  <main class="workspace only-demo" id="workspace">
     <!-- צד ימין: דמו חי -->
     <section class="pane pane-demo">
       <div class="pane-header">

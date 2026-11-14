@@ -2,8 +2,8 @@
 
 Two pages, one static Vite + React app:
 
-- **`/` — TAB Film.** The 2:45 film (`project/TAB Film.dc.html`) at 1920×1080, scaled to fit the window and synced to the ElevenLabs voiceover.
-- **`/desk.html` — TAB Desk.** The clickable employee demo: the desktop the employee shares with TAB, in four rooms (Day: the assistant; Write: the editor; Call: the wingman; Close: the librarian). Ported from the `TAB - Desk` Claude Design export.
+- **`/film` — TAB Film.** The 2:45 film (`project/TAB Film.dc.html`) at 1920×1080, scaled to fit the window and synced to the ElevenLabs voiceover.
+- **`/` — TAB Desk.** The clickable employee demo: the desktop the employee shares with TAB, in four rooms (Day: the assistant; Write: the editor; Call: the wingman; Close: the librarian). Ported from the `TAB - Desk` Claude Design export.
 
 ```sh
 npm install
@@ -47,10 +47,11 @@ The ledger and ROI figures are still illustrative placeholders. Replace them in 
 
 ## Domains
 
-`web/vercel.json` gives each domain its own front page from the same deployment:
+The desk and the film are kept apart on every domain (`web/vercel.json`):
 
-- **tab-at-work.com** (and www) opens straight into the Desk at `/`. The film is at `/film`.
-- **Any other domain** (e.g. tab.dynamicbridge.io) opens the film at `/`. The desk is at `/desk.html`.
+- **`/` opens the Desk**, on tab-at-work.com and on any other domain or preview URL.
+- **The film is only at `/film`.** Nothing else opens it.
+- `/desk-he/` is the Hebrew desk, `/desk-he/interview.html` (or `/interview-he`) the interview screen with the timer, and `/hub` the display hub.
 
 The Desk fills the window in both directions: the 1280×800 room scales between fit-to-screen and 160%.
 
