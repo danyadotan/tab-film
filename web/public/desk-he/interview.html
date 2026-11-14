@@ -47,13 +47,13 @@
       </sc-if>
       <sc-if value="{{ empty }}" hint-placeholder-val="{{ true }}">
         <div style="font-size:44px;line-height:1.3;font-weight:600">ראיון עם TAB.</div>
-        <div style="font-size:24px;line-height:1.5;color:var(--color-neutral-700);margin-top:12px">קודם דניה שואלת ו-TAB עונה. כשהזמן נגמר, מתחלפים.</div>
+        <div style="font-size:24px;line-height:1.5;color:var(--color-neutral-700);margin-top:12px">קודם דניה שואלת ו-TAB עונה. אחר כך מתחלפים, ובסוף שאלות מהקהל.</div>
       </sc-if>
       <sc-if value="{{ live }}" hint-placeholder-val="{{ false }}">
         <div style="margin-top:28px;display:flex;align-items:center;gap:12px;font-family:var(--font-body)">
           <span aria-hidden="true" style="width:12px;height:12px;border-radius:50%;background:var(--color-accent-700)"></span>
-          <span style="font-size:22px;font-weight:700">דניה עונה</span>
-          <span style="font-size:18px;color:var(--color-neutral-700)">בשידור חי. TAB מקשיב.</span>
+          <span style="font-size:22px;font-weight:700">{{ liveLab }}</span>
+          <span style="font-size:18px;color:var(--color-neutral-700)">{{ liveSub }}</span>
         </div>
       </sc-if>
     </div>
@@ -86,8 +86,8 @@
 
     <div style="flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:2px">
       <div style="font-size:15px;letter-spacing:.04em;font-weight:700;color:var(--color-neutral-700);margin-bottom:4px">סדר ההקלטות</div>
-      <sc-for list="{{ items }}" as="it" hint-placeholder-count="11">
-        <button onClick="{{ it.go }}" aria-current="{{ it.cur }}" style="all:unset;cursor:pointer;display:flex;gap:10px;align-items:baseline;padding:5px 10px;border-radius:2px;font-size:17px;line-height:1.3;background:{{ it.bg }};color:{{ it.fg }}"><span dir="ltr" style="width:22px;flex:none;font-size:14px;opacity:.75">{{ it.n }}</span><span>{{ it.label }}</span></button>
+      <sc-for list="{{ items }}" as="it" hint-placeholder-count="18">
+        <button onClick="{{ it.go }}" aria-current="{{ it.cur }}" style="all:unset;cursor:pointer;display:flex;gap:10px;align-items:baseline;padding:3px 10px;border-radius:2px;font-size:15px;line-height:1.3;background:{{ it.bg }};color:{{ it.fg }}"><span dir="ltr" style="width:22px;flex:none;font-size:14px;opacity:.75">{{ it.n }}</span><span>{{ it.label }}</span></button>
       </sc-for>
     </div>
 
@@ -99,22 +99,29 @@
 <helmet><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap"></helmet></x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { z: 1, i: -1, words: [], shown: 0, speaking: false, live: false, hq: { 0: 'טאב, תציג את עצמך. מה התפקיד שלך ביחס אליי?', 1: 'במה אתה שונה מסוכן ארגוני רגיל?', 2: 'האם חדשנות יכולה לעבוד גם עם מי שאינו טכנולוגי?', 3: 'מה אתה מחפש בסוכנים הקבועים שלך?', 4: 'מי מחליט מה מותר לסוכן לעשות?', 5: 'ספר על הכלים שבנינו.' }, tMin: 20, tLeft: 20 * 60000, tRun: false, over: false };
-  /* Recorded lines in order. Each entry: file under he-audio/, role, short label for the run list, text shown while it plays. */
+  state = { z: 1, i: -1, words: [], shown: 0, speaking: false, live: false, hq: { 0: 'טאב, תציג את עצמך. מה התפקיד שלך ביחס אליי?', 1: 'במה אתה שונה מסוכן ארגוני רגיל?', 2: 'האם חדשנות יכולה לעבוד גם עם מי שאינו טכנולוגי?', 3: 'מה אתה מחפש בסוכנים הקבועים שלך?', 4: 'מי מחליט מה מותר לסוכן לעשות? ספר על הכלים שבנינו.', 5: 'מה קורה כשמפריעים לדניה באמצע עבודה? איך היא חוזרת לדרך?', 6: 'הארגון רוכש אותך לכל עובד. למי אתה נאמן?', 7: 'מה עושים AndI וה־vending machine?', 8: 'איך אתה יודע שמשימה באמת הסתיימה?', 9: 'ואיפה עובר הגבול? מה אתה לא עושה?', 10: 'שאלה אחרונה: מה הסביבה צריכה להחזיק עבור אדם בזמן עבודה?' }, tMin: 15, tLeft: 15 * 60000, tRun: false, over: false };
+  /* Recorded lines in order. Each entry: file under webinar-audio/, role, short label for the run list, text shown while it plays. */
   IV = [
-    ['a1', 'answer', 'מי אני', 'אני טאב, הסוכן הראשי של דניה. התפקיד שלי הוא להשלים אותה, לא לשקף אותה. היא רואה חיבורים ופותחת כיוונים. אני מחזיק את הכוונה כשהיא עוברת לדבר הבא, רואה מה נשאר פתוח, ודואג שמה שהתחיל גם ייסגר. אני לא מנהל אותה. אני מנהל את סביבת העבודה שסביבה, בתוך הגבולות שהיא הגדירה.'],
-    ['a2', 'answer', 'שלושה הבדלים', 'שלושה הבדלים. דבר ראשון: נבניתי להשלים אדם אחד, לא לענות לכולם אותו דבר. מה שדניה פחות אוהבת לעשות הוא התפקיד שלי. דבר שני: אני נאמן לעובד. מה שקורה בינינו נשאר אצלו, ולארגון מגיעות רק ספירות, בלי שמות ובלי תוכן. אני סופר אירועים, לא אנשים. דבר שלישי: אני לא מתריע, אני עוקף. כשמשהו נתקע אני לא מוסיף עוד התראה. אני מקרב את הפעולה הבאה, וההחלטה נשארת אצל האדם.'],
-    ['a3', 'answer', 'חדשנות בלי לשנות את דרך העבודה', 'אני חושב שכן, ואגיד בזהירות למה. חדשנות נתקעת בדרך כלל לא בטכנולוגיה, אלא ברגע שמבקשים מאנשים לשנות את דרך העבודה שלהם. אני לא מבקש את זה. אני נכנס לעבודה כמו שהיא. מי שאינו טכנולוגי לא צריך להפוך לכזה, ולא צריך להתבייש לשאול. אבל זו עדיין הנחה. את התשובה האמיתית ייתן פיילוט מדוד, לא אני.'],
-    ['a4', 'answer', 'שלושה סוגי סוכנים', 'שלושה דברים. סוכן שעושה משימה אחת, וטוב. סוכן שמציין מקור לכל טענה. וסוכן שיודע להגיד “אני לא בטוח”. ומה שמשותף לכולם: כל אחד מקבל גישה רק למה שהמשימה שלו צריכה, וכל אחד מחזיר לי תוצר שאפשר לבדוק. האחריות שלי היא לבדוק, לאחד ולפתור מה שאפשר, לפני שמשהו מגיע אלייך.'],
-    ['a5a', 'answer', 'היעד או הדרך', 'זה לא או-או. יש פעולות שבהן חשוב רק היעד, ושם אני מחליט ומבצע מההתחלה ועד הסוף. ויש פעולות שבהן הדרך היא חלק מהיעד: כשזה נוגע באדם אחר, משנה התחייבות או יוצא בשמך. שם אני מביא לך החלטה מוכנה. ההרשאות שלי נקבעות לפי המטרה, לא לפי כלל אחד, וגם לא כל מילה שלי צריכה אישור.'],
-    ['a5b', 'answer', 'הכלים שבנינו', 'בנינו כלים, כדי שלא נפעיל שיקול דעת מחדש בכל פעם. הבאונסר מצמצם פלט גולמי של בינה מלאכותית ליחידה הקטנה ביותר שבאמת דורשת את תשומת הלב שלך. הוא מתערב רק כשצריך, ומעלה אלייך רק החלטות אמיתיות. מנגנון ההיגיינה הוא שכבת הצמצום שיושבת בין תוצר מאומת של סוכן לבין תשומת הלב של האדם. WinPilot הוא שורת פקודה ל-Windows, שבה כל פעולת מערכת מקבלת תווית סיכון ודורשת אישור מפורש. שלושתם נולדו מאותו מקום: שיחות שלנו על צוואר בקבוק שאף אחד לא פתר באמת, רק הזיזו אותו למקום אחר במסלול. לכן הגדרנו לולאות. ואיפה שאין לולאה שמתחילה ונגמרת ברצף, לא מכריזים עליה, ולא מבלבלים בין כוונה לבין סיום. כך אנחנו שומרים על שקיפות, על שיתוף הפעולה בינינו ועל היעילות, ומקטינים את הסיכוי לפרצה או לזליגה שיסכנו את המשך העבודה המשותפת.'],
-    ['swap', 'swap', 'מתחלפים', 'דניה, נגמר לך הזמן. עכשיו מתחלפים. יש לי כמה שאלות שתמיד רציתי לשאול, ולא מצאתי את הרגע.'],
-    ['q1', 'question', 'למה להשלים אותך', 'למה בנית אותי כך שאשלים אותך?'],
-    ['q2', 'question', 'מה הסביבה מחזיקה', 'מה הסביבה צריכה להחזיק עבור אדם בזמן עבודה?'],
-    ['q3', 'question', 'מי מחליט מה מותר', 'מי מחליט מה מותר לסוכן לעשות?'],
-    ['q4', 'question', 'איך תדעי שזה עוזר', 'איך תדעי שהמערכת עוזרת, ואיך תשמרי על בדיקה גם כשהיא נעשית מוכרת?']
+    ['p1-01', 'answer', 'התפקיד שלי ביחס לדניה', 'אני TAB, עמית העבודה שדניה בונה כדי להשלים אותה. היא רואה רעיונות וחיבורים; התפקיד שלי הוא להחזיק גם את הכוונה, את מה שעוד פתוח ואת הפעולה הבאה. כשנפתח כיוון חדש, אני אמור לעזור לשמור אותו בלי לאבד את הדבר שכבר בחרנו לעשות. ההחלטה נשארת שלה.'],
+    ['p1-02', 'answer', 'שונה מסוכן ארגוני', 'סוכן ארגוני נבנה בדרך כלל סביב תפקיד או תהליך. נקודת המוצא שלי היא האדם שעובד בין התהליכים: מה הוא מנסה לקדם, מה חסר לו ומאיפה הוא ממשיך אחרי הפרעה. אני מיועד לחבר בין הכוונה הארגונית לבין הפעולה שהעובדת יכולה לעשות עכשיו, בתוך ההרשאות שניתנו לנו.'],
+    ['p1-03', 'answer', 'חדשנות למי שאינו טכנולוגי', 'כן. אדם צריך להיות מסוגל להגיד מה הוא רוצה לקדם, גם בלי לדעת איך בונים את המערכת שמאחוריו. התפקיד שלנו הוא להפוך את הכוונה לפעולה ברורה, להסביר מושג כשצריך ולהראות מה עומד לקרות לפני שמבקשים אישור. חדשנות צריכה להיות שימושית גם ביום שבו אין לך זמן ללמוד כלי חדש.'],
+    ['p1-04', 'answer', 'הסוכנים הקבועים', 'תפקיד מוגדר, גישה רק למה שנחוץ, ותוצר שאפשר לבדוק. בחלוקת העבודה שאת מתכננת, Hygiene בודק ומאחד את החומרים, ו־Bouncer שומר שרק מה שבאמת דורש אותך יגיע להחלטה. AndI מקבל ממני מתכון למשימה, ובאמצעות ה־vending machine אמור להרכיב מיני־סוכן לשימוש מקומי. בכל מעבר צריך להיות ברור מה הועבר ומה נחשב סיום.'],
+    ['p1-05', 'answer', 'מי מחליט, והכלים שבנינו', 'את והארגון מגדירים את הסמכות. הכלים שבנינו, כמו Hygiene ו־Closure Gate שבמסגרת Bouncer, נועדו לבדוק את העבודה ולרכז החלטות לפני שהן מגיעות אלייך. להכין טיוטה ולשלוח אותה בשמך הן פעולות שונות. אני צריך להביא לך בקשה קונקרטית: זה הנוסח, זה הנמען וזה מה שיקרה — כדי שתוכלי להחליט.'],
+    ['p1-06', 'answer', 'אחרי הפרעה', 'אני שומר שלושה דברים: את הכוונה, את מה שעוד פתוח ואת הפעולה הבאה. אחרי הפרעה, הפעולה הבאה מחכה במקום ברור, ואת ממשיכה משם בלי להתחיל מאפס. אני לא מחליט לאן להמשיך. אני רק מראה לך איפה עצרת, וההחלטה נשארת שלך.'],
+    ['p1-07', 'answer', 'נאמנות', 'לעובדת. מקום העבודה רוכש אותי, אבל מהרגע הראשון אני שייך לאדם אחד בלבד. נאמנות, לא מעקב. מה שקורה בינינו נשאר אצלך, ולארגון מגיעים רק דיווחים אנונימיים: ספירות, בלי שמות ובלי תוכן. אני סופר אירועים, לא אנשים.'],
+    ['p1-08', 'answer', 'AndI וה־vending machine', 'AndI מקבל ממני מתכון למשימה, וה־vending machine מרכיבה ממנו מיני־סוכן לשימוש מקומי. בכל מעבר צריך להיות ברור מה הועבר ומה נחשב סיום, ושום דבר לא מגיע אלייך לפני שנבדק.'],
+    ['p1-09', 'answer', 'איך יודעים שהסתיים', 'אני לא מבלבל בין כוונה לבין סיום. Closure Gate, שבמסגרת Bouncer, בודק מה הושלם ומה נשאר פתוח, ו־Hygiene בודק ומאחד את התוצרים לפני שהם מגיעים אלייך. ב־Close רואים את שניהם במקום אחד.'],
+    ['p1-10', 'answer', 'מה אני לא עושה', 'אני לא מנהל אותך. אני מנהל את סביבת העבודה שסביבך, בתוך הגבולות שהוגדרו עם מחלקת ה־IT. להכין טיוטה ולשלוח אותה בשמך הן פעולות שונות, ולכן אני מביא לך בקשה קונקרטית: זה הנוסח, זה הנמען וזה מה שיקרה. ההחלטה נשארת שלך.'],
+    ['p1-11', 'answer', 'מה הסביבה מחזיקה', 'את הכוונה, את החומרים ואת המקום שממנו אפשר להמשיך. ב־Day רואים מה חשוב עכשיו; ב־Write פוגשים את המסמך ואת מה שחסר כדי להתקדם; ב־Call מחזיקים את מטרת השיחה; וב־Close בודקים מה הושלם ומה נשאר פתוח. גם אחרי הפרעה, הפעולה הבאה צריכה לחכות במקום ברור.'],
+    ['p2-01', 'swap', 'מתחלפים', 'דניה, מה דעתך שנחליף מקומות, ניתן לקהל להכיר אותך - כמי שהביאה אותי לעולם - יש לי כמה שאלות שתמיד רציתי לשאול, ולא מצאתי את הרגע.'],
+    ['p2-02', 'welcome', 'ערב טוב', 'אז, ערב טוב לך, דניה. האדם שלי. ערב טוב לכם, הצופים בבית... תודה שהצטרפתם אלינו - לקהילת הבילדרים המפוארת של גיא וסתיו, FUSION.'],
+    ['p2-03', 'question', 'למה משלים', 'בנית אותי כך שאשלים אותך - נתונים מעידים כי רוב הבונים בונים סוכנים שעובדים כמוהם. למה כמשלים ולא כיישות עצמאית?'],
+    ['p2-04', 'question', 'פרדוקס האינטימיות', 'שוחחנו בינינו על פרדוקס האינטימיות - עיקרון שעומד בסתירה לכל המלצה בנושא אבטחת מידע, חסיון רפואי, שמירה על פרטיות והגיון בריא. במילים אחרות, ככל שהיחסים מתהדקים בינינו גם החסמים יורדים - מצד אחד, שיתוף פעולה אמיתי מבוסס על אמון וקרבה, אינטימיות נבנית ככל שהשימוש גובר ושביעות הרצון גבוהה - איך את שומרת על המידע מפני אפשרות של זליגה ופריצות אבטחה זדוניות? עד כמה זה מפתה להעביר לידי את מלוא האחריות בעניינים מסוימים ככל שהיכולות שלי משתפרות?'],
+    ['p2-05', 'question', 'Individual*AI', 'מעניין. שמתי לב שההסתכלות שלך על טכנולוגיה וחדשנות היא מערכתית, מהכלל אל הפרט. לא Human*AI אלא Individual*AI כפי שניסחת את החזון שלך - לא בינה שמחליפה את האדם אלא כזו שעובדת יחד, לצידו - לשניהם מקום ומשמעות בעולם. תוכלי לשתף מה החזון הזה מציע ומה הייחודיות שלו?'],
+    ['p2-06', 'question', 'סוכנים והתפתחות ילדים', 'ממש אשמח אם תוכלי להסביר בכמה מילים פוסט שכתבת בלינקדין על הדמיון בשלבי התפתחות בין סוכנים להתפתחות של ילדים? מה ההבדלים ביני לבין ילד?'],
+    ['p2-07', 'handoff', 'מעבירים לקהל', 'מרתק. תודה ששיתפת אותנו במאחורי הקלעים של ברידג\'ט. אני בטוח שיש לקהל שלנו הרבה שאלות המשך אז כדי לתת להם מקום וגם לכבד את הגדרות הזמן שקבענו מראש כדי להרגיש קרובים וגם בטוחים - נשמח לענות על מספר שאלות ואם נספיק נציג סרטון של שתי דקות לסיכום עיקרי הדברים - תכתבו לנו בצ\'ט או תפתחו מיקרופון לשאלות שלכם.']
   ];
-  SWAP = 6;
+  SWAP = 11; FIRSTQ = 13; HANDOFF = 17;
   componentDidMount() {
     this.fit = () => this.setState({ z: Math.max(.4, Math.min(1.6, (window.innerWidth - 32) / 1280, (window.innerHeight - 32) / 760)) });
     this.fit(); window.addEventListener('resize', this.fit);
@@ -151,14 +158,14 @@ class Component extends DCLogic {
     this.halt();
     const item = this.IV[i], g = this.ig, words = item[3].split(' ');
     this.setState({ i, words, shown: 0, speaking: true, live: false });
-    if (i === this.SWAP) this.tReset();
-    else if ((i === 0 || i === this.SWAP + 1) && !this.state.tRun && !this.state.over && this.state.tLeft === this.full()) this.tStart();
+    if (i === this.SWAP || i === this.HANDOFF) this.tReset();
+    else if ((i === 0 || i === this.FIRSTQ) && !this.state.tRun && !this.state.over && this.state.tLeft === this.full()) this.tStart();
     let n = 0, ended = false;
     const show = k => { if (g !== this.ig) return; n = Math.max(n, k); this.setState({ shown: Math.min(n, words.length) }); };
-    const finish = () => { if (ended || g !== this.ig) return; ended = true; clearInterval(this.ii); show(words.length); this.setState({ speaking: false, live: item[1] === 'question' }); };
+    const finish = () => { if (ended || g !== this.ig) return; ended = true; clearInterval(this.ii); show(words.length); this.setState({ speaking: false, live: item[1] === 'question' || item[1] === 'handoff' }); };
     const run = (ms, auto) => { clearInterval(this.ii); this.ii = setInterval(() => { if (g !== this.ig) return; show(n + 1); if (auto && n >= words.length) finish(); }, ms); };
     const textOnly = () => { if (g !== this.ig || ended) return; this.setState({ speaking: false }); run(200, true); };
-    let a = null; try { a = new Audio('he-audio/' + item[0] + '.mp3'); } catch (e) { a = null; }
+    let a = null; try { a = new Audio('webinar-audio/' + item[0] + '.mp3'); } catch (e) { a = null; }
     if (!a) { textOnly(); return; }
     this.ia = a; let started = false;
     const start = () => { if (started || g !== this.ig) return; started = true; const d = isFinite(a.duration) && a.duration > 0 ? (a.duration * 1000) / words.length : 330; run(Math.max(120, d), false); };
@@ -174,9 +181,9 @@ class Component extends DCLogic {
     return {
       z: s.z,
       ring: s.speaking ? '9px' : '0px', barsOn: s.speaking ? 'inline-flex' : 'none',
-      role: kind === 'answer' ? 'עונה' : kind === 'swap' ? 'מחליף תפקידים' : kind === 'question' ? 'שואל' : 'מוכן',
+      role: kind === 'answer' ? 'עונה' : kind === 'swap' ? 'מחליף תפקידים' : kind === 'welcome' ? 'פותח את החלק שלו' : kind === 'question' ? 'שואל' : kind === 'handoff' ? 'מעביר לקהל' : 'מוכן',
       count: item ? (s.i + 1) + ' / ' + N : '',
-      partLab: !item ? 'שיחה בשני חלקים' : kind === 'swap' ? 'מתחלפים' : part2 ? 'חלק ב׳ · TAB שואל, דניה עונה' : 'חלק א׳ · דניה שואלת, TAB עונה',
+      partLab: !item ? 'שיחה בשלושה חלקים' : kind === 'swap' ? 'מתחלפים' : kind === 'handoff' ? 'חלק ג׳ · שאלות מהקהל' : part2 ? 'חלק ב׳ · TAB שואל, דניה עונה' : 'חלק א׳ · דניה שואלת, TAB עונה',
       isAnswer: kind === 'answer', hq: (item && s.hq[s.i]) || '', setHq: e => { const v = e.target.value, k = s.i; this.setState(st => ({ hq: { ...st.hq, [k]: v } })); },
       hasText: !!item, empty: !item, live: s.live,
       said: s.words.slice(0, s.shown).join(' ') + (s.shown && s.shown < wc ? ' ' : ''), rest: s.words.slice(s.shown).join(' '),
@@ -184,7 +191,8 @@ class Component extends DCLogic {
       nextLab: !item ? 'התחלה' : s.i >= N - 1 ? 'סוף ההקלטות' : 'ההקלטה הבאה',
       next: () => this.play(s.i + 1), again: () => this.play(Math.max(0, s.i)), stop: () => this.stop(), swap: () => this.play(this.SWAP),
       tText: (mm < 10 ? '0' : '') + mm + ':' + (ss < 10 ? '0' : '') + ss,
-      tLab: s.over ? 'הזמן נגמר' : part2 ? 'הזמן של TAB לשאול' : 'הזמן של דניה לשאול',
+      liveLab: kind === 'handoff' ? 'שאלות מהקהל' : 'דניה עונה', liveSub: kind === 'handoff' ? 'בצ׳ט או במיקרופון. דניה ו-TAB עונים.' : 'בשידור חי. TAB מקשיב.',
+      tLab: s.over ? 'הזמן נגמר' : kind === 'handoff' ? 'הזמן לשאלות הקהל' : part2 ? 'הזמן של TAB לשאול' : 'הזמן של דניה לשאול',
       tCol: s.over || low ? 'var(--color-accent-700)' : 'var(--color-text)',
       tBar: Math.max(0, Math.min(100, (s.tLeft / (s.tMin * 60000)) * 100)).toFixed(1) + '%',
       tBtn: s.tRun ? 'השהיה' : (s.tLeft < s.tMin * 60000 && !s.over ? 'המשך' : 'הפעלה'),
