@@ -84,8 +84,9 @@
     .workspace.split .pane-demo, .workspace.split .pane-video,
     .workspace.demo-interview .pane-demo, .workspace.demo-interview .pane-interview,
     .workspace.only-demo .pane-demo, .workspace.only-video .pane-video,
-    .workspace.only-interview .pane-interview { display: flex; }
-    .workspace.only-demo, .workspace.only-video, .workspace.only-interview { grid-template-columns: 1fr; }
+    .workspace.only-interview .pane-interview,
+    .workspace.only-spine .pane-spine { display: flex; }
+    .workspace.only-demo, .workspace.only-video, .workspace.only-interview, .workspace.only-spine { grid-template-columns: 1fr; }
 
     .pane {
       background: var(--card-white);
@@ -101,6 +102,8 @@
     .pane-video { border-top: 5px solid var(--tab-burgundy); }
     .pane-interview { border-top: 5px solid #B4690E; }
     .pane-interview .pane-header { background: #FBF3E6; color: #7A4706; }
+    .pane-spine { border-top: 5px solid #201e1d; }
+    .pane-spine .pane-header { background: #F3F2F2; color: #201e1d; }
 
     .pane-header {
       padding: 8px 14px;
@@ -214,6 +217,7 @@
       <button class="btn active" data-mode="only-demo" onclick="setLayout('only-demo')">רק דמו חי</button>
       <button class="btn" data-mode="only-video" onclick="setLayout('only-video')">רק וידאו</button>
       <button class="btn" data-mode="only-interview" onclick="setLayout('only-interview')">רק ראיון + טיימר</button>
+      <button class="btn" data-mode="only-spine" onclick="setLayout('only-spine')">הציר הרוחבי</button>
       <button class="btn btn-qr" onclick="toggleModal(true)">QR וקישורים (Danya Dotan)</button>
     </div>
   </header>
@@ -247,6 +251,15 @@
         <a href="https://tab-at-work.com/desk-he/interview.html" target="_blank" style="color:inherit; text-decoration:none;">פתיחה בחלון נפרד ↗</a>
       </div>
       <iframe src="https://tab-at-work.com/desk-he/interview.html" title="ראיון עם TAB" allow="autoplay"></iframe>
+    </section>
+
+    <!-- הציר הרוחבי: הדמו התלת־ממדי -->
+    <section class="pane pane-spine">
+      <div class="pane-header">
+        <span>● הציר הרוחבי (spine)</span>
+        <a href="https://tab-at-work.com/spine/" target="_blank" style="color:inherit; text-decoration:none;">פתיחה בחלון נפרד ↗</a>
+      </div>
+      <iframe src="https://tab-at-work.com/spine/" title="TAB@Work הציר הרוחבי" loading="lazy"></iframe>
     </section>
   </main>
 

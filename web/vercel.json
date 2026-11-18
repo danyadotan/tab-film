@@ -46,6 +46,17 @@
       "dest": "/desk-he/index.html"
     },
     {
+      "src": "^/spine$",
+      "status": 308,
+      "headers": {
+        "Location": "/spine/"
+      }
+    },
+    {
+      "src": "^/spine/$",
+      "dest": "/spine/index.html"
+    },
+    {
       "src": "^/hub$",
       "status": 308,
       "headers": {

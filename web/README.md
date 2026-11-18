@@ -52,6 +52,7 @@ The desk and the film are kept apart on every domain (`web/vercel.json`):
 - **`/` opens the Desk**, on tab-at-work.com and on any other domain or preview URL.
 - **The film is only at `/film`.** Nothing else opens it.
 - `/desk-he/` is the Hebrew desk, `/desk-he/interview.html` (or `/interview-he`) the interview screen with the timer, and `/hub` the display hub.
+- `/spine/` is the 3D horizontal-spine demo (one static page in `public/spine/`, Hebrew first with an English switch). The hub shows it under **הציר הרוחבי**.
 
 The Desk fills the window in both directions: the 1280×800 room scales between fit-to-screen and 160%.
 

@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TAB@Work הציר הרוחבי</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Heebo:wght@400;500;700&family=Source+Serif+4:wght@400;600&display=swap">
+<style>
+/* Layout idea: one open sheet of paper. The 3D spine fills it; TAB speaks in one pill on top, one feed line at the bottom. No panels. */
+:root{
+  color-scheme:light;
+  --paper:#f3f2f2; --surface:#ffffff; --ink:#201e1d; --muted:#6b6663; --hair:#d9d6d3;
+  --cyan:#0088b0; --cyan-deep:#00627f; --magenta:#d6006c;
+  --tab:oklch(0.7 0.17 65); --tab-deep:oklch(0.45 0.15 55); --tab-btn:oklch(0.55 0.17 55); --tab-tint:oklch(0.95 0.05 80);
+  --ok:#3b8f6a; --maint:#7a7572;
+  --font-display:'Frank Ruhl Libre','David Libre','David','Times New Roman',serif;
+  --font-body:'Heebo','Arial',sans-serif;
+  --shadow:0 1px 2px rgba(32,30,29,.08),0 10px 30px rgba(32,30,29,.12);
+}
+html[lang="en"]{--font-display:'Source Serif 4',Georgia,serif;--font-body:'Source Serif 4',Georgia,serif}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-body);overflow:hidden;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit}
+button:focus-visible,a:focus-visible{outline:2px solid var(--cyan-deep);outline-offset:2px}
+#stage{position:fixed;inset:0;touch-action:none}
+#stage canvas{display:block;width:100%;height:100%}
+#labels{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.lab{position:absolute;top:0;left:0;transform:translate(-50%,-50%);white-space:nowrap;font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--ink);background:none;border:0;padding:4px 8px;cursor:pointer;pointer-events:auto;text-shadow:0 0 6px var(--paper),0 0 6px var(--paper),0 0 2px var(--paper)}
+.lab small{display:block;font-family:var(--font-body);font-weight:400;font-size:11.5px;color:var(--muted);text-align:center}
+.lab.quiet{font-weight:400;font-size:13px;color:var(--muted)}
+.lab.on{color:var(--tab-deep)}
+
+/* top: masthead + TAB line */
+#top{position:fixed;top:0;left:0;right:0;padding:12px 16px 18px;background:linear-gradient(var(--paper) 55%,rgba(243,242,242,0));display:flex;flex-direction:column;gap:10px;pointer-events:none;z-index:5}
+#mast{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+#mast h1{margin:0;font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:.01em}
+#mast h1 span{font-weight:400;color:var(--muted);font-size:14px;margin-inline-start:8px}
+#mast .right{display:flex;gap:10px;align-items:baseline;pointer-events:auto}
+#demoTag{font-size:12px;color:var(--muted)}
+#lang{all:unset;cursor:pointer;font-size:13px;padding:4px 10px;border-radius:999px;color:var(--cyan-deep)}
+#lang:hover{background:#e6eef1}
+#line{pointer-events:auto;align-self:flex-start;max-width:min(720px,100%);background:var(--surface);border-radius:26px;outline:1.5px solid var(--tab);box-shadow:var(--shadow);padding:10px 14px 10px 16px;display:flex;flex-direction:column;gap:8px;font-family:var(--font-display)}
+#lineRow{display:flex;align-items:flex-start;gap:10px}
+#dot{flex:none;width:12px;height:12px;margin-top:7px;border-radius:50%;background:var(--tab);transition:box-shadow .25s}
+#line.speaking #dot{box-shadow:0 0 0 5px oklch(0.9 0.1 80)}
+#said{flex:1;min-width:0;font-size:17px;line-height:1.4;text-wrap:pretty}
+#said b{font-weight:600;color:var(--tab-deep);margin-inline-end:6px}
+#said .rest{color:#b5b0ac}
+#stepMeta{flex:none;font-family:var(--font-body);font-size:12px;color:var(--muted);margin-top:5px;font-variant-numeric:tabular-nums}
+#lineX{all:unset;cursor:pointer;flex:none;width:30px;height:30px;margin-top:-3px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:21px;color:var(--muted)}
+#lineX:hover{background:#eceae8;color:var(--ink)}
+#line.min{cursor:pointer;padding:7px 14px 7px 12px;margin-inline-start:-16px;border-radius:999px;border-start-start-radius:0;border-end-start-radius:0}
+#line.min:hover{background:var(--tab-tint)}
+#line.min #lineBtns,#line.min #stepMeta,#line.min #lineX{display:none!important}
+#line.min #dot{margin-top:5px}
+#line.min #said b{margin:0}
+#lineBtns{display:flex;flex-wrap:wrap;gap:6px;padding-inline-start:22px}
+.pill{all:unset;cursor:pointer;padding:6px 15px;border-radius:999px;font-family:var(--font-body);font-size:14.5px;white-space:nowrap;outline:1.5px solid var(--tab);background:var(--surface)}
+.pill:hover{background:var(--tab-tint)}
+.pill.primary{background:var(--tab-btn);color:#fff}
+.pill.primary:hover{background:oklch(0.48 0.17 55)}
+.pill.ghost{outline:0;color:var(--muted)}
+.pill.ghost:hover{color:var(--ink);background:none}
+a.pill{text-decoration:none;color:var(--ink)}
+.mail{font-family:var(--font-body);font-size:16px;direction:ltr;unicode-bidi:isolate;user-select:all;color:var(--cyan-deep)}
+
+/* bottom: feed line + legend */
+#bottom{position:fixed;left:0;right:0;bottom:0;padding:0 16px 14px;display:flex;flex-direction:column;gap:8px;align-items:flex-start;pointer-events:none;z-index:4}
+#legend{display:none;flex-wrap:wrap;gap:4px 14px;font-size:13px;pointer-events:auto;background:var(--surface);padding:8px 12px;border-radius:14px;box-shadow:var(--shadow)}
+#legend.open{display:flex}
+.key{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.glyph{width:11px;height:11px;flex:none;display:inline-block;background:var(--c)}
+.glyph.ok{border-radius:50%}
+.glyph.pred{clip-path:polygon(50% 0,100% 100%,0 100%)}
+.glyph.defect{transform:rotate(45deg) scale(.82)}
+.glyph.sec{clip-path:polygon(50% 0,100% 22%,100% 60%,50% 100%,0 60%,0 22%)}
+.glyph.maint{border-radius:2px;background:none;border:2.5px solid var(--c)}
+.glyph.dir{clip-path:polygon(0 35%,60% 35%,60% 0,100% 50%,60% 100%,60% 65%,0 65%)}
+#feedRow{display:flex;align-items:center;gap:10px;max-width:100%;pointer-events:auto;background:rgba(243,242,242,.88);border-radius:14px}
+#ctl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;pointer-events:auto}
+#legendBtn,#mvBtn{all:unset;cursor:pointer;flex:none;font-size:13px;color:var(--cyan-deep);padding:6px 10px;border-radius:999px;background:rgba(243,242,242,.88)}
+#legendBtn:hover,#mvBtn:hover{background:#e6eef1}
+#mvBtn[aria-pressed="true"]{background:var(--cyan-deep);color:#fff}
+#seg{display:inline-flex;background:var(--surface);border-radius:999px;box-shadow:0 0 0 1px var(--hair);padding:2px}
+#seg button{all:unset;cursor:pointer;font-size:13px;padding:5px 12px;border-radius:999px;color:var(--muted);white-space:nowrap}
+#seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.glyph.fig{width:9px;height:13px;border-radius:50% 50% 2px 2px}
+.sep{flex-basis:100%;height:0}
+#card h3{margin:12px 0 4px;font-size:12.5px;font-weight:700;letter-spacing:.04em;color:var(--muted)}
+.opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+#feed{all:unset;cursor:pointer;display:flex;align-items:center;gap:9px;min-width:0;font-size:14px;line-height:1.35;padding:6px 10px;border-radius:12px}
+#feed:hover{background:rgba(255,255,255,.7)}
+#feed .txt{overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+#feed time{flex:none;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+
+/* detail card */
+#card{position:fixed;inset-inline-start:16px;bottom:14px;width:min(420px,calc(100% - 32px));max-height:52%;overflow:auto;background:var(--surface);border-radius:18px;box-shadow:var(--shadow);padding:16px 18px 18px;z-index:6;display:none}
+#card.open{display:block}
+#card .kicker{font-size:12.5px;font-weight:700;letter-spacing:.04em;color:var(--magenta)}
+#card h2{margin:4px 0 8px;font-family:var(--font-display);font-size:24px;font-weight:600;line-height:1.15;text-wrap:balance;padding-inline-end:34px}
+#card p{margin:0 0 8px;font-size:15.5px;line-height:1.55}
+#card p.note{color:var(--muted);font-size:14px}
+#card .x{all:unset;cursor:pointer;position:absolute;top:10px;inset-inline-end:10px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:22px;color:var(--muted)}
+#card .x:hover{background:#eceae8;color:var(--ink)}
+.counts{display:flex;flex-wrap:wrap;gap:6px 14px;margin:8px 0;font-size:14px;font-variant-numeric:tabular-nums}
+table.ledger{width:100%;border-collapse:collapse;margin:4px 0;font-size:13.5px;font-variant-numeric:tabular-nums}
+table.ledger th{font-weight:500;color:var(--muted);text-align:start;padding:2px 0;font-size:12px}
+table.ledger td{padding:2.5px 0;border-top:1px solid var(--hair)}
+table.ledger td.n,table.ledger th.n{text-align:end;width:4.5em}
+.pending{margin-top:10px;padding:10px 12px;background:var(--tab-tint);border-radius:12px;font-size:14.5px;line-height:1.5;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+
+/* summary dialog */
+#veil{position:fixed;inset:0;background:rgba(32,30,29,.28);z-index:9;display:none;align-items:center;justify-content:center;padding:16px}
+#veil.open{display:flex}
+#sum{background:var(--surface);border-radius:18px;box-shadow:var(--shadow);width:min(560px,100%);max-height:86%;overflow:auto;padding:22px 22px 18px;position:relative}
+#sum h2{margin:0 0 10px;font-family:var(--font-display);font-size:26px;font-weight:600}
+#sumText{white-space:pre-wrap;font-size:15.5px;line-height:1.6;margin:0 0 14px;font-family:var(--font-body)}
+#sum .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#copied{font-size:13px;color:var(--ok)}
+#nogl{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:var(--font-display);font-size:20px}
+@media (max-width:520px){
+  #mast h1{font-size:18px} #mast h1 span{display:none}
+  #said{font-size:16px} .lab{font-size:13.5px} .lab small{font-size:11px}
+  #card{max-height:50%;padding:14px 16px 14px}
+  #card h2{font-size:21px;margin-bottom:6px}
+  #card p{font-size:14.5px;line-height:1.45;margin-bottom:6px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="labels"></div>
+
+<div id="top">
+  <div id="mast">
+    <h1>TAB@Work<span id="sub"></span></h1>
+    <div class="right"><span id="demoTag"></span><button id="lang" type="button"></button></div>
+  </div>
+  <div id="line" role="status" aria-live="polite">
+    <div id="lineRow"><span id="dot" aria-hidden="true"></span><div id="said"></div><span id="stepMeta"></span><button id="lineX" type="button">×</button></div>
+    <div id="lineBtns"></div>
+  </div>
+</div>
+
+<div id="bottom">
+  <div id="legend"></div>
+  <div id="feedRow">
+    <button id="feed" type="button"><span class="glyph ok" style="--c:var(--ok)"></span><span class="txt"></span><time></time></button>
+  </div>
+  <div id="ctl">
+    <div id="seg" role="group"><button id="segOff" type="button"></button><button id="segOn" type="button"></button></div>
+    <button id="mvBtn" type="button" aria-pressed="false"></button>
+    <button id="legendBtn" type="button" aria-expanded="false"></button>
+  </div>
+</div>
+
+<div id="card" role="dialog" aria-labelledby="cardTitle"></div>
+
+<div id="veil"><div id="sum" role="dialog" aria-labelledby="sumTitle">
+  <h2 id="sumTitle"></h2>
+  <pre id="sumText"></pre>
+  <div class="row"><button class="pill primary" id="copyBtn" type="button"></button><button class="pill ghost" id="sumClose" type="button"></button><span id="copied" role="status"></span></div>
+</div></div>
+<div id="nogl"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id)};
+var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- content (demo, invented data) ---------- */
+var TYPES={
+  ok:{c:'#3b8f6a',g:'ok',he:'תקינות',en:'Healthy'},
+  pred:{c:'#e3922e',g:'pred',he:'כשל צפוי',en:'Predicted failure'},
+  defect:{c:'#d6006c',g:'defect',he:'ליקוי',en:'Defect'},
+  sec:{c:'#0088b0',g:'sec',he:'אבטחה',en:'Security'},
+  maint:{c:'#7a7572',g:'maint',he:'תחזוקה',en:'Maintenance'},
+  dir:{c:'#201e1d',g:'dir',he:'החלטת הנהלה',en:'Management decision'}
+};
+var DEPTS=[
+  {id:'service',x:-5,side:1,n:7,he:'מוקד שירות',en:'Service center'},
+  {id:'sales',x:-2.5,side:-1,n:5,he:'מכירות',en:'Sales'},
+  {id:'ops',x:0,side:1,n:6,he:'תפעול',en:'Operations'},
+  {id:'finance',x:2.5,side:-1,n:4,he:'כספים',en:'Finance'},
+  {id:'it',x:5,side:1,n:5,he:'מערכות מידע',en:'IT'}
+];
+var EVENTS=[
+  {d:'ops',t:'pred',he:'תור האישורים עומד להתמלא ביום חמישי. המסלול הוסט מראש, והעבודה לא נעצרה.',en:'The approvals queue is about to fill up on Thursday. The route was shifted ahead of time and work never stopped.'},
+  {d:'finance',t:'sec',he:'קובץ עמד לצאת בערוץ לא מאושר. הוצע ערוץ מאושר באותו רגע, והעבודה המשיכה.',en:'A file was about to leave through an unapproved channel. An approved channel was offered on the spot and work continued.'},
+  {d:'service',t:'defect',he:'אותו פרט מוקלד בשני כלים. הסוכן האחראי חיבר ביניהם דרך השקע.',en:'The same detail is typed into two tools. The lead agent connected them through the socket.'},
+  {d:'it',t:'maint',decide:true,he:'עדכון גרסה מוכן. חלון מוצע: הלילה ב-23:00. ממתין להחלטת ההנהלה.',en:'A version update is ready. Proposed window: tonight at 23:00. Waiting for a management decision.',
+   okHe:'החלון אושר. הסוכנים האישיים מעדכנים את הצוותים מראש.',okEn:'Window approved. Personal agents are preparing their teams in advance.'},
+  {d:'sales',t:'ok',he:'כל החיבורים פעילים. אין מה לטפל.',en:'All connections are live. Nothing to handle.'},
+  {d:'service',t:'pred',he:'עומס פניות צפוי אחרי ההודעה ללקוחות. תסריט מענה הוכן מראש לסוכנים האישיים.',en:'A spike in inquiries is expected after the customer notice. A response script was prepared ahead for the personal agents.'}
+];
+var S={
+  sub:{he:'הציר הרוחבי',en:'the spine'},
+  demo:{he:'דמו · נתונים מומצאים',en:'Demo · invented data'},
+  lang:{he:'English',en:'עברית'},
+  legend:{he:'מקרא',en:'Legend'},
+  mgmt:{he:'הנהלה',en:'Management'}, mgmtSmall:{he:'צוות הסוכנים שלה',en:'and its agent team'},
+  os:{he:'תשתית מערכת ההפעלה',en:'Operating system infrastructure'},
+  free:{he:'שקע פנוי',en:'Free socket'},
+  open:{he:'זה הציר של TAB@Work. מאיפה להתחיל?',en:'This is the TAB@Work spine. Where shall we start?'},
+  tour:{he:'סיור במבנה',en:'Tour the structure'}, story:{he:'הוראה אחת, שני מסלולים',en:'One directive, two routes'}, roam:{he:'שיטוט חופשי',en:'Explore freely'},
+  off:{he:'בלי הציר',en:'Without the spine'}, on:{he:'עם הציר',en:'With the spine'}, mv:{he:'מבט הנהלה',en:'Management view'},
+  offFeed:{he:'בלי הציר: כל הוראה עוברת דרך מנהל הביניים, הלוך ושוב.',en:'Without the spine: every directive goes through the middle manager, back and forth.'},
+  mm:{he:'מנהל ביניים',en:'Middle manager'}, leadK:{he:'סוכן אחראי',en:'Lead agent'}, persK:{he:'סוכן אישי',en:'Personal agent'},
+  connect:{he:'מה לחבר כאן?',en:'What should plug in here?'},
+  talk:{he:'לדבר על מחלקה ראשונה',en:'Talk about a first department'}, desk:{he:'שולחן העבודה של TAB',en:'The TAB work desk'},
+  deskMoment:{he:'הרגע הזה בשולחן העבודה',en:'This moment on the work desk'},
+  empty:{he:'עדיין לא עבר על הציר אירוע. הראשון כבר בדרך.',en:'No event has crossed the spine yet. The first one is on its way.'},
+  copyMail:{he:'העתקת הכתובת',en:'Copy address'}, next2:{he:'השלב הבא',en:'Next step'}, evWord:{he:'אירועים',en:'events'},
+  roamHint:{he:'לחיצה על כל דבר במסך פותחת הסבר.',en:'Tap anything on screen for an explanation.'},
+  summary:{he:'סיכום',en:'Summary'}, next:{he:'הבא',en:'Next'}, stop:{he:'עצירה',en:'Stop'}, done:{he:'סיום',en:'Finish'},
+  close:{he:'סגירה',en:'Close'}, minTab:{he:'הזזת TAB לשוליים',en:'Move TAB to the margin'}, openTab:{he:'פתיחת TAB',en:'Open TAB'}, copy:{he:'העתקת הסיכום',en:'Copy summary'}, copied:{he:'הועתק.',en:'Copied.'},
+  copyFail:{he:'ההעתקה נחסמה. אפשר לסמן את הטקסט ולהעתיק ידנית.',en:'Copying was blocked. Select the text and copy it manually.'},
+  sumTitle:{he:'עיקרי הדברים',en:'Key points'},
+  approve:{he:'לאשר את החלון',en:'Approve the window'},
+  since:{he:'מאז שהעמוד נפתח',en:'Since this page opened'},
+  none:{he:'עדיין לא עבר כאן אירוע.',en:'No event has passed here yet.'},
+  last:{he:'אחרון',en:'Latest'},
+  dept:{he:'מחלקה',en:'Department'}, events:{he:'אירועים',en:'Events'}, bypassed:{he:'נעקפו',en:'Bypassed'},
+  nogl:{he:'הדפדפן הזה לא מציג תלת־ממד. אפשר לפתוח את העמוד בדפדפן אחר.',en:'This browser cannot show 3D. Open the page in another browser.'}
+};
+var EXTRA={hr:{n:4,he:'משאבי אנוש',en:'HR'},vendor:{n:3,he:'ספק חיצוני',en:'Outside vendor'},tool:{n:0,he:'כלי חדש',en:'New tool'}};
+var RECEIPT={d:'ops',t:'pred',he:'אירוע חיכוך אחד נעקף. בלי שם.',en:'One friction event bypassed. No name.'};
+var STORY=[
+  {spine:false,mv:false,f:'all',act:'s1',he:'הוראה יוצאת מההנהלה: "המתחרים כבר עושים את זה. רוצים גם, עד סוף הרבעון." מה בדיוק? לא סגור. הביטחון מלא.',en:'A directive leaves management: “Competitors already do this. We want it too, by end of quarter.” What exactly? Not settled. The confidence is total.'},
+  {f:'dept:ops',ring:'mm:ops',he:'היא נוחתת אצל מנהל הביניים. מלמעלה: תוצאות, דדליין, ובונוס שאף אחד לא אומר בקול.',en:'It lands on the middle manager. From above: results, a deadline, and a bonus nobody mentions out loud.'},
+  {f:'dept:ops',ring:'dept:ops',he:'מלמטה: היומיום. נהלים, תירוצים, שחיקה, שיחות אישיות, שיחות מוטיבציה, דוחות ביצועים לכספים. כלא מזהב.',en:'From below: the day to day. Procedures, excuses, attrition, one-on-ones, pep talks, performance reports for finance. A golden cage.'},
+  {f:'dept:ops',ring:'mm:ops',act:'s4',he:'הוא מעביר את ההוראה הלאה, בטוח בעצמו. לא מברר מה הובן. לשאלות אין זמן.',en:'He passes the directive on, sure of himself. He does not check what was understood. There is no time for questions.'},
+  {f:'dept:ops',ring:'p0:ops',act:'s5',he:'מי שקיבל את המשימה לא בטוח שהבין, אבל יודע שצריך למהר. חוזר ניחוש חצי אפוי.',en:'Whoever got the task is not sure they understood, but knows it is urgent. A half-baked guess comes back.'},
+  {f:'all',act:'s6',he:'ההנהלה חצי מרוצה, כי גם היא לא ידעה בדיוק מה חיפשה. סיבוב נוסף. הזמן נמרח.',en:'Management is half satisfied, because it was never sure what it was looking for either. Another round. Time smears.'},
+  {spine:true,f:'all',he:'עכשיו אותה הוראה, עם הציר.',en:'Now the same directive, with the spine.'},
+  {f:'mgmt',act:'s8',he:'ההוראה יורדת על הציר. החסר בה נתפס בדרך וחוזר להנהלה כשאלה אחת, לפני שהגיע לצוות.',en:'The directive travels down the spine. What is missing is caught on the way and returns to management as one question, before it reaches the team.'},
+  {f:'dept:ops',ring:'mm:ops',act:'s9',he:'מנהל הביניים מקבל הוראה סגורה. הוא לא צריך לנחש, לרדוף או לתחקר אף אחד כדי לדעת איפה הצוות עומד.',en:'The middle manager receives a settled directive. He does not have to guess, chase or question anyone to know where the team stands.'},
+  {desk:true,f:'dept:ops',ring:'p0:ops',act:'s10',he:'הרגע שלפני: המשימה נפתחת ועדיין חסר בה פרט. ההתערבות: הסוכן האישי משלים אותו במקום. אין שאלה שצריך להעז לשאול.',en:'The moment before: the task opens and a detail is still missing. The intervention: the personal agent fills it in on the spot. No question anyone has to dare to ask.'},
+  {f:'all',act:'s11',he:'הקבלה האנונימית: לציר עולה שורה אחת, "אירוע חיכוך אחד · תפעול". בלי שם.',en:'The anonymous receipt: one line goes up the spine, “one friction event · Operations”. No name.'},
+  {mv:true,f:'mgmt',act:'s12',he:'ההנהלה רואה סיבוב אחד במקום שלושה. היא לא רואה מי שאל.',en:'Management sees one round instead of three. It does not see who asked.'},
+  {mv:false,cta:true,f:'newdept',act:'s13',he:'כך נכנסים: דרך מחלקה אחת, בשקע אחד. משם ממשיכים לרוחב הארגון, וכל שקע נוסף מתחבר בלי לבנות מחדש.',en:'This is how it starts: through one department, at one socket. From there it continues across the organization, and every further socket plugs in without rebuilding.'}
+];
+var TOUR=[
+  {spine:true,mv:false,f:'all',he:'זה הציר. כבל מאריך שמונח לאורך תשתית מערכת ההפעלה ופותח בארגון מסלול חדש ומהיר.',en:'This is the spine. An extension cord laid along the operating system infrastructure, opening a new, fast route through the organization.'},
+  {f:'sockets',he:'לאורך הציר יש שקעים. כל מחלקה, כלי או צוות מתחברים בנקודה אחת, בלי לשנות את הציר.',en:'Sockets run along the spine. Every department, tool or team plugs in at one point, without changing the spine.'},
+  {f:'dept:ops',he:'בכל מחלקה יש סוכן אחראי לצד מנהל הביניים, וסביבם הסוכנים האישיים של העובדים. הסוכן האישי נאמן לעובד שלו.',en:'Each department has a lead agent beside the middle manager, surrounded by the employees’ personal agents. A personal agent is loyal to its employee.'},
+  {f:'all',legend:true,he:'לאורך המסלול משודר מצב המערכת: תקינות, כשל צפוי, ליקוי, אבטחה ותחזוקה.',en:'System state is broadcast along the route: healthy, predicted failure, defect, security and maintenance.'},
+  {f:'dept:ops',act:'ev',he:'לכיוון העובדים: כשמשהו עומד להיתקע, המסלול עוקף אותו. העובד ממשיך לעבוד.',en:'Toward employees: when something is about to stall, the route bypasses it. The employee keeps working.'},
+  {f:'mgmt',act:'mg',he:'לכיוון ההנהלה: עולה תמונה מצטברת ואנונימית לצוות הסוכנים שלה. סופרים אירועים, לא אנשים.',en:'Toward management: an aggregate, anonymous picture rises to its agent team. It counts events, not people.'},
+  {cta:true,f:'sockets',he:'זה כל המסלול. נכנסים דרך מחלקה אחת, בשקע אחד, וממשיכים לרוחב הארגון.',en:'That is the whole route. It starts through one department, at one socket, and continues across the organization.'}
+];
+var MAIL='danya@dynamicbridge.io';function deskUrl(){return lang==='he'?'https://tab-at-work.com/desk-he/':'https://tab-at-work.com/'}
+var lang='he';
+try{var sv=localStorage.getItem('tabspine-lang');if(sv==='en'||sv==='he')lang=sv}catch(e){}
+function t(o){return o[lang]}
+
+/* ---------- state ---------- */
+var counts={};DEPTS.forEach(function(d){counts[d.id]={total:0,bypassed:0,byType:{},last:null}});
+var pending=[];var visited=[];var seenEvents=0;var lastEvent=null;
+var mode='intro';var step=0;var cardKey=null;var seq=null;var spineOn=true;var mgmtView=false;var resay=null;
+var t0=Date.now();
+
+/* ---------- three scene ---------- */
+if(!window.THREE||!(function(){try{var c=document.createElement('canvas');return !!(c.getContext('webgl')||c.getContext('experimental-webgl'))}catch(e){return false}})()){
+  $('nogl').style.display='flex';$('nogl').textContent=t(S.nogl);return;
+}
+var stage=$('stage');
+var renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+renderer.setClearColor(0xf3f2f2,1);
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+stage.appendChild(renderer.domElement);
+var scene=new THREE.Scene();
+var camera=new THREE.PerspectiveCamera(28,1,0.1,400);
+var controls=new THREE.OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;controls.dampingFactor=.08;controls.maxPolarAngle=Math.PI*.44;controls.minPolarAngle=.15;
+controls.minDistance=9;controls.maxDistance=90;controls.screenSpacePanning=false;
+
+scene.add(new THREE.HemisphereLight(0xffffff,0xe6e2de,.92));
+var sun=new THREE.DirectionalLight(0xffffff,.55);sun.position.set(-8,22,10);sun.castShadow=true;
+sun.shadow.mapSize.set(2048,2048);var sc=sun.shadow.camera;sc.left=-30;sc.right=30;sc.top=24;sc.bottom=-24;sc.near=1;sc.far=80;sun.shadow.radius=4;sun.shadow.bias=-.0005;
+scene.add(sun);
+
+var M=function(c,o){return new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.85,metalness:0},o||{}))};
+var matPaper=M(0xffffff),matInk=M(0x201e1d,{roughness:.6}),matTab=M(0xe3922e,{roughness:.55}),matPerson=M(0xc9c5c1,{transparent:true}),matHuman=M(0x3a3634,{roughness:.6}),matMgmt=M(0x00627f,{roughness:.55}),matLane=M(0xe9e7e5),matHair=M(0xbdb8b4);
+var picks=[];
+function pick(mesh,key){mesh.userData.key=key;picks.push(mesh);return mesh}
+
+// ground that only receives shadow
+var ground=new THREE.Mesh(new THREE.PlaneGeometry(40,26),new THREE.ShadowMaterial({opacity:.10}));
+ground.rotation.x=-Math.PI/2;ground.position.y=-.02;ground.receiveShadow=true;scene.add(ground);
+
+var spineG=new THREE.Group(),arcsG=new THREE.Group();scene.add(spineG);scene.add(arcsG);arcsG.visible=false;var personMeshes=[];
+var X0=-10.2,X1=10.6;           // spine ends: management at X0, OS at X1
+// OS infrastructure lane under the spine
+var lane=new THREE.Mesh(new THREE.BoxGeometry(X1-X0+1.6,.04,1.5),matLane);lane.position.set((X0+X1)/2,0,0);lane.receiveShadow=true;spineG.add(pick(lane,'os'));
+// the spine (cable)
+var spine=new THREE.Mesh(new THREE.CylinderGeometry(.15,.15,X1-X0,20),matInk);spine.rotation.z=Math.PI/2;spine.position.set((X0+X1)/2,.2,0);spine.castShadow=true;spineG.add(pick(spine,'spine'));
+var plug=new THREE.Mesh(new THREE.BoxGeometry(.9,.5,.7),matInk);plug.position.set(X1+.35,.25,0);plug.castShadow=true;spineG.add(pick(plug,'os'));
+
+function pawn(mat,s){var g=new THREE.Group();
+  var body=new THREE.Mesh(new THREE.CylinderGeometry(.13*s,.24*s,.5*s,16),mat);body.position.y=.25*s;body.castShadow=true;
+  var head=new THREE.Mesh(new THREE.SphereGeometry(.17*s,18,14),mat);head.position.y=.62*s;head.castShadow=true;
+  g.add(body);g.add(head);g.userData.parts=[body,head];return g}
+function socket(x,connected,key){var g=new THREE.Group();
+  var base=new THREE.Mesh(new THREE.CylinderGeometry(.42,.42,.16,28),matPaper);base.position.y=.4;base.castShadow=true;g.add(base);
+  var ring=new THREE.Mesh(new THREE.TorusGeometry(.42,.035,8,36),connected?matTab:matHair);ring.rotation.x=Math.PI/2;ring.position.y=.49;g.add(ring);
+  [-.13,.13].forEach(function(dx){var h=new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,.02,10),matInk);h.position.set(dx,.49,0);g.add(h)});
+  g.position.set(x,0,0);spineG.add(g);pick(base,key);
+  var hit=new THREE.Mesh(new THREE.SphereGeometry(.75,8,8),new THREE.MeshBasicMaterial({visible:false}));hit.position.set(x,.4,0);spineG.add(pick(hit,key));
+  return {ring:ring,base:base,hit:hit}}
+
+var deptObj={};var MG=new THREE.Vector3(X0-1.9,.6,0);
+function buildDept(d,hasSocket){
+  var cz=d.side*5.2,R=2.0;
+  var isl=new THREE.Mesh(new THREE.CylinderGeometry(R,R,.14,48),matPaper);isl.position.set(d.x,.07,cz);isl.castShadow=true;isl.receiveShadow=true;scene.add(pick(isl,'dept:'+d.id));
+  var br=new THREE.Mesh(new THREE.BoxGeometry(.09,.06,Math.abs(cz)-R-.3),matInk);br.position.set(d.x,.05,d.side*(.35+(Math.abs(cz)-R-.3)/2));spineG.add(br);
+  if(!hasSocket)socket(d.x,true,'socket:'+d.id);
+  var lead=pawn(matTab,1.35);lead.position.set(d.x-.36,.14,cz);scene.add(lead);lead.userData.parts.forEach(function(p){pick(p,'lead:'+d.id)});
+  var mgr=pawn(matHuman,1.25);mgr.position.set(d.x+.36,.14,cz);scene.add(mgr);mgr.userData.parts.forEach(function(p){pick(p,'mm:'+d.id)});
+  var mgrP=new THREE.Vector3(d.x+.36,.95,cz);
+  var curve=new THREE.QuadraticBezierCurve3(MG.clone().setY(1.2),new THREE.Vector3((MG.x+d.x)/2,4.2,cz*.5),mgrP);var cpts=curve.getPoints(22);
+  var arc=new THREE.Line(new THREE.BufferGeometry().setFromPoints(cpts),new THREE.LineDashedMaterial({color:0x201e1d,dashSize:.28,gapSize:.2,transparent:true,opacity:.5}));arc.computeLineDistances();arcsG.add(arc);
+  var people=[];
+  for(var i=0;i<d.n;i++){var a=(i/d.n)*Math.PI*2+d.x;var p=pawn(matPerson,.9);var px=d.x+Math.cos(a)*1.35,pz=cz+Math.sin(a)*1.35;p.position.set(px,.14,pz);scene.add(p);
+    p.userData.parts.forEach(function(q){pick(q,'person:'+d.id);personMeshes.push(q)});people.push(new THREE.Vector3(px,.55,pz))}
+  var ringM=new THREE.Mesh(new THREE.RingGeometry(.9,1,48),new THREE.MeshBasicMaterial({color:0xe3922e,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}));
+  ringM.rotation.x=-Math.PI/2;ringM.position.set(d.x,.16,cz);scene.add(ringM);
+  deptObj[d.id]={d:d,center:new THREE.Vector3(d.x,.5,cz),sock:new THREE.Vector3(d.x,.55,0),edge:new THREE.Vector3(d.x,.3,d.side*.5),people:people,ring:ringM,ringT:-1,mgr:mgrP,arcDown:cpts,arcUp:cpts.slice().reverse()};
+}
+DEPTS.forEach(function(d){buildDept(d,false)});
+// free sockets
+var FREE=[{x:7.4,side:-1},{x:9.2,side:1}];FREE.forEach(function(f,i){f.s=socket(f.x,false,'free:'+i)});
+// management deck
+var mg=new THREE.Mesh(new THREE.CylinderGeometry(2.1,2.1,.14,6),matPaper);mg.position.set(X0-1.9,.07,0);mg.rotation.y=Math.PI/6;mg.castShadow=true;mg.receiveShadow=true;scene.add(pick(mg,'mgmt'));
+[[0,0,1.5],[-.9,.75,1.1],[-.9,-.75,1.1]].forEach(function(o){var p=pawn(matMgmt,o[2]);p.position.set(MG.x+o[0],.14,o[1]);scene.add(p);p.userData.parts.forEach(function(q){pick(q,'mgmt')})});
+var selRing=new THREE.Mesh(new THREE.RingGeometry(1,1.08,56),new THREE.MeshBasicMaterial({color:0x201e1d,transparent:true,opacity:.55,side:THREE.DoubleSide,depthWrite:false}));
+selRing.rotation.x=-Math.PI/2;selRing.visible=false;scene.add(selRing);
+
+/* ---------- pulses ---------- */
+var pulses=[];var pgeo=new THREE.SphereGeometry(.13,14,10);var pmats={};
+Object.keys(TYPES).forEach(function(k){pmats[k]=new THREE.MeshBasicMaterial({color:TYPES[k].c})});
+function spawn(type,pts,speed,done,big){var m=new THREE.Mesh(pgeo,pmats[type]);if(big)m.scale.setScalar(1.7);m.position.copy(pts[0]);scene.add(m);
+  if(big){var hit=new THREE.Mesh(new THREE.SphereGeometry(.5,6,6),new THREE.MeshBasicMaterial({visible:false}));m.add(hit);pick(hit,'event')}
+  var segs=[],L=0;for(var i=1;i<pts.length;i++){var l=pts[i].distanceTo(pts[i-1]);segs.push(l);L+=l}
+  pulses.push({m:m,pts:pts,segs:segs,L:L,s:0,v:speed,done:done,big:big})}
+function sp(x){return new THREE.Vector3(x,.55,0)}
+function pathUp(o){return [o.center.clone().setY(.75),o.edge.clone().setY(.55),o.sock,sp(X0),MG]}
+function pathDown(o){return [MG,sp(X0),o.sock,o.edge.clone().setY(.55),o.center.clone().setY(.75)]}
+function pathOS(o){return [sp(X1),o.sock,o.edge.clone().setY(.55),o.center.clone().setY(.75)]}
+function clearPulses(){pulses.forEach(function(p){scene.remove(p.m);if(p.big){var ix=picks.indexOf(p.m.children[0]);if(ix>=0)picks.splice(ix,1)}});pulses.length=0}
+function ambient(){var o=deptObj[DEPTS[Math.floor(Math.random()*DEPTS.length)].id];var r=Math.random();
+  if(!spineOn){var pp=o.people.length?o.people[Math.floor(Math.random()*o.people.length)]:o.center;
+    if(r<.3)spawn('dir',o.arcDown,2.4);else if(r<.55)spawn('maint',o.arcUp,2.4);else if(r<.8)spawn('dir',[o.mgr,pp],1.3);else spawn('maint',[pp,o.mgr],1.3);return}
+  if(!o.people.length){spawn('ok',r<.5?pathUp(o):pathOS(o),4.6);return}
+  if(r<.4)spawn('ok',pathUp(o),4.6);
+  else if(r<.7)spawn('ok',pathOS(o),4.6);
+  else{var p=o.people[Math.floor(Math.random()*o.people.length)];spawn('ok',[p,o.center.clone().setY(.75)],1.6)}}
+
+var evIdx=0;
+function bump(e){var c=counts[e.d];c.total++;c.byType[e.t]=(c.byType[e.t]||0)+1;c.last=e;seenEvents++;lastEvent=e;if(!e.decide&&e.t!=='ok')c.bypassed++;if(mgmtView)labelText()}
+function fireEvent(i){var e=EVENTS[i%EVENTS.length];var o=deptObj[e.d];var c=counts[e.d];
+  var p=o.people[Math.floor(Math.random()*o.people.length)];
+  spawn(e.t,[p,o.center.clone().setY(.75)],2.2,function(){
+    o.ringT=0;o.ring.material.color.set(TYPES[e.t].c);
+    bump(e);if(e.decide&&pending.indexOf(e)<0)pending.push(e);
+    setFeed(e,false);
+    spawn(e.t,pathUp(o).slice(1),5.2,function(){refreshCard()},true);
+    refreshCard();
+  },true);}
+function approve(e){var i=pending.indexOf(e);if(i<0)return;pending.splice(i,1);var o=deptObj[e.d];
+  spawn('dir',pathDown(o),5.6,function(){o.ringT=0;o.ring.material.color.set(0x201e1d);counts[e.d].bypassed++;lastEvent=e;setFeed(e,true);refreshCard();if(mgmtView)labelText()},true);refreshCard()}
+var ACT={
+  ev:function(){fireEvent(0)},
+  mg:function(){openCardQuiet('mgmt')},
+  s1:function(o){spawn('dir',o.arcDown,3,null,true)},
+  s4:function(o,P){spawn('dir',[o.mgr,P],1.5,null,true)},
+  s5:function(o,P){spawn('maint',[P,o.mgr].concat(o.arcUp),3,null,true)},
+  s6:function(o){spawn('dir',o.arcDown,3.6,function(){spawn('maint',o.arcUp,3.6,null,true)},true)},
+  s8:function(){spawn('dir',[MG,sp(X0),sp(-5)],4,function(){spawn('pred',[sp(-5),sp(X0),MG],4,null,true)},true)},
+  s9:function(o){spawn('dir',[sp(X0),o.sock,o.edge.clone().setY(.55),o.mgr],5,null,true)},
+  s10:function(o,P){spawn('dir',[o.mgr,P],1.5,function(){o.ringT=0;o.ring.material.color.set(0xe3922e)},true)},
+  s11:function(o,P){bump(RECEIPT);setFeed(RECEIPT,false);spawn('pred',[P].concat(pathUp(o)),5,null,true)},
+  s12:function(){openCardQuiet('mgmt')},
+  s13:function(){for(var i=0;i<FREE.length;i++){if(!FREE[i].used){connectFree(i,'hr',true);break}}}
+};
+function setSpine(on){if(spineOn===on)return;spineOn=on;spineG.visible=on;arcsG.visible=!on;clearPulses();
+  $('segOn').setAttribute('aria-pressed',on?'true':'false');$('segOff').setAttribute('aria-pressed',on?'false':'true');
+  if(!on){if(cardKey){var k=cardKey.split(':')[0];if(k==='socket'||k==='free'||k==='spine'||k==='os')closeCard(true)}}
+  paintFeed();labelText();for(var i=0;i<6;i++)ambient()}
+function setMgmtView(on){if(mgmtView===on)return;mgmtView=on;matPerson.opacity=on?.13:1;personMeshes.forEach(function(m){m.castShadow=!on});
+  $('mvBtn').setAttribute('aria-pressed',on?'true':'false');labelText();if(cardKey&&cardKey.split(':')[0]==='person')renderCard(cardKey)}
+var lastPlugged=null;
+function connectFree(i,kind,quiet){var f=FREE[i];if(f.used)return;f.used=true;lastPlugged='x'+i;setSpine(true);var x=EXTRA[kind];var d={id:'x'+i,x:f.x,side:f.side,n:x.n,he:x.he,en:x.en};
+  DEPTS.push(d);counts[d.id]={total:0,bypassed:0,byType:{},last:null};buildDept(d,true);
+  f.s.ring.material=matTab;f.s.base.userData.key=f.s.hit.userData.key='socket:'+d.id;
+  for(var j=labels.length-1;j>=0;j--){if(labels[j].key==='free:'+i){labels[j].el.remove();labels.splice(j,1)}}
+  addLabel('dept:'+d.id,new THREE.Vector3(d.x,.1,d.side*7.75));labelText();
+  var o=deptObj[d.id];o.ringT=0;spawn('ok',pathOS(o),4.6);spawn('ok',pathUp(o),4.6);spawn('ok',pathDown(o),4.6);
+  if(mgmtView)setMgmtView(false);if(quiet)ringAt('dept:'+d.id);else openCard('dept:'+d.id)}
+
+/* ---------- labels ---------- */
+var labels=[];
+function addLabel(key,pos,cls){var b=document.createElement('button');b.type='button';b.className='lab'+(cls?' '+cls:'');b.addEventListener('click',function(){openCard(key)});$('labels').appendChild(b);labels.push({el:b,pos:pos,key:key});return b}
+DEPTS.forEach(function(d){addLabel('dept:'+d.id,new THREE.Vector3(d.x,.1,d.side*7.75))});
+addLabel('mgmt',new THREE.Vector3(MG.x,.1,-3.1));
+addLabel('os',new THREE.Vector3(X1+.5,.1,0),'quiet');
+FREE.forEach(function(f,i){addLabel('free:'+i,new THREE.Vector3(f.x,.1,-f.side*1.7),'quiet')});
+function labelText(){labels.forEach(function(l){var k=l.key;
+  var hideSp=!spineOn&&(k==='os'||k.indexOf('free')===0);l.off=hideSp;
+  if(k.indexOf('dept:')===0){var dd=deptObj[k.slice(5)].d;l.el.textContent=t(dd);if(mgmtView){var sm=document.createElement('small');sm.textContent=counts[dd.id].total+' '+t(S.evWord);l.el.appendChild(sm)}}
+  else if(k==='mgmt'){l.el.innerHTML='';l.el.appendChild(document.createTextNode(t(S.mgmt)));var s=document.createElement('small');s.textContent=t(S.mgmtSmall);l.el.appendChild(s)}
+  else if(k==='os')l.el.textContent=t(S.os);else l.el.textContent=t(S.free)})}
+var v3=new THREE.Vector3();
+function placeLabels(){var w=stage.clientWidth,h=stage.clientHeight;labels.forEach(function(l){v3.copy(l.pos).project(camera);
+  var x=(v3.x*.5+.5)*w,y=(-v3.y*.5+.5)*h;var hide=l.off||v3.z>1||x<-40||x>w+40||y<-20||y>h+20;
+  l.el.style.display=hide?'none':'';if(!hide)l.el.style.transform='translate(-50%,-50%) translate('+x.toFixed(1)+'px,'+y.toFixed(1)+'px)';
+  l.el.classList.toggle('on',cardKey===l.key)})}
+
+/* ---------- camera ---------- */
+var tween=null;
+function dirFor(){var a=stage.clientWidth/stage.clientHeight;return a<.85?new THREE.Vector3(.5,.86,.02).normalize():new THREE.Vector3(.04,.74,.67).normalize()}
+function fit(center,pts,pad){var dir=dirFor();var w=stage.clientWidth,h=stage.clientHeight;
+  var topPx=$('top').offsetHeight+6,botPx=$('card').classList.contains('open')?($('card').offsetHeight+30):($('bottom').offsetHeight+8);if(topPx+botPx>h*.72)botPx=Math.max(70,h*.72-topPx);
+  var yMax=1-2*topPx/h,yMin=-1+2*botPx/h,half=(yMax-yMin)/2*.94,mid=(yMax+yMin)/2,xM=pad||.92;var save=camera.position.clone();var q=camera.quaternion.clone();var d,found=false;
+  for(d=7;d<100;d+=1){camera.position.copy(center).addScaledVector(dir,d);camera.lookAt(center);camera.updateMatrixWorld(true);var ok=true;
+    for(var i=0;i<pts.length;i++){v3.copy(pts[i]).project(camera);if(v3.x<-xM||v3.x>xM||v3.y<-half||v3.y>half){ok=false;break}}if(ok){found=true;break}}
+  if(!found)d=45;
+  camera.position.copy(center).addScaledVector(dir,d);camera.lookAt(center);
+  var u=new THREE.Vector3(0,1,0).applyQuaternion(camera.quaternion);var g=new THREE.Vector3(u.x,0,u.z);var gl=g.length()||1;g.multiplyScalar(1/gl);
+  var k=mid*d*Math.tan(camera.fov*Math.PI/360)/gl;var tgt=center.clone().addScaledVector(g,-k);
+  var out=tgt.clone().addScaledVector(dir,d);camera.position.copy(save);camera.quaternion.copy(q);camera.updateMatrixWorld(true);return {pos:out,target:tgt}}
+function box(cx,cz,rx,rz){return [new THREE.Vector3(cx-rx,0,cz-rz),new THREE.Vector3(cx+rx,0,cz-rz),new THREE.Vector3(cx-rx,0,cz+rz),new THREE.Vector3(cx+rx,0,cz+rz),new THREE.Vector3(cx,1.6,cz)]}
+function view(name){var c,pts;
+  if(name==='sockets'){c=new THREE.Vector3(6.6,0,0);pts=box(6.6,0,4.6,2.4)}
+  else if(name==='mgmt'){c=new THREE.Vector3(MG.x+1.1,0,-.3);pts=box(MG.x+1.1,-.3,3.4,3.1)}
+  else if(name&&name.indexOf('dept:')===0){var o=deptObj[name.slice(5)];c=new THREE.Vector3(o.d.x,0,o.d.side*3.7);pts=box(o.d.x,o.d.side*3.7,2.7,4.9)}
+  else{c=new THREE.Vector3(-.3,0,0);pts=box(-.3,0,12.9,8.2)}
+  return fit(c,pts)}
+function go(name,instant){var v=view(name);if(instant||reduce){camera.position.copy(v.pos);controls.target.copy(v.target);controls.update();tween=null;return}
+  tween={p0:camera.position.clone(),t0:controls.target.clone(),p1:v.pos,t1:v.target,k:0}}
+
+/* ---------- TAB line ---------- */
+var words=[],shown=0,wTimer=null;
+function say(text,meta,btns){words=text.split(' ');shown=reduce?words.length:0;$('stepMeta').textContent=meta||'';
+  var bx=$('lineBtns');bx.innerHTML='';(btns||[]).forEach(function(b){var el;if(b.href){el=document.createElement('a');el.href=b.href;el.target='_blank';el.rel='noopener'}else{el=document.createElement('button');el.type='button';el.addEventListener('click',b.fn)}el.className='pill'+(b.cls?' '+b.cls:'');el.textContent=b.label;bx.appendChild(el)});
+  bx.style.display=btns&&btns.length?'':'none';
+  clearInterval(wTimer);paintLine();
+  if(!reduce){$('line').classList.add('speaking');wTimer=setInterval(function(){shown++;paintLine();if(shown>=words.length){clearInterval(wTimer);$('line').classList.remove('speaking')}},75)}}
+var lineMin=false;
+function setMin(on){lineMin=on;var l=$('line');l.classList.toggle('min',on);if(on){l.setAttribute('role','button');l.setAttribute('tabindex','0');l.setAttribute('aria-label',t(S.openTab))}else{l.setAttribute('role','status');l.removeAttribute('tabindex');l.removeAttribute('aria-label')}paintLine()}
+$('lineX').addEventListener('click',function(e){e.stopPropagation();setMin(true)});
+$('line').addEventListener('click',function(){if(lineMin)setMin(false)});
+$('line').addEventListener('keydown',function(e){if(lineMin&&(e.key==='Enter'||e.key===' ')){e.preventDefault();setMin(false)}});
+function paintLine(){var s=$('said');s.innerHTML='';var b=document.createElement('b');b.textContent='TAB';s.appendChild(b);if(lineMin)return;
+  s.appendChild(document.createTextNode(words.slice(0,shown).join(' ')+(shown<words.length?' ':'')));
+  var r=document.createElement('span');r.className='rest';r.textContent=words.slice(shown).join(' ');s.appendChild(r)}
+function seqBtn(a){return function(){startSeq(a)}}
+function intro(){mode='intro';setLegend(false);resay=intro;say(t(S.open),'',[{label:t(S.story),cls:'primary',fn:seqBtn(STORY)},{label:t(S.tour),fn:seqBtn(TOUR)},{label:t(S.roam),fn:roam}])}
+function roamSay(){say(t(S.roamHint),'',[{label:t(S.summary),cls:'primary',fn:openSummary},{label:t(S.story),fn:seqBtn(STORY)},{label:t(S.tour),fn:seqBtn(TOUR)}])}
+function roam(){var was=mode;mode='roam';setLegend(false);if(was==='seq'){setMgmtView(false);closeCard(true)}go('all');resay=roamSay;roamSay()}
+function startSeq(a){mode='seq';seq=a;step=0;closeCard(true);runStep()}
+function sayStep(){var st=seq[step];var last=step===seq.length-1;
+  var btns=st.cta?[{label:t(S.talk),cls:'primary',fn:openContact},{label:t(S.desk),href:deskUrl()},{label:t(S.summary),fn:openSummary},{label:t(S.roam),cls:'ghost',fn:roam}]
+          :last?[{label:t(S.summary),cls:'primary',fn:openSummary},{label:t(S.roam),fn:roam}]
+               :[{label:t(S.next),cls:'primary',fn:function(){step++;runStep()}}].concat(st.desk?[{label:t(S.deskMoment),href:deskUrl()}]:[]).concat([{label:t(S.stop),cls:'ghost',fn:roam}]);
+  say(t(st),(step+1)+' / '+seq.length,btns)}
+function openContact(){openCardQuiet('contact');if(mode!=='seq')go('sockets')}
+function runStep(){var st=seq[step];
+  if(seq===STORY)clearPulses();
+  if(st.spine!=null)setSpine(st.spine);if(st.mv!=null)setMgmtView(st.mv);
+  setLegend(!!st.legend);closeCard(true);
+  if(st.ring)ringAt(st.ring);
+  if(st.act){var o=deptObj.ops;ACT[st.act](o,o.people[0])}
+  resay=sayStep;sayStep();
+  var ff=st.f==='newdept'?(lastPlugged?'dept:'+lastPlugged:'sockets'):st.f;
+  requestAnimationFrame(function(){go(ff)})}
+
+/* ---------- feed + legend ---------- */
+function glyph(type){var s=document.createElement('span');s.className='glyph '+TYPES[type].g;s.style.setProperty('--c',TYPES[type].c);return s}
+var feedState=null;
+function setFeed(e,approved){feedState={e:e,approved:approved,at:Date.now()};paintFeed()}
+function paintFeed(){var f=$('feed');f.innerHTML='';
+  if(!spineOn){f.appendChild(glyph('dir'));var so=document.createElement('span');so.className='txt';so.textContent=t(S.offFeed);f.appendChild(so);return}
+  if(!feedState){f.appendChild(glyph('ok'));var s0=document.createElement('span');s0.className='txt';s0.textContent=t(S.demo);f.appendChild(s0);return}
+  var e=feedState.e,d=deptObj[e.d].d;f.appendChild(glyph(feedState.approved?'dir':e.t));
+  var s=document.createElement('span');s.className='txt';
+  s.textContent=t(d)+' · '+t(TYPES[feedState.approved?'dir':e.t])+': '+(feedState.approved?(lang==='he'?e.okHe:e.okEn):t(e));f.appendChild(s)}
+$('feed').addEventListener('click',function(){if(!spineOn)openCard('mm:ops');else if(feedState)openCard('dept:'+feedState.e.d)});
+function buildLegend(){var L=$('legend');L.innerHTML='';Object.keys(TYPES).forEach(function(k){var s=document.createElement('span');s.className='key';s.appendChild(glyph(k));s.appendChild(document.createTextNode(t(TYPES[k])));L.appendChild(s)});
+  var sp0=document.createElement('span');sp0.className='sep';L.appendChild(sp0);
+  [['#e3922e',S.leadK],['#c9c5c1',S.persK],['#3a3634',S.mm],['#00627f',S.mgmt]].forEach(function(a){var s=document.createElement('span');s.className='key';var g=document.createElement('span');g.className='glyph fig';g.style.setProperty('--c',a[0]);s.appendChild(g);s.appendChild(document.createTextNode(t(a[1])));L.appendChild(s)})}
+$('segOn').addEventListener('click',function(){setSpine(true)});$('segOff').addEventListener('click',function(){setSpine(false)});
+$('mvBtn').addEventListener('click',function(){setMgmtView(!mgmtView)});
+function setLegend(on){$('legend').classList.toggle('open',on);$('legendBtn').setAttribute('aria-expanded',on?'true':'false')}
+$('legendBtn').addEventListener('click',function(){setLegend(!$('legend').classList.contains('open'))});
+
+/* ---------- cards ---------- */
+function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+var CARD={
+  spine:{k:{he:'הציר',en:'The spine'},h:{he:'כבל מאריך לרוחב הארגון',en:'An extension cord through the organization'},
+    p:{he:['הציר מונח לאורך תשתית מערכת ההפעלה ופותח מסלול חדש ומהיר. הוא לא מחליף כלים קיימים. הוא מחבר ביניהם.','עליו נע מצב המערכת בשני כיוונים: לעובדים ולמחלקות, ולהנהלה ולצוות הסוכנים שלה.'],
+       en:['The spine lies along the operating system infrastructure and opens a new, fast route. It does not replace existing tools. It connects them.','System state travels on it in two directions: to employees and departments, and to management and its agent team.']}},
+  os:{k:{he:'תשתית',en:'Infrastructure'},h:{he:'תשתית מערכת ההפעלה',en:'Operating system infrastructure'},
+    p:{he:['כאן הציר מתחבר. הוא יושב על מה שכבר קיים בארגון, ולכן אין צורך לשנות תהליכי עבודה כדי להתחיל.'],en:['This is where the spine plugs in. It sits on what the organization already has, so no workflow has to change to get started.']}},
+  free:{k:{he:'שקע',en:'Socket'},h:{he:'שקע פנוי',en:'Free socket'},
+    p:{he:['נקודת חיבור שמחכה. מחלקה חדשה, כלי חדש או ספק חיצוני מתחברים כאן, והציר נשאר כמו שהוא.'],en:['A connection point in waiting. A new department, a new tool or an outside vendor plugs in here, and the spine stays as it is.']}},
+  socket:{k:{he:'שקע',en:'Socket'},
+    p:{he:['נקודת החיבור של המחלקה לציר. דרכה יורד למחלקה מה שרלוונטי לה, ועולה ממנה ספירת אירועים בלבד.'],en:['The department’s connection point to the spine. What is relevant comes down through it, and only an event count goes up.']}},
+  lead:{k:{he:'סוכן אחראי',en:'Lead agent'},
+    p:{he:['אחראי על צוות הסוכנים האישיים במחלקה. מנתב את מה שיורד מהציר לסוכן הנכון, ומעלה לציר תקינות, כשלים צפויים, ליקויים, ממצאי אבטחה ודוחות תחזוקה.','מה שעולה ממנו מצטבר לפי מחלקה וסוג. בלי שמות.'],
+       en:['Responsible for the department’s team of personal agents. Routes what comes down the spine to the right agent, and sends up health, predicted failures, defects, security findings and maintenance reports.','What it sends up is aggregated by department and type. No names.']}},
+  person:{k:{he:'סוכן אישי',en:'Personal agent'},
+    p:{he:['עומד לצד עובד אחד ונאמן לו. כשמשהו בדרך עומד להיתקע, הוא עוקף את התקלה במקום להתריע עליה.','ממנו יוצא לציר אירוע. לא שם, ולא מי.'],
+       en:['Stands beside one employee and is loyal to them. When something on the way is about to stall, it bypasses the problem instead of raising an alert.','What leaves it for the spine is an event. Not a name, not a who.']}}
+};
+CARD.hidden={k:{he:'מבט הנהלה',en:'Management view'},h:{he:'את זה ההנהלה לא רואה',en:'Management does not see this'},
+  p:{he:['הסוכנים האישיים והעובדים שלצידם לא מוצגים להנהלה. מה שמגיע אליה הוא ספירה לפי מחלקה וסוג.','זו לא הגדרה שאפשר לשנות. כך הציר בנוי.'],en:['Personal agents and the employees beside them are not shown to management. What reaches it is a count by department and type.','This is not a setting someone can change. It is how the spine is built.']}};
+var MM={offH:S.off,onH:S.on,
+  off:{he:['מלמעלה: תוצאות, דדליין, הוראות שלא סגורות עד הסוף, ובונוס שאף אחד לא אומר בקול.','מלמטה: נהלים, תירוצים, שחיקה, שיחות אישיות, שיחות מוטיבציה, ודוחות ביצועים לכספים. כלא מזהב.','הוא המתרגם היחיד בין שני הצדדים, ואין לו ממי לברר.'],
+       en:['From above: results, a deadline, directives that are never quite settled, and a bonus nobody mentions out loud.','From below: procedures, excuses, attrition, one-on-ones, pep talks, and performance reports for finance. A golden cage.','He is the only translator between the two sides, with no one to ask.']},
+  on:{he:['מגיע אליו מהציר: הוראה שהחסר בה כבר נסגר, ותמונת מצב של הצוות לפי אירועים.','נחסך לו: לנחש למה התכוונו, לרדוף אחרי סטטוס, ולתחקר אנשים. נשאר לו לנהל.'],
+      en:['What reaches him from the spine: a directive whose gap is already closed, and a picture of the team by events.','What he is spared: guessing what was meant, chasing status, and questioning people. What is left is managing.']}};
+function countsRow(c){var w=el('div','counts');var any=false;Object.keys(TYPES).forEach(function(k){var n=c.byType[k];if(!n)return;any=true;var s=el('span','key');s.appendChild(glyph(k));s.appendChild(document.createTextNode(t(TYPES[k])+' '+n));w.appendChild(s)});return any?w:null}
+function renderCard(key){var c=$('card');c.innerHTML='';var x=el('button','x','×');x.type='button';x.setAttribute('aria-label',t(S.close));x.addEventListener('click',function(){closeCard()});c.appendChild(x);
+  var kind=key.split(':')[0],id=key.split(':')[1];var o=(id&&deptObj[id])?deptObj[id]:null;
+  if(kind==='person'&&mgmtView){kind='hidden';o=null}
+  if(kind==='mm'){c.appendChild(el('div','kicker',t(S.mm)+' · '+t(o.d)));var hm=el('h2',null,lang==='he'?'בין הפטיש לסדן':'Between hammer and anvil');hm.id='cardTitle';c.appendChild(hm);
+    var first=spineOn?'on':'off',second=spineOn?'off':'on';[first,second].forEach(function(m){c.appendChild(el('h3',null,t(MM[m+'H'])));t(MM[m]).forEach(function(p){c.appendChild(el('p',null,p))})});
+  }else if(kind==='free'){var f=FREE[+id];c.appendChild(el('div','kicker',t(CARD.free.k)));var hf=el('h2',null,t(CARD.free.h));hf.id='cardTitle';c.appendChild(hf);
+    t(CARD.free.p).forEach(function(p){c.appendChild(el('p',null,p))});c.appendChild(el('p','note',t(S.connect)));
+    var ops=el('div','opts');Object.keys(EXTRA).forEach(function(k){var b=el('button','pill',t(EXTRA[k]));b.type='button';b.addEventListener('click',function(){connectFree(+id,k)});ops.appendChild(b)});c.appendChild(ops);
+  }else if(kind==='dept'){c.appendChild(el('div','kicker',t(S.dept)));var h=el('h2',null,t(o.d));h.id='cardTitle';c.appendChild(h);
+    c.appendChild(el('p',null,o.d.n?(lang==='he'?('מנהל ביניים, סוכן אחראי ו-'+o.d.n+' סוכנים אישיים, מחוברים לציר בשקע אחד.'):('A middle manager, a lead agent and '+o.d.n+' personal agents, connected to the spine through one socket.')):(lang==='he'?'חובר עכשיו לשקע פנוי. הציר לא השתנה, ושאר המחלקות לא הרגישו.':'Just plugged into a free socket. The spine did not change, and the other departments felt nothing.')));
+    var cc=counts[id];var row=countsRow(cc);
+    c.appendChild(el('p','note',t(S.since)+':'));
+    if(row)c.appendChild(row);else c.appendChild(el('p','note',t(S.none)));
+    if(cc.last){c.appendChild(el('p',null,t(S.last)+' · '+t(TYPES[cc.last.t])+': '+t(cc.last)))}
+  }else if(kind==='contact'){c.appendChild(el('div','kicker',t(S.next2)));var hc=el('h2',null,lang==='he'?'מחלקה ראשונה, שקע אחד':'One first department, one socket');hc.id='cardTitle';c.appendChild(hc);
+    c.appendChild(el('p',null,lang==='he'?'בוחרים יחד מחלקה אחת שבה הוראות הולכות לאיבוד בדרך, ומחברים אותה לציר. שאר הארגון נשאר כמו שהוא.':'Together we pick one department where directives get lost on the way, and plug it into the spine. The rest of the organization stays as it is.'));
+    var m=el('p');var ma=el('a','mail',MAIL);ma.href='mailto:'+MAIL;m.appendChild(ma);c.appendChild(m);
+    var ops2=el('div','opts');var cb=el('button','pill primary',t(S.copyMail));cb.type='button';var ok=el('span','note','');ok.setAttribute('role','status');
+    cb.addEventListener('click',function(){try{navigator.clipboard.writeText(MAIL).then(function(){ok.textContent=t(S.copied)},function(){ok.textContent=MAIL})}catch(e){ok.textContent=MAIL}});
+    var dl=el('a','pill',t(S.desk));dl.href=deskUrl();dl.target='_blank';dl.rel='noopener';ops2.appendChild(cb);ops2.appendChild(dl);ops2.appendChild(ok);c.appendChild(ops2);
+  }else if(kind==='mgmt'){c.appendChild(el('div','kicker',t(S.mgmt)));var h2=el('h2',null,lang==='he'?'תמונה מצטברת, בלי שמות':'An aggregate picture, no names');h2.id='cardTitle';c.appendChild(h2);
+    c.appendChild(el('p',null,lang==='he'?'מהציר עולה ספירה לפי מחלקה וסוג, והחלטות יורדות עליו. סופרים אירועים, לא אנשים.':'A count by department and type comes up the spine, and decisions go back down it. It counts events, not people.'));
+    var allT=0;DEPTS.forEach(function(d){allT+=counts[d.id].total});
+    if(!allT){c.appendChild(el('p','note',t(S.empty)))}else{
+    var tb=el('table','ledger');var tr=el('tr');tr.appendChild(el('th',null,t(S.dept)));tr.appendChild(el('th','n',t(S.events)));tr.appendChild(el('th','n',t(S.bypassed)));tb.appendChild(tr);
+    DEPTS.forEach(function(d){var r=el('tr');r.appendChild(el('td',null,t(d)));r.appendChild(el('td','n',String(counts[d.id].total)));r.appendChild(el('td','n',String(counts[d.id].bypassed)));tb.appendChild(r)});c.appendChild(tb);}
+    c.appendChild(el('p','note',t(S.since)+'. '+t(S.demo)+'.'));
+    pending.forEach(function(e){var b=el('div','pending');b.appendChild(el('span',null,t(deptObj[e.d].d)+' · '+t(e)));var ab=el('button','pill primary',t(S.approve));ab.type='button';ab.addEventListener('click',function(){approve(e)});b.appendChild(ab);c.appendChild(b)});
+  }else if(kind==='event'){if(lastEvent){renderCard('dept:'+lastEvent.d);return}renderCard('spine');return
+  }else{var def=CARD[kind]||CARD.spine;c.appendChild(el('div','kicker',t(def.k)+(o?' · '+t(o.d):'')));
+    var h3=el('h2',null,def.h?t(def.h):(t(def.k)+(o?' · '+t(o.d):'')));h3.id='cardTitle';c.appendChild(h3);
+    t(def.p).forEach(function(p){c.appendChild(el('p',null,p))})}
+}
+function ringAt(key){var kind=key.split(':')[0],id=key.split(':')[1];var o=(id&&deptObj[id])?deptObj[id]:null;
+  if(kind==='mm'){selRing.position.set(o.mgr.x,.16,o.mgr.z);selRing.scale.setScalar(.5);selRing.visible=true}
+  else if(kind==='p0'){selRing.position.set(o.people[0].x,.16,o.people[0].z);selRing.scale.setScalar(.45);selRing.visible=true}
+  else if(kind==='free'){selRing.position.set(FREE[+id].x,.02,0);selRing.scale.setScalar(.7);selRing.visible=true}
+  else if(kind==='dept'||kind==='lead'||kind==='person'){selRing.position.set(o.d.x,.02,o.center.z);selRing.scale.setScalar(2.25);selRing.visible=true}
+  else if(kind==='mgmt'){selRing.position.set(MG.x,.02,0);selRing.scale.setScalar(2.35);selRing.visible=true}
+  else if(kind==='socket'){selRing.position.set(o.d.x,.02,0);selRing.scale.setScalar(.7);selRing.visible=true}
+  else selRing.visible=false}
+function openCardQuiet(key){cardKey=key;if(visited.indexOf(key.split(':')[0]==='event'?'dept':key)<0)visited.push(key);renderCard(key);$('card').classList.add('open');$('bottom').style.visibility='hidden';ringAt(key)}
+function openCard(key){if(key==='event'&&lastEvent)key='dept:'+lastEvent.d;openCardQuiet(key);
+  if(mode==='intro')roam();
+  var kind=key.split(':')[0];if(mode!=='seq'){if(kind==='dept'||kind==='lead'||kind==='person'||kind==='mm')go('dept:'+key.split(':')[1]);else if(kind==='mgmt')go('mgmt');else if(kind==='free'||kind==='os')go('sockets')}}
+function closeCard(keepView){cardKey=null;$('card').classList.remove('open');$('bottom').style.visibility='';selRing.visible=false;if(!keepView&&mode==='roam')go('all')}
+function refreshCard(){if(cardKey&&$('card').classList.contains('open')){var k=cardKey.split(':')[0];if(k==='dept'||k==='mgmt')renderCard(cardKey)}}
+
+/* ---------- summary ---------- */
+function summaryText(){var he=lang==='he';var L=[];
+  L.push(he?'TAB@Work · הציר הרוחבי':'TAB@Work · the spine');L.push('');
+  (he?['בלי הציר, הוראה לא סגורה עוברת מההנהלה למנהל הביניים ולעובד וחוזרת כניחוש. כל סיבוב מורח זמן, ומנהל הביניים נשאר המתרגם היחיד.',
+       'הציר הוא כבל מאריך שמונח לאורך תשתית מערכת ההפעלה ופותח בארגון מסלול חדש ומהיר.',
+       'לאורכו שקעים: כל מחלקה, כלי או צוות מתחברים בנקודה אחת, בלי לשנות את הציר.',
+       'בכל מחלקה סוכן אחראי וסביבו הסוכנים האישיים של העובדים. הסוכן האישי נאמן לעובד שלו.',
+       'לכיוון העובדים: תקינות, כשלים צפויים, ליקויים, אבטחה ותחזוקה מטופלים במקום. המסלול עוקף את התקלה במקום להתריע עליה.',
+       'לכיוון ההנהלה: תמונה מצטברת ואנונימית לצוות הסוכנים שלה. סופרים אירועים, לא אנשים. החלטות יורדות חזרה על אותו ציר.']
+      :['Without the spine, an unsettled directive travels from management to the middle manager to the employee and comes back as a guess. Every round smears time, and the middle manager remains the only translator.',
+        'The spine is an extension cord laid along the operating system infrastructure, opening a new, fast route through the organization.',
+        'Sockets run along it: every department, tool or team plugs in at one point, without changing the spine.',
+        'Each department has a lead agent surrounded by the employees’ personal agents. A personal agent is loyal to its employee.',
+        'Toward employees: health, predicted failures, defects, security and maintenance are handled in place. The route bypasses the problem instead of raising an alert.',
+        'Toward management: an aggregate, anonymous picture for its agent team. It counts events, not people. Decisions travel back down the same spine.'])
+  .forEach(function(s,i){L.push((i+1)+'. '+s)});
+  var names=[];visited.forEach(function(k){var kind=k.split(':')[0],id=k.split(':')[1];var dn=(id&&deptObj[id])?t(deptObj[id].d):'';var n=kind==='dept'?dn:kind==='mgmt'?t(S.mgmt):kind==='free'?t(S.free):kind==='os'?t(S.os):kind==='mm'?(t(S.mm)+' ('+dn+')'):(CARD[kind]?t(CARD[kind].k)+(dn?' ('+dn+')':''):null);if(n&&names.indexOf(n)<0)names.push(n)});
+  var plugged=DEPTS.filter(function(d){return d.id.charAt(0)==='x'}).map(function(d){return t(d)});
+  L.push('');
+  if(plugged.length)L.push((he?'חובר לשקע פנוי: ':'Plugged into a free socket: ')+plugged.join(', ')+'.');
+  if(names.length)L.push((he?'מה נפתח בסיור הזה: ':'Opened in this visit: ')+names.join(', ')+'.');
+  var tot=0,byp=0;DEPTS.forEach(function(d){tot+=counts[d.id].total;byp+=counts[d.id].bypassed});
+  L.push(he?('בזמן הצפייה עברו על הציר '+tot+' אירועים, מתוכם '+byp+' נעקפו'+(pending.length?(' ו-'+pending.length+' ממתינים להחלטת הנהלה'):'')+'. הנתונים מומצאים לצורך הדמו.')
+           :('During this visit '+tot+' events crossed the spine, '+byp+' of them bypassed'+(pending.length?(' and '+pending.length+' waiting for a management decision'):'')+'. The data is invented for this demo.'));
+  L.push('');L.push((he?'להמשך: ':'Next: ')+MAIL+' · '+(he?'שולחן העבודה של TAB: ':'TAB work desk: ')+deskUrl());
+  return L.join('\n')}
+function openSummary(){$('sumTitle').textContent=t(S.sumTitle);$('sumText').textContent=summaryText();$('copyBtn').textContent=t(S.copy);$('sumClose').textContent=t(S.close);$('copied').textContent='';$('veil').classList.add('open');$('copyBtn').focus()}
+$('sumClose').addEventListener('click',function(){$('veil').classList.remove('open')});
+$('veil').addEventListener('click',function(e){if(e.target===$('veil'))$('veil').classList.remove('open')});
+$('copyBtn').addEventListener('click',function(){var done=function(){$('copied').textContent=t(S.copied)},fail=function(){$('copied').textContent=t(S.copyFail);var r=document.createRange();r.selectNodeContents($('sumText'));var s=window.getSelection();s.removeAllRanges();s.addRange(r)};
+  try{navigator.clipboard.writeText($('sumText').textContent).then(done,fail)}catch(e){fail()}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){if($('veil').classList.contains('open'))$('veil').classList.remove('open');else if(cardKey)closeCard()}});
+
+/* ---------- language ---------- */
+function applyLang(){document.documentElement.lang=lang;document.documentElement.dir=lang==='he'?'rtl':'ltr';
+  $('sub').textContent=t(S.sub);$('demoTag').textContent=t(S.demo);$('lang').textContent=t(S.lang);$('legendBtn').textContent=t(S.legend);$('lineX').setAttribute('aria-label',t(S.minTab));$('lineX').title=t(S.minTab);
+  labelText();buildLegend();paintFeed();if(cardKey)renderCard(cardKey);
+  $('segOff').textContent=t(S.off);$('segOn').textContent=t(S.on);$('mvBtn').textContent=t(S.mv);$('segOn').setAttribute('aria-pressed',spineOn?'true':'false');$('segOff').setAttribute('aria-pressed',spineOn?'false':'true');
+  if(resay)resay();else intro();
+  if($('veil').classList.contains('open'))openSummary()}
+$('lang').addEventListener('click',function(){lang=lang==='he'?'en':'he';try{localStorage.setItem('tabspine-lang',lang)}catch(e){}applyLang()});
+
+/* ---------- picking ---------- */
+var ray=new THREE.Raycaster(),ndc=new THREE.Vector2(),down=null;
+renderer.domElement.addEventListener('pointerdown',function(e){down={x:e.clientX,y:e.clientY};tween=null});
+renderer.domElement.addEventListener('pointerup',function(e){if(!down)return;var dx=e.clientX-down.x,dy=e.clientY-down.y;down=null;if(dx*dx+dy*dy>49)return;
+  var r=renderer.domElement.getBoundingClientRect();ndc.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ndc,camera);
+  var hits=ray.intersectObjects(picks,false).filter(function(h){for(var n=h.object;n;n=n.parent){if(!n.visible&&n.type==='Group')return false}return true});if(!hits.length){if(cardKey)closeCard(true);return}
+  var order={event:0,person:1,lead:1,mm:1,socket:2,free:2,mgmt:3,spine:4,dept:5,os:6};var best=hits[0];
+  for(var i=1;i<hits.length&&hits[i].distance-hits[0].distance<1.2;i++){if(order[hits[i].object.userData.key.split(':')[0]]<order[best.object.userData.key.split(':')[0]])best=hits[i]}
+  openCard(best.object.userData.key)});
+
+/* ---------- loop ---------- */
+function resize(){var w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+var rz;window.addEventListener('resize',function(){resize();clearTimeout(rz);rz=setTimeout(function(){if(!cardKey&&mode!=='seq')go('all',true)},150)});
+var last=performance.now(),ambAcc=0,evAcc=6;
+function frame(now){var dt=Math.min(.05,(now-last)/1000);last=now;
+  if(tween){tween.k=Math.min(1,tween.k+dt/1.1);var k=tween.k,e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;camera.position.lerpVectors(tween.p0,tween.p1,e);controls.target.lerpVectors(tween.t0,tween.t1,e);if(k>=1)tween=null}
+  controls.update();
+  ambAcc+=dt;if(ambAcc>(reduce?2.4:(spineOn?.75:1.1))&&!(mode==='seq'&&seq===STORY)){ambAcc=0;if(pulses.length<26)ambient()}
+  if(mode!=='seq'&&spineOn){evAcc+=dt;if(evAcc>7){evAcc=0;fireEvent(evIdx++)}}
+  for(var i=pulses.length-1;i>=0;i--){var p=pulses[i];p.s+=p.v*dt;var s=p.s,j=0;while(j<p.segs.length&&s>p.segs[j]){s-=p.segs[j];j++}
+    if(j>=p.segs.length){scene.remove(p.m);if(p.big){var ix=picks.indexOf(p.m.children[0]);if(ix>=0)picks.splice(ix,1)}pulses.splice(i,1);if(p.done)p.done();continue}
+    p.m.position.lerpVectors(p.pts[j],p.pts[j+1],s/p.segs[j])}
+  Object.keys(deptObj).forEach(function(id){var o=deptObj[id];if(o.ringT>=0){o.ringT+=dt/1.4;var k2=o.ringT;o.ring.scale.setScalar(.6+k2*1.9);o.ring.material.opacity=Math.max(0,.75*(1-k2));if(k2>=1){o.ringT=-1;o.ring.material.opacity=0}}});
+  renderer.render(scene,camera);placeLabels();requestAnimationFrame(frame)}
+
+resize();applyLang();go('all',true);
+for(var i=0;i<8;i++)ambient();
+pulses.forEach(function(p){p.s=Math.random()*p.L*.8});
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
